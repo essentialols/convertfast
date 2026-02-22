@@ -388,48 +388,42 @@ body {
 .back-link:hover { background: #dbeafe; border-color: var(--primary); }
 .back-link svg { width: 16px; height: 16px; }
 
-/* Converter grid (index page) */
-.converter-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 1rem;
-  margin: 2rem 0;
+/* Tools sections (index page) */
+.tools-section {
+  margin-bottom: 2.5rem;
 }
-.converter-card {
-  display: block;
-  padding: 1.5rem;
+.tools-section:first-of-type {
+  margin-top: 3rem;
+}
+.tools-section__heading {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+}
+.tools-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.tool-link {
+  display: inline-block;
+  padding: 0.6rem 1.2rem;
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: 100px;
   text-decoration: none;
   color: var(--text);
-  transition: border-color .2s, box-shadow .2s;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: border-color .15s, background .15s, color .15s;
 }
-.converter-card:hover {
+.tool-link:hover {
   border-color: var(--primary);
-  box-shadow: var(--shadow-lg);
+  background: #eff6ff;
+  color: var(--primary);
 }
-.converter-card h3 {
-  font-size: 1rem;
-  font-weight: 700;
-  margin-bottom: 0.25rem;
-}
-.converter-card p {
-  font-size: 0.85rem;
-  color: var(--text-muted);
-}
-.converter-card__badge {
-  display: inline-block;
-  font-size: 0.7rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  padding: 0.15rem 0.5rem;
-  border-radius: 4px;
-  margin-bottom: 0.5rem;
-}
-.badge--wasm { background: #dbeafe; color: #1e40af; }
-.badge--native { background: #f0fdf4; color: #166534; }
-.badge--pdf { background: #fef3c7; color: #92400e; }
 
 /* About page */
 .prose { max-width: 640px; margin: 0 auto; padding: 2rem 0; }
@@ -449,5 +443,6 @@ body {
   .controls { gap: 1rem; }
   .file-item { flex-wrap: wrap; }
   .file-item__progress { width: 100%; order: 10; }
-  .converter-grid { grid-template-columns: 1fr; }
+  .tools-grid { gap: 0.4rem; }
+  .tool-link { font-size: 0.85rem; padding: 0.5rem 1rem; }
 }

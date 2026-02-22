@@ -21,12 +21,27 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://convertfast.app/webp-to-png</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://convertfast.app/png-to-jpg</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://convertfast.app/jpg-to-png</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://convertfast.app/jpg-to-webp</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://convertfast.app/png-to-webp</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>

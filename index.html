@@ -91,80 +91,43 @@
 
   <main class="container">
     <section class="hero hero--landing">
-      <h1>Convert Images Privately, Instantly</h1>
-      <p>All conversion happens in your browser. Your files never touch a server. Powered by WebAssembly.</p>
+      <h1>Convert files privately.</h1>
+      <p>Everything runs in your browser. Nothing is uploaded. Ever.</p>
     </section>
-
-    <div class="trust-banner">
-      <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 1L3 5v4c0 4.4 3 8.5 7 9.9 4-1.4 7-5.5 7-9.9V5l-7-4z" fill="#16a34a" opacity=".15"/><path d="M10 1L3 5v4c0 4.4 3 8.5 7 9.9 4-1.4 7-5.5 7-9.9V5l-7-4z" stroke="#16a34a" stroke-width="1.5" fill="none"/><path d="M7 10l2 2 4-4" stroke="#16a34a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      Your files never leave your browser. Zero server uploads. 100% private.
-    </div>
 
     <div id="smart-drop" class="drop-zone">
       <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M28 8H12a4 4 0 00-4 4v24a4 4 0 004 4h24a4 4 0 004-4V20L28 8z"/><path d="M28 8v12h12"/><path d="M24 34v-8m-4 4l4-4 4 4"/></svg>
-      <p>Drop any file here and we'll figure out the rest</p>
-      <p style="font-size:0.8rem;margin-top:0.5rem">HEIC, JPG, PNG, WebP, PDF. Batch supported.</p>
+      <p>Drop any file here, or <strong>click to browse</strong></p>
+      <p style="font-size:0.8rem;margin-top:0.5rem;color:var(--text-muted)">We'll detect the format and show your options.</p>
       <input type="file" id="smart-file-input" accept="image/*,.heic,.heif,.pdf,application/pdf" multiple>
     </div>
     <div id="route-panel" class="route-panel" style="display:none"></div>
 
-    <div class="converter-grid">
-      <a href="/heic-to-jpg" class="converter-card">
-        <span class="converter-card__badge badge--wasm">WASM</span>
-        <h3>HEIC to JPG</h3>
-        <p>Convert iPhone HEIC photos to universally compatible JPG format.</p>
-      </a>
-      <a href="/heic-to-png" class="converter-card">
-        <span class="converter-card__badge badge--wasm">WASM</span>
-        <h3>HEIC to PNG</h3>
-        <p>Convert HEIC to lossless PNG with full transparency support.</p>
-      </a>
-      <a href="/webp-to-jpg" class="converter-card">
-        <span class="converter-card__badge badge--native">Native</span>
-        <h3>WebP to JPG</h3>
-        <p>Convert WebP images to JPG for maximum compatibility.</p>
-      </a>
-      <a href="/png-to-jpg" class="converter-card">
-        <span class="converter-card__badge badge--native">Native</span>
-        <h3>PNG to JPG</h3>
-        <p>Convert PNG to smaller JPG files. Great for reducing file size.</p>
-      </a>
-      <a href="/jpg-to-png" class="converter-card">
-        <span class="converter-card__badge badge--native">Native</span>
-        <h3>JPG to PNG</h3>
-        <p>Convert JPG to lossless PNG format.</p>
-      </a>
-      <a href="/compress" class="converter-card">
-        <span class="converter-card__badge badge--native">Native</span>
-        <h3>Compress Images</h3>
-        <p>Reduce file size with adjustable quality. Supports JPG, PNG, WebP.</p>
-      </a>
-      <a href="/jpg-to-pdf" class="converter-card">
-        <span class="converter-card__badge badge--pdf">PDF</span>
-        <h3>JPG to PDF</h3>
-        <p>Combine JPG images into a single PDF document.</p>
-      </a>
-      <a href="/png-to-pdf" class="converter-card">
-        <span class="converter-card__badge badge--pdf">PDF</span>
-        <h3>PNG to PDF</h3>
-        <p>Convert PNG images to a PDF document.</p>
-      </a>
-      <a href="/pdf-to-jpg" class="converter-card">
-        <span class="converter-card__badge badge--pdf">PDF</span>
-        <h3>PDF to JPG</h3>
-        <p>Convert PDF pages to JPG images.</p>
-      </a>
-      <a href="/pdf-to-png" class="converter-card">
-        <span class="converter-card__badge badge--pdf">PDF</span>
-        <h3>PDF to PNG</h3>
-        <p>Convert PDF pages to lossless PNG images.</p>
-      </a>
-      <a href="/merge-pdf" class="converter-card">
-        <span class="converter-card__badge badge--pdf">PDF</span>
-        <h3>Merge PDFs</h3>
-        <p>Combine multiple PDF files into one document.</p>
-      </a>
-    </div>
+    <section class="tools-section">
+      <h2 class="tools-section__heading">Image Conversion</h2>
+      <div class="tools-grid">
+        <a href="/heic-to-jpg" class="tool-link">HEIC to JPG</a>
+        <a href="/heic-to-png" class="tool-link">HEIC to PNG</a>
+        <a href="/webp-to-jpg" class="tool-link">WebP to JPG</a>
+        <a href="/webp-to-png" class="tool-link">WebP to PNG</a>
+        <a href="/png-to-jpg" class="tool-link">PNG to JPG</a>
+        <a href="/jpg-to-png" class="tool-link">JPG to PNG</a>
+        <a href="/jpg-to-webp" class="tool-link">JPG to WebP</a>
+        <a href="/png-to-webp" class="tool-link">PNG to WebP</a>
+        <a href="/compress" class="tool-link">Compress</a>
+      </div>
+    </section>
+
+    <section class="tools-section">
+      <h2 class="tools-section__heading">PDF Tools</h2>
+      <div class="tools-grid">
+        <a href="/jpg-to-pdf" class="tool-link">JPG to PDF</a>
+        <a href="/png-to-pdf" class="tool-link">PNG to PDF</a>
+        <a href="/pdf-to-jpg" class="tool-link">PDF to JPG</a>
+        <a href="/pdf-to-png" class="tool-link">PDF to PNG</a>
+        <a href="/merge-pdf" class="tool-link">Merge PDFs</a>
+      </div>
+    </section>
 
     <section class="faq">
       <h2>Frequently Asked Questions</h2>

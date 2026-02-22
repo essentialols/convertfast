@@ -16,6 +16,11 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://convertfast.app/heic-to-webp</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://convertfast.app/heic-to-pdf</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
@@ -171,7 +176,22 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://convertfast.app/ico-to-jpg</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://convertfast.app/ico-to-png</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://convertfast.app/ico-to-webp</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://convertfast.app/ico-to-pdf</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -182,6 +202,16 @@
   </url>
   <url>
     <loc>https://convertfast.app/tiff-to-png</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://convertfast.app/tiff-to-webp</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://convertfast.app/tiff-to-pdf</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>

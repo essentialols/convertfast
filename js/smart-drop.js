@@ -21,15 +21,15 @@ const SIGS = [
 
 // Format -> available conversion targets
 const ROUTES = {
-  'image/heic':  [{ label: 'Convert to JPG', href: '/heic-to-jpg' }, { label: 'Convert to PNG', href: '/heic-to-png' }, { label: 'Convert to PDF', href: '/heic-to-pdf' }],
+  'image/heic':  [{ label: 'Convert to JPG', href: '/heic-to-jpg' }, { label: 'Convert to PNG', href: '/heic-to-png' }, { label: 'Convert to WebP', href: '/heic-to-webp' }, { label: 'Convert to PDF', href: '/heic-to-pdf' }],
   'image/png':   [{ label: 'Convert to JPG', href: '/png-to-jpg' }, { label: 'Convert to WebP', href: '/png-to-webp' }, { label: 'Compress', href: '/compress' }, { label: 'Convert to PDF', href: '/png-to-pdf' }],
   'image/jpeg':  [{ label: 'Convert to WebP', href: '/jpg-to-webp' }, { label: 'Convert to PNG', href: '/jpg-to-png' }, { label: 'Compress', href: '/compress' }, { label: 'Convert to PDF', href: '/jpg-to-pdf' }],
   'image/webp':  [{ label: 'Convert to JPG', href: '/webp-to-jpg' }, { label: 'Convert to PNG', href: '/webp-to-png' }, { label: 'Convert to PDF', href: '/webp-to-pdf' }],
   'image/gif':   [{ label: 'Convert to JPG', href: '/gif-to-jpg' }, { label: 'Convert to PNG', href: '/gif-to-png' }, { label: 'Convert to WebP', href: '/gif-to-webp' }, { label: 'Convert to PDF', href: '/gif-to-pdf' }],
   'image/bmp':   [{ label: 'Convert to JPG', href: '/bmp-to-jpg' }, { label: 'Convert to PNG', href: '/bmp-to-png' }, { label: 'Convert to WebP', href: '/bmp-to-webp' }, { label: 'Convert to PDF', href: '/bmp-to-pdf' }],
   'image/avif':  [{ label: 'Convert to JPG', href: '/avif-to-jpg' }, { label: 'Convert to PNG', href: '/avif-to-png' }, { label: 'Convert to WebP', href: '/avif-to-webp' }, { label: 'Convert to PDF', href: '/avif-to-pdf' }],
-  'image/tiff':  [{ label: 'Convert to JPG', href: '/tiff-to-jpg' }, { label: 'Convert to PNG', href: '/tiff-to-png' }],
-  'image/x-icon': [{ label: 'Convert to PNG', href: '/ico-to-png' }],
+  'image/tiff':  [{ label: 'Convert to JPG', href: '/tiff-to-jpg' }, { label: 'Convert to PNG', href: '/tiff-to-png' }, { label: 'Convert to WebP', href: '/tiff-to-webp' }, { label: 'Convert to PDF', href: '/tiff-to-pdf' }],
+  'image/x-icon': [{ label: 'Convert to JPG', href: '/ico-to-jpg' }, { label: 'Convert to PNG', href: '/ico-to-png' }, { label: 'Convert to WebP', href: '/ico-to-webp' }, { label: 'Convert to PDF', href: '/ico-to-pdf' }],
   'image/svg+xml': [{ label: 'Convert to JPG', href: '/svg-to-jpg' }, { label: 'Convert to PNG', href: '/svg-to-png' }, { label: 'Convert to WebP', href: '/svg-to-webp' }, { label: 'Convert to PDF', href: '/svg-to-pdf' }],
   'application/pdf': [{ label: 'Convert to JPG', href: '/pdf-to-jpg' }, { label: 'Convert to PNG', href: '/pdf-to-png' }, { label: 'Merge PDFs', href: '/merge-pdf' }],
   'video/mp4':  [{ label: 'Convert to GIF', href: '/video-to-gif' }],

@@ -7,7 +7,7 @@ const ROOT = resolve(import.meta.dirname, '..');
 const BASE = 'http://localhost:3987';
 
 const PAGES = [
-  '/', '/heic-to-jpg', '/heic-to-png', '/heic-to-pdf',
+  '/', '/heic-to-jpg', '/heic-to-png', '/heic-to-webp', '/heic-to-pdf',
   '/webp-to-jpg', '/webp-to-png', '/webp-to-pdf',
   '/png-to-jpg', '/jpg-to-png', '/jpg-to-webp', '/png-to-webp',
   '/compress', '/jpg-to-pdf', '/png-to-pdf',
@@ -16,7 +16,8 @@ const PAGES = [
   '/bmp-to-jpg', '/bmp-to-png', '/bmp-to-webp', '/bmp-to-pdf',
   '/gif-to-jpg', '/gif-to-png', '/gif-to-webp', '/gif-to-pdf',
   '/avif-to-jpg', '/avif-to-png', '/avif-to-webp', '/avif-to-pdf',
-  '/ico-to-png', '/tiff-to-jpg', '/tiff-to-png',
+  '/ico-to-jpg', '/ico-to-png', '/ico-to-webp', '/ico-to-pdf',
+  '/tiff-to-jpg', '/tiff-to-png', '/tiff-to-webp', '/tiff-to-pdf',
   '/about'
 ];
 
@@ -158,7 +159,7 @@ async function globalChecks() {
   const urls = [];
   let m;
   while ((m = locRe.exec(sitemap)) !== null) urls.push(m[1]);
-  ok(urls.length === 38, `sitemap.xml: has ${urls.length} URLs (expected 38)`);
+  ok(urls.length === 44, `sitemap.xml: has ${urls.length} URLs (expected 44)`);
 
   // each sitemap URL corresponds to a real page
   for (const url of urls) {

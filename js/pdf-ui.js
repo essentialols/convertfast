@@ -6,6 +6,7 @@
 
 import { imagesToPdf, pdfToImages, mergePdfs, splitPdf } from './pdf-engine.js';
 import { formatSize, downloadBlob, downloadAsZip } from './converter.js';
+import { loadPendingFiles } from './smart-drop.js';
 
 let mode = '';  // 'img-to-pdf', 'pdf-to-img', 'merge', 'split'
 let targetMime = '';
@@ -48,6 +49,11 @@ export function init() {
 
   if (actionBtn) actionBtn.addEventListener('click', runAction);
   if (clearBtn) clearBtn.addEventListener('click', clearAll);
+
+  // Auto-load files passed from landing page smart drop
+  loadPendingFiles().then(pending => {
+    if (pending && pending.length > 0) addFiles(pending);
+  }).catch(() => {});
 
   // FAQ accordion
   document.querySelectorAll('.faq-question').forEach(btn => {

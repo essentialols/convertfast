@@ -100,6 +100,14 @@
       Your files never leave your browser. Zero server uploads. 100% private.
     </div>
 
+    <div id="smart-drop" class="drop-zone">
+      <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M28 8H12a4 4 0 00-4 4v24a4 4 0 004 4h24a4 4 0 004-4V20L28 8z"/><path d="M28 8v12h12"/><path d="M24 34v-8m-4 4l4-4 4 4"/></svg>
+      <p>Drop any file here and we'll figure out the rest</p>
+      <p style="font-size:0.8rem;margin-top:0.5rem">HEIC, JPG, PNG, WebP, PDF. Batch supported.</p>
+      <input type="file" id="smart-file-input" accept="image/*,.heic,.heif,.pdf,application/pdf" multiple>
+    </div>
+    <div id="route-panel" class="route-panel" style="display:none"></div>
+
     <div class="converter-grid">
       <a href="/heic-to-jpg" class="converter-card">
         <span class="converter-card__badge badge--wasm">WASM</span>
@@ -204,5 +212,23 @@
       <p>ConvertFast. All processing happens in your browser. <a href="https://buymeacoffee.com/convertfast">Buy me a coffee</a></p>
     </div>
   </footer>
+
+  <script type="module">
+    import { initSmartDrop } from './js/smart-drop.js';
+    initSmartDrop();
+    // FAQ accordion
+    document.querySelectorAll('.faq-question').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const item = btn.parentElement;
+        const answer = item.querySelector('.faq-answer');
+        const isOpen = item.classList.contains('open');
+        document.querySelectorAll('.faq-item.open').forEach(el => {
+          el.classList.remove('open');
+          el.querySelector('.faq-answer').style.maxHeight = null;
+        });
+        if (!isOpen) { item.classList.add('open'); answer.style.maxHeight = answer.scrollHeight + 'px'; }
+      });
+    });
+  </script>
 </body>
 </html>

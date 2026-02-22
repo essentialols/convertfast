@@ -8,6 +8,7 @@ import {
   outputFilename, downloadBlob, downloadAsZip, formatSize,
   validateFile, MAX_BATCH_SIZE
 } from './converter.js';
+import { loadPendingFiles } from './smart-drop.js';
 
 // Populated by each page's inline script
 let PAGE_CONFIG = {
@@ -106,6 +107,11 @@ export function init() {
       }
     });
   });
+
+  // Auto-load files passed from landing page smart drop
+  loadPendingFiles().then(files => {
+    if (files && files.length > 0) handleFiles(files);
+  }).catch(() => {});
 }
 
 function handleFiles(files) {

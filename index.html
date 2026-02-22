@@ -100,7 +100,7 @@
       <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M28 8H12a4 4 0 00-4 4v24a4 4 0 004 4h24a4 4 0 004-4V20L28 8z"/><path d="M28 8v12h12"/><path d="M24 34v-8m-4 4l4-4 4 4"/></svg>
       <p>Drop any file here, or <strong>click to browse</strong></p>
       <p style="font-size:0.8rem;margin-top:0.5rem;color:var(--text-muted)">We'll detect the format and show your options.</p>
-      <input type="file" id="smart-file-input" accept="image/*,.heic,.heif,.pdf,application/pdf,video/*,.mp4,.webm,.mov" multiple>
+      <input type="file" id="smart-file-input" accept="image/*,.heic,.heif,.avif,.svg,.bmp,.gif,.tiff,.tif,.ico,.pdf,application/pdf,video/*,.mp4,.webm,.mov" multiple>
     </div>
     <div id="route-panel" class="route-panel" style="display:none"></div>
 
@@ -140,6 +140,61 @@
             <a href="/jpg-to-png" class="tool-link">PNG</a>
             <a href="/jpg-to-webp" class="tool-link">WebP</a>
             <a href="/jpg-to-pdf" class="tool-link">PDF</a>
+          </div>
+        </div>
+        <div class="convert-row">
+          <span class="convert-source">SVG</span>
+          <span class="convert-arrow">→</span>
+          <div class="convert-targets">
+            <a href="/svg-to-jpg" class="tool-link">JPG</a>
+            <a href="/svg-to-png" class="tool-link">PNG</a>
+            <a href="/svg-to-webp" class="tool-link">WebP</a>
+            <a href="/svg-to-pdf" class="tool-link">PDF</a>
+          </div>
+        </div>
+        <div class="convert-row">
+          <span class="convert-source">BMP</span>
+          <span class="convert-arrow">→</span>
+          <div class="convert-targets">
+            <a href="/bmp-to-jpg" class="tool-link">JPG</a>
+            <a href="/bmp-to-png" class="tool-link">PNG</a>
+            <a href="/bmp-to-webp" class="tool-link">WebP</a>
+            <a href="/bmp-to-pdf" class="tool-link">PDF</a>
+          </div>
+        </div>
+        <div class="convert-row">
+          <span class="convert-source">GIF</span>
+          <span class="convert-arrow">→</span>
+          <div class="convert-targets">
+            <a href="/gif-to-jpg" class="tool-link">JPG</a>
+            <a href="/gif-to-png" class="tool-link">PNG</a>
+            <a href="/gif-to-webp" class="tool-link">WebP</a>
+            <a href="/gif-to-pdf" class="tool-link">PDF</a>
+          </div>
+        </div>
+        <div class="convert-row">
+          <span class="convert-source">AVIF</span>
+          <span class="convert-arrow">→</span>
+          <div class="convert-targets">
+            <a href="/avif-to-jpg" class="tool-link">JPG</a>
+            <a href="/avif-to-png" class="tool-link">PNG</a>
+            <a href="/avif-to-webp" class="tool-link">WebP</a>
+            <a href="/avif-to-pdf" class="tool-link">PDF</a>
+          </div>
+        </div>
+        <div class="convert-row">
+          <span class="convert-source">TIFF</span>
+          <span class="convert-arrow">→</span>
+          <div class="convert-targets">
+            <a href="/tiff-to-jpg" class="tool-link">JPG</a>
+            <a href="/tiff-to-png" class="tool-link">PNG</a>
+          </div>
+        </div>
+        <div class="convert-row">
+          <span class="convert-source">ICO</span>
+          <span class="convert-arrow">→</span>
+          <div class="convert-targets">
+            <a href="/ico-to-png" class="tool-link">PNG</a>
           </div>
         </div>
         <div class="convert-row">

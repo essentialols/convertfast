@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AVIF to WebP Converter - Free, Private, No Upload | ConvertFast</title>
+  <meta name="description" content="Convert AVIF images to WebP in your browser. No upload needed. Broad compatibility. Batch support.">
+  <meta property="og:title" content="AVIF to WebP Converter - Free, Private, No Upload | ConvertFast">
+  <meta property="og:description" content="Convert AVIF images to WebP in your browser. No upload needed. Broad compatibility. Batch support.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://convertfast.app/avif-to-webp">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="AVIF to WebP Converter - Free, Private, No Upload | ConvertFast">
+  <meta name="twitter:description" content="Convert AVIF images to WebP in your browser. No upload needed. Broad compatibility. Batch support.">
+  <meta property="og:image" content="https://convertfast.app/img/og-default.png">
+  <meta name="twitter:image" content="https://convertfast.app/img/og-default.png">
+  <link rel="canonical" href="https://convertfast.app/avif-to-webp">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <script type="application/ld+json">
+  [
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "AVIF to WebP Converter - ConvertFast",
+      "url": "https://convertfast.app/avif-to-webp",
+      "description": "Convert AVIF images to WebP in your browser. No upload needed. Broad compatibility. Batch support.",
+      "applicationCategory": "MultimediaApplication",
+      "operatingSystem": "Any",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Why convert AVIF to WebP?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "While AVIF has better compression, WebP has broader software support. WebP works in all modern browsers and most image editors, making it a safer choice for sharing."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Will transparency be preserved?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. WebP supports transparency just like AVIF."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Which browsers support this conversion?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Your browser needs to support both AVIF decoding (Chrome 85+, Firefox 93+, Safari 16.1+) and WebP encoding (all modern browsers)."
+          }
+        }
+      ]
+    }
+  ]
+  </script>
+</head>
+<body>
+  <header class="header">
+    <div class="container container--wide">
+      <a href="/" class="logo">Convert<span>Fast</span></a>
+      <nav class="nav">
+        <a href="/">All Converters</a>
+        <a href="/about">About</a>
+        <a href="https://buymeacoffee.com/convertfast" class="support-btn" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 8h1.5a2.5 2.5 0 010 5H17"/><path d="M3 8h14v9a4 4 0 01-4 4H7a4 4 0 01-4-4V8z" fill="currentColor" stroke="none" opacity=".15"/><path d="M3 8h14v9a4 4 0 01-4 4H7a4 4 0 01-4-4V8z"/><path d="M6 1v3M10 1v3M14 1v3" opacity=".6"/></svg> Buy me a coffee</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <a href="/" class="back-link"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 12L6 8l4-4"/></svg> All Converters</a>
+    <section class="hero">
+      <h1>AVIF to WebP</h1>
+      <p>Convert AVIF to WebP for broader browser support. Everything runs in your browser.</p>
+    </section>
+
+    <div class="trust-banner">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 1L3 5v4c0 4.4 3 8.5 7 9.9 4-1.4 7-5.5 7-9.9V5l-7-4z" fill="#16a34a" opacity=".15"/><path d="M10 1L3 5v4c0 4.4 3 8.5 7 9.9 4-1.4 7-5.5 7-9.9V5l-7-4z" stroke="#16a34a" stroke-width="1.5" fill="none"/><path d="M7 10l2 2 4-4" stroke="#16a34a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Your files never leave your browser. Zero server uploads. 100% private.
+    </div>
+
+    <div id="drop-zone" class="drop-zone">
+      <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M28 8H12a4 4 0 00-4 4v24a4 4 0 004 4h24a4 4 0 004-4V20L28 8z"/><path d="M28 8v12h12"/><path d="M24 34v-8m-4 4l4-4 4 4"/></svg>
+      <p>Drag & drop AVIF files here, or <strong>click to browse</strong></p>
+      <p style="font-size:0.8rem;margin-top:0.5rem">Supports batch conversion. Drop multiple files at once.</p>
+      <input type="file" id="file-input" accept=".avif,image/avif" multiple>
+    </div>
+
+    <div class="controls">
+      <div class="quality-control">
+        <label for="quality-slider">Quality:</label>
+        <input type="range" id="quality-slider" min="10" max="100" value="92">
+        <span id="quality-value" class="quality-value">92%</span>
+      </div>
+    </div>
+
+    <div id="file-list" class="file-list"></div>
+
+    <div class="batch-actions">
+      <button id="download-all" class="btn btn--primary" style="display:none">Download All as ZIP</button>
+      <button id="clear-all" class="btn btn--secondary" style="display:none">Clear All</button>
+    </div>
+
+    <div class="related-tools">
+      <h2>Related Tools</h2>
+      <div class="related-tools__links">
+        <a href="/avif-to-jpg">AVIF to JPG</a>
+        <a href="/avif-to-png">AVIF to PNG</a>
+        <a href="/webp-to-jpg">WebP to JPG</a>
+      </div>
+    </div>
+
+    <section class="faq">
+      <h2>Frequently Asked Questions</h2>
+      <div class="faq-item">
+        <button class="faq-question">Why convert AVIF to WebP?</button>
+        <div class="faq-answer">
+          <p>While AVIF has better compression, WebP has broader software support. WebP works in all modern browsers and most image editors, making it a safer choice for sharing.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question">Will transparency be preserved?</button>
+        <div class="faq-answer">
+          <p>Yes. WebP supports transparency just like AVIF.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question">Which browsers support this conversion?</button>
+        <div class="faq-answer">
+          <p>Your browser needs to support both AVIF decoding (Chrome 85+, Firefox 93+, Safari 16.1+) and WebP encoding (all modern browsers).</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-links">
+        <a href="/">All Converters</a>
+        <a href="/avif-to-jpg">AVIF to JPG</a>
+        <a href="/webp-to-jpg">WebP to JPG</a>
+        <a href="/about">About</a>
+      </div>
+      <p>ConvertFast. All processing happens in your browser.</p>
+    </div>
+  </footer>
+
+  <div id="converter-config" data-source-formats="image/avif" data-target-mime="image/webp" data-target-ext="webp" data-mode="convert"></div>
+  <script src="js/fflate.min.js"></script>
+  <script type="module" src="js/boot.js"></script>
+</body>
+</html>

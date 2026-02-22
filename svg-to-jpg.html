@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SVG to JPG Converter - Free, Private, No Upload | ConvertFast</title>
+  <meta name="description" content="Convert SVG vector graphics to JPG images in your browser. No upload needed. Batch support included.">
+  <meta property="og:title" content="SVG to JPG Converter - Free, Private, No Upload | ConvertFast">
+  <meta property="og:description" content="Convert SVG vector graphics to JPG images in your browser. No upload needed. Batch support included.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://convertfast.app/svg-to-jpg">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="SVG to JPG Converter - Free, Private, No Upload | ConvertFast">
+  <meta name="twitter:description" content="Convert SVG vector graphics to JPG images in your browser. No upload needed. Batch support included.">
+  <meta property="og:image" content="https://convertfast.app/img/og-default.png">
+  <meta name="twitter:image" content="https://convertfast.app/img/og-default.png">
+  <link rel="canonical" href="https://convertfast.app/svg-to-jpg">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <script type="application/ld+json">
+  [
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "SVG to JPG Converter - ConvertFast",
+      "url": "https://convertfast.app/svg-to-jpg",
+      "description": "Convert SVG vector graphics to JPG images in your browser. No upload needed. Batch support included.",
+      "applicationCategory": "MultimediaApplication",
+      "operatingSystem": "Any",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What resolution will my SVG be converted at?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "SVG files are rendered at their intrinsic dimensions (the width and height specified in the file). The resulting JPG preserves the full resolution of the vector graphic."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Will text in my SVG render correctly?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes, as long as the SVG uses standard web fonts or has fonts embedded. The browser's rendering engine handles all SVG features including text, gradients, and filters."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I convert multiple SVGs at once?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Drop as many SVG files as you want. ConvertFast processes them in parallel and lets you download all results as a ZIP."
+          }
+        }
+      ]
+    }
+  ]
+  </script>
+</head>
+<body>
+  <header class="header">
+    <div class="container container--wide">
+      <a href="/" class="logo">Convert<span>Fast</span></a>
+      <nav class="nav">
+        <a href="/">All Converters</a>
+        <a href="/about">About</a>
+        <a href="https://buymeacoffee.com/convertfast" class="support-btn" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 8h1.5a2.5 2.5 0 010 5H17"/><path d="M3 8h14v9a4 4 0 01-4 4H7a4 4 0 01-4-4V8z" fill="currentColor" stroke="none" opacity=".15"/><path d="M3 8h14v9a4 4 0 01-4 4H7a4 4 0 01-4-4V8z"/><path d="M6 1v3M10 1v3M14 1v3" opacity=".6"/></svg> Buy me a coffee</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <a href="/" class="back-link"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 12L6 8l4-4"/></svg> All Converters</a>
+    <section class="hero">
+      <h1>SVG to JPG</h1>
+      <p>Convert SVG vector graphics to JPG images. Batch support. Everything runs in your browser.</p>
+    </section>
+
+    <div class="trust-banner">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 1L3 5v4c0 4.4 3 8.5 7 9.9 4-1.4 7-5.5 7-9.9V5l-7-4z" fill="#16a34a" opacity=".15"/><path d="M10 1L3 5v4c0 4.4 3 8.5 7 9.9 4-1.4 7-5.5 7-9.9V5l-7-4z" stroke="#16a34a" stroke-width="1.5" fill="none"/><path d="M7 10l2 2 4-4" stroke="#16a34a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Your files never leave your browser. Zero server uploads. 100% private.
+    </div>
+
+    <div id="drop-zone" class="drop-zone">
+      <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M28 8H12a4 4 0 00-4 4v24a4 4 0 004 4h24a4 4 0 004-4V20L28 8z"/><path d="M28 8v12h12"/><path d="M24 34v-8m-4 4l4-4 4 4"/></svg>
+      <p>Drag & drop SVG files here, or <strong>click to browse</strong></p>
+      <p style="font-size:0.8rem;margin-top:0.5rem">Supports batch conversion. Drop multiple files at once.</p>
+      <input type="file" id="file-input" accept=".svg,image/svg+xml" multiple>
+    </div>
+
+    <div class="controls">
+      <div class="quality-control">
+        <label for="quality-slider">Quality:</label>
+        <input type="range" id="quality-slider" min="10" max="100" value="92">
+        <span id="quality-value" class="quality-value">92%</span>
+      </div>
+    </div>
+
+    <div id="file-list" class="file-list"></div>
+
+    <div class="batch-actions">
+      <button id="download-all" class="btn btn--primary" style="display:none">Download All as ZIP</button>
+      <button id="clear-all" class="btn btn--secondary" style="display:none">Clear All</button>
+    </div>
+
+    <div class="related-tools">
+      <h2>Related Tools</h2>
+      <div class="related-tools__links">
+        <a href="/svg-to-png">SVG to PNG</a>
+        <a href="/svg-to-webp">SVG to WebP</a>
+        <a href="/jpg-to-png">JPG to PNG</a>
+      </div>
+    </div>
+
+    <section class="faq">
+      <h2>Frequently Asked Questions</h2>
+      <div class="faq-item">
+        <button class="faq-question">What resolution will my SVG be converted at?</button>
+        <div class="faq-answer">
+          <p>SVG files are rendered at their intrinsic dimensions (the width and height specified in the file). The resulting JPG preserves the full resolution of the vector graphic.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question">Will text in my SVG render correctly?</button>
+        <div class="faq-answer">
+          <p>Yes, as long as the SVG uses standard web fonts or has fonts embedded. The browser's rendering engine handles all SVG features including text, gradients, and filters.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question">Can I convert multiple SVGs at once?</button>
+        <div class="faq-answer">
+          <p>Yes. Drop as many SVG files as you want. ConvertFast processes them in parallel and lets you download all results as a ZIP.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-links">
+        <a href="/">All Converters</a>
+        <a href="/svg-to-png">SVG to PNG</a>
+        <a href="/jpg-to-webp">JPG to WebP</a>
+        <a href="/about">About</a>
+      </div>
+      <p>ConvertFast. All processing happens in your browser.</p>
+    </div>
+  </footer>
+
+  <div id="converter-config" data-source-formats="image/svg+xml" data-target-mime="image/jpeg" data-target-ext="jpg" data-mode="convert"></div>
+  <script src="js/fflate.min.js"></script>
+  <script type="module" src="js/boot.js"></script>
+</body>
+</html>

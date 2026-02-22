@@ -5,11 +5,15 @@
 
 const SIGS = [
   { mime: 'image/heic', ext: 'heic', label: 'HEIC', offsets: [[4,[0x66,0x74,0x79,0x70,0x68,0x65,0x69,0x63]],[4,[0x66,0x74,0x79,0x70,0x68,0x65,0x69,0x78]],[4,[0x66,0x74,0x79,0x70,0x68,0x65,0x76,0x63]],[4,[0x66,0x74,0x79,0x70,0x6d,0x69,0x66,0x31]],[4,[0x66,0x74,0x79,0x70,0x6d,0x73,0x66,0x31]],[4,[0x66,0x74,0x79,0x70,0x68,0x65,0x69,0x66]],[4,[0x66,0x74,0x79,0x70,0x68,0x65,0x76,0x78]]] },
+  { mime: 'image/avif', ext: 'avif', label: 'AVIF', offsets: [[4,[0x66,0x74,0x79,0x70,0x61,0x76,0x69,0x66]],[4,[0x66,0x74,0x79,0x70,0x61,0x76,0x69,0x73]]] },
   { mime: 'image/png',  ext: 'png',  label: 'PNG',  offsets: [[0,[0x89,0x50,0x4E,0x47]]] },
   { mime: 'image/jpeg', ext: 'jpg',  label: 'JPG',  offsets: [[0,[0xFF,0xD8,0xFF]]] },
   { mime: 'image/webp', ext: 'webp', label: 'WebP', offsets: [[8,[0x57,0x45,0x42,0x50]]] },
   { mime: 'image/gif',  ext: 'gif',  label: 'GIF',  offsets: [[0,[0x47,0x49,0x46]]] },
   { mime: 'image/bmp',  ext: 'bmp',  label: 'BMP',  offsets: [[0,[0x42,0x4D]]] },
+  { mime: 'image/tiff', ext: 'tiff', label: 'TIFF', offsets: [[0,[0x49,0x49,0x2A,0x00]],[0,[0x4D,0x4D,0x00,0x2A]]] },
+  { mime: 'image/x-icon', ext: 'ico', label: 'ICO', offsets: [[0,[0x00,0x00,0x01,0x00]]] },
+  { mime: 'image/svg+xml', ext: 'svg', label: 'SVG', offsets: [] },
   { mime: 'application/pdf', ext: 'pdf', label: 'PDF', offsets: [[0,[0x25,0x50,0x44,0x46]]] },
   { mime: 'video/mp4',  ext: 'mp4',  label: 'MP4',  offsets: [[4,[0x66,0x74,0x79,0x70]]] },
   { mime: 'video/webm', ext: 'webm', label: 'WebM', offsets: [[0,[0x1A,0x45,0xDF,0xA3]]] },
@@ -21,8 +25,12 @@ const ROUTES = {
   'image/png':   [{ label: 'Convert to JPG', href: '/png-to-jpg' }, { label: 'Convert to WebP', href: '/png-to-webp' }, { label: 'Compress', href: '/compress' }, { label: 'Convert to PDF', href: '/png-to-pdf' }],
   'image/jpeg':  [{ label: 'Convert to WebP', href: '/jpg-to-webp' }, { label: 'Convert to PNG', href: '/jpg-to-png' }, { label: 'Compress', href: '/compress' }, { label: 'Convert to PDF', href: '/jpg-to-pdf' }],
   'image/webp':  [{ label: 'Convert to JPG', href: '/webp-to-jpg' }, { label: 'Convert to PNG', href: '/webp-to-png' }, { label: 'Convert to PDF', href: '/webp-to-pdf' }],
-  'image/gif':   [{ label: 'Compress', href: '/compress' }],
-  'image/bmp':   [{ label: 'Compress', href: '/compress' }],
+  'image/gif':   [{ label: 'Convert to JPG', href: '/gif-to-jpg' }, { label: 'Convert to PNG', href: '/gif-to-png' }, { label: 'Convert to WebP', href: '/gif-to-webp' }, { label: 'Convert to PDF', href: '/gif-to-pdf' }],
+  'image/bmp':   [{ label: 'Convert to JPG', href: '/bmp-to-jpg' }, { label: 'Convert to PNG', href: '/bmp-to-png' }, { label: 'Convert to WebP', href: '/bmp-to-webp' }, { label: 'Convert to PDF', href: '/bmp-to-pdf' }],
+  'image/avif':  [{ label: 'Convert to JPG', href: '/avif-to-jpg' }, { label: 'Convert to PNG', href: '/avif-to-png' }, { label: 'Convert to WebP', href: '/avif-to-webp' }, { label: 'Convert to PDF', href: '/avif-to-pdf' }],
+  'image/tiff':  [{ label: 'Convert to JPG', href: '/tiff-to-jpg' }, { label: 'Convert to PNG', href: '/tiff-to-png' }],
+  'image/x-icon': [{ label: 'Convert to PNG', href: '/ico-to-png' }],
+  'image/svg+xml': [{ label: 'Convert to JPG', href: '/svg-to-jpg' }, { label: 'Convert to PNG', href: '/svg-to-png' }, { label: 'Convert to WebP', href: '/svg-to-webp' }, { label: 'Convert to PDF', href: '/svg-to-pdf' }],
   'application/pdf': [{ label: 'Convert to JPG', href: '/pdf-to-jpg' }, { label: 'Convert to PNG', href: '/pdf-to-png' }, { label: 'Merge PDFs', href: '/merge-pdf' }],
   'video/mp4':  [{ label: 'Convert to GIF', href: '/video-to-gif' }],
   'video/webm': [{ label: 'Convert to GIF', href: '/video-to-gif' }],
@@ -37,6 +45,15 @@ async function detect(file) {
       }
     }
   }
+  // SVG: check extension or sniff text content
+  const ext = (file.name || '').split('.').pop().toLowerCase();
+  if (ext === 'svg' || file.type === 'image/svg+xml') {
+    return SIGS.find(s => s.mime === 'image/svg+xml');
+  }
+  // ICO/TIFF: fallback on extension if magic bytes missed
+  if (ext === 'ico') return SIGS.find(s => s.mime === 'image/x-icon');
+  if (ext === 'tif' || ext === 'tiff') return SIGS.find(s => s.mime === 'image/tiff');
+  if (ext === 'avif') return SIGS.find(s => s.mime === 'image/avif');
   return null;
 }
 

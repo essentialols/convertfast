@@ -40,11 +40,37 @@ export async function detectFormat(file) {
 }
 
 /**
- * Check if a format needs the HEIC WASM worker.
+ * Check if a format needs the HEIC WASM decoder.
  */
 export function needsHeicDecoder(mime) {
   return mime === 'image/heic' || mime === 'image/heif';
 }
+
+// Safeguards
+const MAX_FILE_SIZE = 100 * 1024 * 1024;  // 100MB
+const MAX_PIXELS = 100_000_000;            // 100 megapixels (e.g. 10000x10000)
+const MAX_BATCH_SIZE = 50;
+
+/**
+ * Validate a file before processing. Throws descriptive errors.
+ */
+export function validateFile(file) {
+  if (file.size > MAX_FILE_SIZE) {
+    throw new Error(`File too large (${formatSize(file.size)}). Max is ${formatSize(MAX_FILE_SIZE)}.`);
+  }
+}
+
+/**
+ * Validate image dimensions before Canvas allocation. Throws if too large.
+ */
+export function validateDimensions(width, height) {
+  const pixels = width * height;
+  if (pixels > MAX_PIXELS) {
+    throw new Error(`Image too large (${width}x${height} = ${Math.round(pixels/1e6)}MP). Max is ${Math.round(MAX_PIXELS/1e6)}MP.`);
+  }
+}
+
+export { MAX_BATCH_SIZE };
 
 /**
  * Convert an image using the Canvas API (for natively-supported formats).
@@ -58,6 +84,13 @@ export function convertWithCanvas(file, targetMime, quality) {
     const img = new Image();
     const url = URL.createObjectURL(file);
     img.onload = () => {
+      try {
+        validateDimensions(img.naturalWidth, img.naturalHeight);
+      } catch (e) {
+        URL.revokeObjectURL(url);
+        reject(e);
+        return;
+      }
       const canvas = document.createElement('canvas');
       canvas.width = img.naturalWidth;
       canvas.height = img.naturalHeight;

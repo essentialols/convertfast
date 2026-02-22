@@ -72,31 +72,40 @@ body {
 /* Hero section */
 .hero {
   text-align: center;
-  padding: 3rem 0 2rem;
+  padding: 2rem 0 1.25rem;
 }
 .hero h1 {
-  font-size: 2.25rem;
+  font-size: 2rem;
   font-weight: 800;
   letter-spacing: -0.02em;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.5rem;
 }
 .hero p {
-  font-size: 1.1rem;
+  font-size: 1rem;
   color: var(--text-muted);
   max-width: 540px;
   margin: 0 auto;
 }
+/* Bigger hero on landing page */
+.hero--landing { padding: 3rem 0 2rem; }
+.hero--landing h1 { font-size: 2.25rem; }
+.hero--landing p { font-size: 1.1rem; }
 
 /* Drop zone */
 .drop-zone {
   border: 2px dashed var(--border);
   border-radius: var(--radius);
-  padding: 3rem 2rem;
+  padding: 3.5rem 2rem;
   text-align: center;
   cursor: pointer;
   transition: border-color .2s, background .2s;
   margin-bottom: 1.5rem;
   background: var(--bg-secondary);
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 .drop-zone:hover, .drop-zone.dragover {
   border-color: var(--primary);
@@ -188,7 +197,9 @@ body {
 .file-item__meta {
   font-size: 0.8rem;
   color: var(--text-muted);
+  transition: color .3s;
 }
+.file-item.done .file-item__meta { color: var(--success); font-weight: 500; }
 .file-item__progress {
   width: 120px;
   height: 6px;
@@ -211,6 +222,30 @@ body {
 }
 .file-item__status.done { color: var(--success); }
 .file-item__status.error { color: var(--danger); }
+
+/* Notice (warnings/limits) */
+.notice {
+  background: #fefce8;
+  border: 1px solid #fde68a;
+  border-radius: 8px;
+  padding: 0.6rem 1rem;
+  font-size: 0.85rem;
+  color: #92400e;
+  margin-bottom: 1rem;
+}
+
+/* Batch summary */
+.batch-summary {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 0.75rem;
+  text-align: center;
+}
 
 /* Batch actions */
 .batch-actions {

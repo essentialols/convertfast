@@ -5,7 +5,8 @@
 
 import {
   detectFormat, needsHeicDecoder, convertWithCanvas, convertHeic,
-  outputFilename, downloadBlob, downloadAsZip, formatSize
+  outputFilename, downloadBlob, downloadAsZip, formatSize,
+  validateFile, MAX_BATCH_SIZE
 } from './converter.js';
 
 // Populated by each page's inline script
@@ -102,7 +103,16 @@ export function init() {
 }
 
 function handleFiles(files) {
-  for (const file of files) {
+  const remaining = MAX_BATCH_SIZE - fileQueue.length;
+  if (remaining <= 0) {
+    showNotice(`Batch limit reached (${MAX_BATCH_SIZE} files). Clear some files first.`);
+    return;
+  }
+  const toAdd = Array.from(files).slice(0, remaining);
+  if (toAdd.length < files.length) {
+    showNotice(`Only added ${toAdd.length} of ${files.length} files (batch limit: ${MAX_BATCH_SIZE}).`);
+  }
+  for (const file of toAdd) {
     addFile(file);
   }
 }
@@ -116,7 +126,23 @@ async function addFile(file) {
     outputBlob: null,
     outputName: null,
     detectedFormat: null,
+    durationMs: null,
+    savings: null,
   };
+
+  // Pre-validate file size
+  try {
+    validateFile(file);
+  } catch (err) {
+    entry.status = 'error';
+    entry.errorMsg = err.message;
+    fileQueue.push(entry);
+    renderFileItem(entry);
+    updateFileItem(entry);
+    updateBatchActions();
+    return;
+  }
+
   fileQueue.push(entry);
   renderFileItem(entry);
   processQueue();
@@ -133,10 +159,16 @@ async function processQueue() {
     activeCount++;
     next.status = 'processing';
     updateFileItem(next);
+    const t0 = performance.now();
     try {
       await processFile(next);
+      next.durationMs = Math.round(performance.now() - t0);
       next.status = 'done';
       next.progress = 100;
+      if (next.outputBlob) {
+        const saved = 1 - (next.outputBlob.size / next.file.size);
+        next.savings = Math.round(saved * 100);
+      }
     } catch (err) {
       next.status = 'error';
       next.errorMsg = err.message;
@@ -219,6 +251,7 @@ function updateFileItem(entry) {
   const actions = div.querySelector('.file-item__actions');
   const meta = div.querySelector('.file-item__meta');
 
+  div.className = 'file-item' + (entry.status === 'done' ? ' done' : '');
   bar.style.width = entry.progress + '%';
   bar.className = 'file-item__progress-bar';
 
@@ -227,8 +260,23 @@ function updateFileItem(entry) {
     status.className = 'file-item__status';
   } else if (entry.status === 'done') {
     bar.classList.add('done');
-    const sizeInfo = entry.outputBlob ? ` \u2192 ${formatSize(entry.outputBlob.size)}` : '';
-    meta.textContent = formatSize(entry.file.size) + sizeInfo;
+    // Build rich meta line: size change, savings %, duration
+    let metaParts = [formatSize(entry.file.size)];
+    if (entry.outputBlob) {
+      metaParts.push('\u2192 ' + formatSize(entry.outputBlob.size));
+      if (entry.savings > 0) {
+        metaParts.push(`(${entry.savings}% smaller)`);
+      } else if (entry.savings < 0) {
+        metaParts.push(`(${Math.abs(entry.savings)}% larger)`);
+      }
+    }
+    if (entry.durationMs !== null) {
+      const dur = entry.durationMs < 1000
+        ? entry.durationMs + 'ms'
+        : (entry.durationMs / 1000).toFixed(1) + 's';
+      metaParts.push('\u00b7 ' + dur);
+    }
+    meta.textContent = metaParts.join(' ');
     actions.innerHTML = `
       <button class="btn btn--success btn-download" style="padding:0.4rem 0.8rem;font-size:0.8rem">Download</button>
       <button class="btn btn--danger btn-remove">Remove</button>
@@ -268,6 +316,7 @@ function updateBatchActions() {
   if (clearAllBtn) {
     clearAllBtn.style.display = fileQueue.length > 0 ? '' : 'none';
   }
+  updateBatchSummary();
 }
 
 async function handleDownloadAll() {
@@ -291,6 +340,46 @@ function handleClearAll() {
   fileQueue.length = 0;
   fileList.innerHTML = '';
   updateBatchActions();
+}
+
+function showNotice(msg) {
+  let notice = document.getElementById('cf-notice');
+  if (!notice) {
+    notice = document.createElement('div');
+    notice.id = 'cf-notice';
+    notice.className = 'notice';
+    dropZone.parentElement.insertBefore(notice, dropZone.nextSibling);
+  }
+  notice.textContent = msg;
+  notice.style.display = '';
+  clearTimeout(notice._timer);
+  notice._timer = setTimeout(() => { notice.style.display = 'none'; }, 5000);
+}
+
+function updateBatchSummary() {
+  const doneFiles = fileQueue.filter(f => f.status === 'done' && f.outputBlob);
+  let summary = document.getElementById('batch-summary');
+  if (doneFiles.length < 2) {
+    if (summary) summary.style.display = 'none';
+    return;
+  }
+  if (!summary) {
+    summary = document.createElement('div');
+    summary.id = 'batch-summary';
+    summary.className = 'batch-summary';
+    const batchActions = document.querySelector('.batch-actions');
+    if (batchActions) batchActions.parentElement.insertBefore(summary, batchActions);
+  }
+  const totalIn = doneFiles.reduce((s, f) => s + f.file.size, 0);
+  const totalOut = doneFiles.reduce((s, f) => s + f.outputBlob.size, 0);
+  const totalSavings = totalIn > 0 ? Math.round((1 - totalOut / totalIn) * 100) : 0;
+  const avgMs = Math.round(doneFiles.reduce((s, f) => s + (f.durationMs || 0), 0) / doneFiles.length);
+  const avgDur = avgMs < 1000 ? avgMs + 'ms' : (avgMs / 1000).toFixed(1) + 's';
+  let savingsText = '';
+  if (totalSavings > 0) savingsText = ` (${totalSavings}% smaller)`;
+  else if (totalSavings < 0) savingsText = ` (${Math.abs(totalSavings)}% larger)`;
+  summary.textContent = `${doneFiles.length} files: ${formatSize(totalIn)} \u2192 ${formatSize(totalOut)}${savingsText} \u00b7 avg ${avgDur}/file`;
+  summary.style.display = '';
 }
 
 function escapeHtml(str) {

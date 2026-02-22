@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PNG to JPG Converter - Free, Private, No Upload | ConvertFast</title>
+  <meta name="description" content="Convert PNG images to smaller JPG files instantly in your browser. No upload needed. Reduce file sizes while preserving quality. Batch support.">
+  <meta property="og:title" content="PNG to JPG Converter - Free, Private, No Upload | ConvertFast">
+  <meta property="og:description" content="Convert PNG images to smaller JPG files instantly in your browser. No upload needed. Reduce file sizes while preserving quality. Batch support.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://convertfast.app/png-to-jpg">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="PNG to JPG Converter - Free, Private, No Upload | ConvertFast">
+  <meta name="twitter:description" content="Convert PNG images to smaller JPG files instantly in your browser. No upload needed. Reduce file sizes while preserving quality. Batch support.">
+  <link rel="canonical" href="https://convertfast.app/png-to-jpg">
+  <link rel="stylesheet" href="css/style.css">
+  <script type="application/ld+json">
+  [
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "PNG to JPG Converter - ConvertFast",
+      "url": "https://convertfast.app/png-to-jpg",
+      "description": "Convert PNG images to smaller JPG files entirely in your browser. No server upload required.",
+      "applicationCategory": "MultimediaApplication",
+      "operatingSystem": "Any",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "How much smaller will my files be after converting PNG to JPG?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "JPG files are typically 5-10x smaller than PNG for photographic images. A 5MB PNG photo might become 500KB-1MB as JPG at 92% quality. The savings are most dramatic for photos; for graphics with flat colors or text, the difference is smaller."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Will I lose transparency when converting PNG to JPG?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. JPG does not support transparency. Any transparent areas in your PNG will become white in the converted JPG. If you need to preserve transparency, keep your file as PNG or convert to WebP instead."
+          }
+        }
+      ]
+    }
+  ]
+  </script>
+</head>
+<body>
+  <header class="header">
+    <div class="container container--wide">
+      <a href="/" class="logo">Convert<span>Fast</span></a>
+      <nav class="nav">
+        <a href="/">All Converters</a>
+        <a href="/about">About</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <h1>PNG to JPG Converter</h1>
+      <p>Reduce file sizes by converting PNG to JPG. Instant browser-based conversion, no upload needed.</p>
+    </section>
+
+    <div class="trust-banner">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 1L3 5v4c0 4.4 3 8.5 7 9.9 4-1.4 7-5.5 7-9.9V5l-7-4z" fill="#16a34a" opacity=".15"/><path d="M10 1L3 5v4c0 4.4 3 8.5 7 9.9 4-1.4 7-5.5 7-9.9V5l-7-4z" stroke="#16a34a" stroke-width="1.5" fill="none"/><path d="M7 10l2 2 4-4" stroke="#16a34a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Your files never leave your browser. Zero server uploads. 100% private.
+    </div>
+
+    <div id="drop-zone" class="drop-zone">
+      <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M28 8H12a4 4 0 00-4 4v24a4 4 0 004 4h24a4 4 0 004-4V20L28 8z"/><path d="M28 8v12h12"/><path d="M24 34v-8m-4 4l4-4 4 4"/></svg>
+      <p>Drag & drop PNG files here, or <strong>click to browse</strong></p>
+      <p style="font-size:0.8rem;margin-top:0.5rem">Supports batch conversion. Drop multiple files at once.</p>
+      <input type="file" id="file-input" accept=".png,image/png" multiple>
+    </div>
+
+    <div class="controls">
+      <div class="quality-control">
+        <label for="quality-slider">Quality:</label>
+        <input type="range" id="quality-slider" min="10" max="100" value="92">
+        <span id="quality-value" class="quality-value">92%</span>
+      </div>
+    </div>
+
+    <div id="file-list" class="file-list"></div>
+
+    <div class="batch-actions">
+      <button id="download-all" class="btn btn--primary" style="display:none">Download All as ZIP</button>
+      <button id="clear-all" class="btn btn--secondary" style="display:none">Clear All</button>
+    </div>
+
+    <section class="faq">
+      <h2>Frequently Asked Questions</h2>
+      <div class="faq-item">
+        <button class="faq-question">How much smaller will my files be after converting PNG to JPG?</button>
+        <div class="faq-answer">
+          <p>JPG files are typically 5-10x smaller than PNG for photographic images. A 5MB PNG photo might become 500KB-1MB as JPG at 92% quality. The savings are most dramatic for photos; for graphics with flat colors, the difference is smaller.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question">Will I lose transparency when converting PNG to JPG?</button>
+        <div class="faq-answer">
+          <p>Yes. JPG does not support transparency. Any transparent areas in your PNG will become white in the converted JPG. If you need to preserve transparency, keep your file as PNG or convert to WebP instead.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question">Is PNG to JPG conversion lossy?</button>
+        <div class="faq-answer">
+          <p>Yes. PNG is a lossless format while JPG uses lossy compression. At 92% quality, the visual difference is negligible for photographs. Use the quality slider to find your preferred balance between size and quality.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question">Can I convert PNG to JPG without uploading my files?</button>
+        <div class="faq-answer">
+          <p>Yes, that's exactly what ConvertFast does. The conversion uses your browser's Canvas API and happens instantly on your device. No files are sent to any server.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-links">
+        <a href="/">All Converters</a>
+        <a href="/jpg-to-png">JPG to PNG</a>
+        <a href="/heic-to-jpg">HEIC to JPG</a>
+        <a href="/about">About</a>
+      </div>
+      <p>ConvertFast. All processing happens in your browser.</p>
+    </div>
+  </footer>
+
+  <div id="converter-config" data-source-formats="image/png" data-target-mime="image/jpeg" data-target-ext="jpg" data-mode="convert"></div>
+  <script src="js/fflate.min.js"></script>
+  <script type="module" src="js/boot.js"></script>
+</body>
+</html>

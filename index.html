@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ConvertFast - Free Private Image Converter | Files Never Leave Your Browser</title>
+  <meta name="description" content="Convert HEIC, WebP, PNG, JPG images for free. All processing happens in your browser using WebAssembly. Your files never leave your device.">
+  <meta property="og:title" content="ConvertFast - Free Private Image Converter | Files Never Leave Your Browser">
+  <meta property="og:description" content="Convert HEIC, WebP, PNG, JPG images for free. All processing happens in your browser using WebAssembly. Your files never leave your device.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://convertfast.app/">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="ConvertFast - Free Private Image Converter | Files Never Leave Your Browser">
+  <meta name="twitter:description" content="Convert HEIC, WebP, PNG, JPG images for free. All processing happens in your browser using WebAssembly. Your files never leave your device.">
+  <link rel="canonical" href="https://convertfast.app/">
+  <link rel="stylesheet" href="css/style.css">
+  <script type="application/ld+json">
+  [
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "ConvertFast",
+      "url": "https://convertfast.app",
+      "description": "Privacy-first image converter. All conversion happens client-side using WebAssembly. Files never leave your browser.",
+      "applicationCategory": "MultimediaApplication",
+      "operatingSystem": "Any",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+      "browserRequirements": "Requires a modern browser with WebAssembly support"
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "How is ConvertFast different from other online converters?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Most online converters upload your files to their servers for processing. ConvertFast runs entirely in your browser using WebAssembly technology. Your images never leave your device, making it the most private way to convert images online. In March 2025, the FBI warned about malicious online file converters that install malware. With ConvertFast, there's nothing to install and no server to trust."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is it really free? What's the catch?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "ConvertFast is completely free with no limits. Because all processing happens on your device, we have near-zero server costs. There's no account required, no watermarks, and no file size limits beyond what your browser can handle."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What formats are supported?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "ConvertFast supports HEIC/HEIF (from iPhones), WebP, PNG, JPG/JPEG, GIF, and BMP as input formats. You can convert to JPG or PNG. HEIC conversion uses a WebAssembly build of libheif, while other formats use the browser's native Canvas API for maximum speed."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I convert multiple files at once?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Drag and drop as many files as you want. ConvertFast processes them in parallel (two at a time) and shows progress for each file. When you're done, download files individually or grab them all in a single ZIP."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does it work on mobile?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. ConvertFast works on any modern browser, including Safari on iOS and Chrome on Android. Just tap to browse for files instead of dragging and dropping."
+          }
+        }
+      ]
+    }
+  ]
+  </script>
+</head>
+<body>
+  <header class="header">
+    <div class="container container--wide">
+      <a href="/" class="logo">Convert<span>Fast</span></a>
+      <nav class="nav">
+        <a href="/about">About</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <h1>Convert Images Privately, Instantly</h1>
+      <p>All conversion happens in your browser. Your files never touch a server. Powered by WebAssembly.</p>
+    </section>
+
+    <div class="trust-banner">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 1L3 5v4c0 4.4 3 8.5 7 9.9 4-1.4 7-5.5 7-9.9V5l-7-4z" fill="#16a34a" opacity=".15"/><path d="M10 1L3 5v4c0 4.4 3 8.5 7 9.9 4-1.4 7-5.5 7-9.9V5l-7-4z" stroke="#16a34a" stroke-width="1.5" fill="none"/><path d="M7 10l2 2 4-4" stroke="#16a34a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Your files never leave your browser. Zero server uploads. 100% private.
+    </div>
+
+    <div class="converter-grid">
+      <a href="/heic-to-jpg" class="converter-card">
+        <span class="converter-card__badge badge--wasm">WASM</span>
+        <h3>HEIC to JPG</h3>
+        <p>Convert iPhone HEIC photos to universally compatible JPG format.</p>
+      </a>
+      <a href="/heic-to-png" class="converter-card">
+        <span class="converter-card__badge badge--wasm">WASM</span>
+        <h3>HEIC to PNG</h3>
+        <p>Convert HEIC to lossless PNG with full transparency support.</p>
+      </a>
+      <a href="/webp-to-jpg" class="converter-card">
+        <span class="converter-card__badge badge--native">Native</span>
+        <h3>WebP to JPG</h3>
+        <p>Convert WebP images to JPG for maximum compatibility.</p>
+      </a>
+      <a href="/png-to-jpg" class="converter-card">
+        <span class="converter-card__badge badge--native">Native</span>
+        <h3>PNG to JPG</h3>
+        <p>Convert PNG to smaller JPG files. Great for reducing file size.</p>
+      </a>
+      <a href="/jpg-to-png" class="converter-card">
+        <span class="converter-card__badge badge--native">Native</span>
+        <h3>JPG to PNG</h3>
+        <p>Convert JPG to lossless PNG format.</p>
+      </a>
+      <a href="/compress" class="converter-card">
+        <span class="converter-card__badge badge--native">Native</span>
+        <h3>Compress Images</h3>
+        <p>Reduce file size with adjustable quality. Supports JPG, PNG, WebP.</p>
+      </a>
+    </div>
+
+    <section class="faq">
+      <h2>Frequently Asked Questions</h2>
+      <div class="faq-item">
+        <button class="faq-question">How is ConvertFast different from other online converters?</button>
+        <div class="faq-answer">
+          <p>Most online converters upload your files to their servers for processing. ConvertFast runs entirely in your browser using WebAssembly technology. Your images never leave your device, making it the most private way to convert images online. In March 2025, the FBI warned about malicious online file converters that install malware. With ConvertFast, there's nothing to install and no server to trust.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question">Is it really free? What's the catch?</button>
+        <div class="faq-answer">
+          <p>ConvertFast is completely free with no limits. Because all processing happens on your device, we have near-zero server costs. There's no account required, no watermarks, and no file size limits beyond what your browser can handle.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question">What formats are supported?</button>
+        <div class="faq-answer">
+          <p>ConvertFast supports HEIC/HEIF (from iPhones), WebP, PNG, JPG/JPEG, GIF, and BMP as input formats. You can convert to JPG or PNG. HEIC conversion uses a WebAssembly build of libheif, while other formats use the browser's native Canvas API for maximum speed.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question">Can I convert multiple files at once?</button>
+        <div class="faq-answer">
+          <p>Yes. Drag and drop as many files as you want. ConvertFast processes them in parallel (two at a time) and shows progress for each file. When you're done, download files individually or grab them all in a single ZIP.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question">Does it work on mobile?</button>
+        <div class="faq-answer">
+          <p>Yes. ConvertFast works on any modern browser, including Safari on iOS and Chrome on Android. Just tap to browse for files instead of dragging and dropping.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-links">
+        <a href="/about">About</a>
+        <a href="/heic-to-jpg">HEIC to JPG</a>
+        <a href="/webp-to-jpg">WebP to JPG</a>
+        <a href="/compress">Compress</a>
+      </div>
+      <p>ConvertFast. All processing happens in your browser.</p>
+    </div>
+  </footer>
+</body>
+</html>

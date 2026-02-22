@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HEIC to PNG Converter - Free, Private, No Upload | ConvertFast</title>
+  <meta name="description" content="Convert HEIC photos to lossless PNG in your browser. No upload. Preserves transparency. Private conversion using WebAssembly. Batch support.">
+  <meta property="og:title" content="HEIC to PNG Converter - Free, Private, No Upload | ConvertFast">
+  <meta property="og:description" content="Convert HEIC photos to lossless PNG in your browser. No upload. Preserves transparency. Private conversion using WebAssembly. Batch support.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://convertfast.app/heic-to-png">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="HEIC to PNG Converter - Free, Private, No Upload | ConvertFast">
+  <meta name="twitter:description" content="Convert HEIC photos to lossless PNG in your browser. No upload. Preserves transparency. Private conversion using WebAssembly. Batch support.">
+  <link rel="canonical" href="https://convertfast.app/heic-to-png">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="preload" href="wasm/heic/heic-to.iife.js" as="script">
+  <script type="application/ld+json">
+  [
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "HEIC to PNG Converter - ConvertFast",
+      "url": "https://convertfast.app/heic-to-png",
+      "description": "Convert HEIC/HEIF photos to lossless PNG format entirely in your browser. No server upload.",
+      "applicationCategory": "MultimediaApplication",
+      "operatingSystem": "Any",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Why convert HEIC to PNG instead of JPG?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "PNG is lossless, meaning no quality is lost during conversion. Choose PNG when you need pixel-perfect quality, transparency support, or plan to edit the image further. JPG is better when you want smaller file sizes for sharing or web use."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Will the PNG files be larger than the original HEIC?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes, typically 3-5x larger. HEIC is a highly efficient compressed format, while PNG is lossless and uncompressed. A 3MB HEIC photo might become 10-15MB as PNG. If file size matters more than perfect quality, consider HEIC to JPG instead."
+          }
+        }
+      ]
+    }
+  ]
+  </script>
+</head>
+<body>
+  <header class="header">
+    <div class="container container--wide">
+      <a href="/" class="logo">Convert<span>Fast</span></a>
+      <nav class="nav">
+        <a href="/">All Converters</a>
+        <a href="/about">About</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <h1>HEIC to PNG Converter</h1>
+      <p>Convert iPhone HEIC photos to lossless PNG. All processing happens in your browser. Your files stay private.</p>
+    </section>
+
+    <div class="trust-banner">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 1L3 5v4c0 4.4 3 8.5 7 9.9 4-1.4 7-5.5 7-9.9V5l-7-4z" fill="#16a34a" opacity=".15"/><path d="M10 1L3 5v4c0 4.4 3 8.5 7 9.9 4-1.4 7-5.5 7-9.9V5l-7-4z" stroke="#16a34a" stroke-width="1.5" fill="none"/><path d="M7 10l2 2 4-4" stroke="#16a34a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Your files never leave your browser. Zero server uploads. 100% private.
+    </div>
+
+    <div id="drop-zone" class="drop-zone">
+      <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M28 8H12a4 4 0 00-4 4v24a4 4 0 004 4h24a4 4 0 004-4V20L28 8z"/><path d="M28 8v12h12"/><path d="M24 34v-8m-4 4l4-4 4 4"/></svg>
+      <p>Drag & drop HEIC files here, or <strong>click to browse</strong></p>
+      <p style="font-size:0.8rem;margin-top:0.5rem">Supports batch conversion. Drop multiple files at once.</p>
+      <input type="file" id="file-input" accept=".heic,.heif,image/heic,image/heif" multiple>
+    </div>
+
+    <div class="controls">
+      <div class="quality-control">
+        <label for="quality-slider">Quality:</label>
+        <input type="range" id="quality-slider" min="10" max="100" value="100">
+        <span id="quality-value" class="quality-value">100%</span>
+      </div>
+    </div>
+
+    <div id="file-list" class="file-list"></div>
+
+    <div class="batch-actions">
+      <button id="download-all" class="btn btn--primary" style="display:none">Download All as ZIP</button>
+      <button id="clear-all" class="btn btn--secondary" style="display:none">Clear All</button>
+    </div>
+
+    <section class="faq">
+      <h2>Frequently Asked Questions</h2>
+      <div class="faq-item">
+        <button class="faq-question">Why convert HEIC to PNG instead of JPG?</button>
+        <div class="faq-answer">
+          <p>PNG is lossless, meaning no quality is lost during conversion. Choose PNG when you need pixel-perfect quality, transparency support, or plan to edit the image further. JPG is better when you want smaller file sizes for sharing or web use.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question">Will the PNG files be larger than the original HEIC?</button>
+        <div class="faq-answer">
+          <p>Yes, typically 3-5x larger. HEIC is a highly efficient compressed format, while PNG is lossless. A 3MB HEIC photo might become 10-15MB as PNG. If file size matters more than perfect quality, consider HEIC to JPG instead.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question">Is this converter safe to use?</button>
+        <div class="faq-answer">
+          <p>Yes. ConvertFast processes everything client-side using WebAssembly. Your files are never uploaded to any server. The FBI has warned about malicious online converters; ConvertFast avoids this risk entirely by keeping files on your device.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question">Can I convert multiple HEIC files to PNG at once?</button>
+        <div class="faq-answer">
+          <p>Yes. Drop as many files as you want. ConvertFast processes two files at a time and shows individual progress. Download files one by one or grab them all in a ZIP.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-links">
+        <a href="/">All Converters</a>
+        <a href="/heic-to-jpg">HEIC to JPG</a>
+        <a href="/webp-to-jpg">WebP to JPG</a>
+        <a href="/about">About</a>
+      </div>
+      <p>ConvertFast. All processing happens in your browser.</p>
+    </div>
+  </footer>
+
+  <div id="converter-config" data-source-formats="image/heic,image/heif" data-target-mime="image/png" data-target-ext="png" data-mode="convert"></div>
+  <script src="js/fflate.min.js"></script>
+  <script type="module" src="js/boot.js"></script>
+</body>
+</html>

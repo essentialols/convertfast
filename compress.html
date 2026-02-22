@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image Compressor - Free, Private, No Upload | ConvertFast</title>
+  <meta name="description" content="Compress JPG, PNG, and WebP images in your browser. No upload required. Adjust quality with a slider and see file size reduction instantly. Batch support.">
+  <meta property="og:title" content="Image Compressor - Free, Private, No Upload | ConvertFast">
+  <meta property="og:description" content="Compress JPG, PNG, and WebP images in your browser. No upload required. Adjust quality with a slider and see file size reduction instantly. Batch support.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://convertfast.app/compress">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Image Compressor - Free, Private, No Upload | ConvertFast">
+  <meta name="twitter:description" content="Compress JPG, PNG, and WebP images in your browser. No upload required. Adjust quality with a slider and see file size reduction instantly. Batch support.">
+  <link rel="canonical" href="https://convertfast.app/compress">
+  <link rel="stylesheet" href="css/style.css">
+  <script type="application/ld+json">
+  [
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Image Compressor - ConvertFast",
+      "url": "https://convertfast.app/compress",
+      "description": "Compress images in your browser with adjustable quality. No server upload. Private and free.",
+      "applicationCategory": "MultimediaApplication",
+      "operatingSystem": "Any",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "How does image compression work?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "ConvertFast re-encodes your image at a lower quality setting using your browser's Canvas API. For JPG and WebP, this means more aggressive lossy compression that discards visual details the human eye is less sensitive to. PNG files are lossless, so the quality slider has minimal effect on them. Lower quality means smaller files but more visible artifacts for lossy formats."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What quality setting should I use?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "For photos shared online or via email, 75-85% offers a good balance of quality and file size. For archival or print, stay at 92% or above. Below 60%, compression artifacts become noticeable in most photos. The slider lets you preview the tradeoff."
+          }
+        }
+      ]
+    }
+  ]
+  </script>
+</head>
+<body>
+  <header class="header">
+    <div class="container container--wide">
+      <a href="/" class="logo">Convert<span>Fast</span></a>
+      <nav class="nav">
+        <a href="/">All Converters</a>
+        <a href="/about">About</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <h1>Compress Images</h1>
+      <p>Reduce image file sizes with adjustable quality. Works with JPG, PNG, and WebP. All processing happens in your browser.</p>
+    </section>
+
+    <div class="trust-banner">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 1L3 5v4c0 4.4 3 8.5 7 9.9 4-1.4 7-5.5 7-9.9V5l-7-4z" fill="#16a34a" opacity=".15"/><path d="M10 1L3 5v4c0 4.4 3 8.5 7 9.9 4-1.4 7-5.5 7-9.9V5l-7-4z" stroke="#16a34a" stroke-width="1.5" fill="none"/><path d="M7 10l2 2 4-4" stroke="#16a34a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Your files never leave your browser. Zero server uploads. 100% private.
+    </div>
+
+    <div id="drop-zone" class="drop-zone">
+      <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M28 8H12a4 4 0 00-4 4v24a4 4 0 004 4h24a4 4 0 004-4V20L28 8z"/><path d="M28 8v12h12"/><path d="M24 34v-8m-4 4l4-4 4 4"/></svg>
+      <p>Drag & drop images here, or <strong>click to browse</strong></p>
+      <p style="font-size:0.8rem;margin-top:0.5rem">Supports JPG, PNG, WebP. Batch processing included.</p>
+      <input type="file" id="file-input" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" multiple>
+    </div>
+
+    <div class="controls">
+      <div class="quality-control">
+        <label for="quality-slider">Quality:</label>
+        <input type="range" id="quality-slider" min="10" max="100" value="75">
+        <span id="quality-value" class="quality-value">75%</span>
+      </div>
+    </div>
+
+    <div id="file-list" class="file-list"></div>
+
+    <div class="batch-actions">
+      <button id="download-all" class="btn btn--primary" style="display:none">Download All as ZIP</button>
+      <button id="clear-all" class="btn btn--secondary" style="display:none">Clear All</button>
+    </div>
+
+    <section class="faq">
+      <h2>Frequently Asked Questions</h2>
+      <div class="faq-item">
+        <button class="faq-question">How does image compression work?</button>
+        <div class="faq-answer">
+          <p>ConvertFast re-encodes your image at a lower quality setting using your browser's Canvas API. For JPG and WebP, this means more aggressive lossy compression. Lower quality means smaller files but more visible artifacts.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question">What quality setting should I use?</button>
+        <div class="faq-answer">
+          <p>For photos shared online or via email, 75-85% offers a good balance. For archival or print, stay at 92% or above. Below 60%, compression artifacts become noticeable in most photos.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question">Is this compressor safe to use?</button>
+        <div class="faq-answer">
+          <p>Yes. Everything happens in your browser. No files are uploaded to any server. ConvertFast has no server component at all, so there is zero risk of your images being stored or shared.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question">Can I compress HEIC images?</button>
+        <div class="faq-answer">
+          <p>The compressor works with JPG, PNG, and WebP. For HEIC files, first convert them to JPG using our <a href="/heic-to-jpg">HEIC to JPG converter</a>, then compress the result here if needed.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-links">
+        <a href="/">All Converters</a>
+        <a href="/heic-to-jpg">HEIC to JPG</a>
+        <a href="/png-to-jpg">PNG to JPG</a>
+        <a href="/about">About</a>
+      </div>
+      <p>ConvertFast. All processing happens in your browser.</p>
+    </div>
+  </footer>
+
+  <div id="converter-config" data-source-formats="" data-target-mime="" data-target-ext="" data-mode="compress"></div>
+  <script src="js/fflate.min.js"></script>
+  <script type="module" src="js/boot.js"></script>
+</body>
+</html>

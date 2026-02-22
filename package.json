@@ -1,0 +1,19 @@
+{
+  "name": "convertfast",
+  "version": "1.0.0",
+  "description": "Privacy-first client-side image converter. Files never leave your browser.",
+  "private": true,
+  "scripts": {
+    "build": "bash build.sh",
+    "dev": "npx serve . -p 3000",
+    "start": "npx serve . -p 3000"
+  },
+  "devDependencies": {
+    "esbuild": "^0.24.0",
+    "fflate": "^0.8.2",
+    "heic-to": "^1.4.2",
+    "serve": "^14.2.0"
+  },
+  "keywords": ["image-converter", "heic", "webp", "privacy", "wasm", "client-side"],
+  "license": "MIT"
+}

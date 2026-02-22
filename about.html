@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About ConvertFast - How It Works & Why Privacy Matters</title>
+  <meta name="description" content="Learn how ConvertFast converts images entirely in your browser using WebAssembly. No servers, no uploads, no tracking. Built in response to FBI warnings about malicious online converters.">
+  <meta property="og:title" content="About ConvertFast - How It Works & Why Privacy Matters">
+  <meta property="og:description" content="Learn how ConvertFast converts images entirely in your browser using WebAssembly. No servers, no uploads, no tracking. Built in response to FBI warnings about malicious online converters.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://convertfast.app/about">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="About ConvertFast - How It Works & Why Privacy Matters">
+  <meta name="twitter:description" content="Learn how ConvertFast converts images entirely in your browser using WebAssembly. No servers, no uploads, no tracking. Built in response to FBI warnings about malicious online converters.">
+  <link rel="canonical" href="https://convertfast.app/about">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="header">
+    <div class="container container--wide">
+      <a href="/" class="logo">Convert<span>Fast</span></a>
+      <nav class="nav">
+        <a href="/">All Converters</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="prose">
+      <h1>About ConvertFast</h1>
+
+      <p>ConvertFast is a free image converter that works entirely in your browser. Your files are never uploaded to a server. Every conversion happens on your device using WebAssembly and the Canvas API.</p>
+
+      <h2>Why this exists</h2>
+
+      <p>In March 2025, the FBI issued a public warning about free online file converters being used to distribute malware. The warning highlighted a fundamental problem: most online converters require you to upload your files to a remote server. You have no way of knowing what happens to your files after they leave your device.</p>
+
+      <p>ConvertFast takes a different approach. There is no server. The entire application is static HTML, CSS, and JavaScript. When you drop a file into ConvertFast, it stays on your device. The conversion runs in your browser, and the result is downloaded directly, just like any other file.</p>
+
+      <h2>How it works</h2>
+
+      <p><strong>For HEIC/HEIF files</strong> (iPhone photos): ConvertFast loads a WebAssembly build of <a href="https://github.com/strukturag/libheif">libheif</a> (version 1.21.2), the reference HEIC decoder. The WASM binary is lazy-loaded on the main thread only when you actually need it (roughly 2.5MB). It decodes the HEIC file, then re-encodes it as JPG or PNG.</p>
+
+      <p><strong>For JPG, PNG, and WebP files</strong>: Modern browsers already know how to decode these formats. ConvertFast loads the image into a Canvas element, then exports it in the target format using the browser's built-in encoding. This takes milliseconds, even for large images.</p>
+
+      <p><strong>For batch downloads</strong>: Multiple files are packaged into a ZIP using <a href="https://github.com/101arrowz/fflate">fflate</a>, a fast JavaScript compression library. The ZIP is assembled in your browser and downloaded as a single file.</p>
+
+      <h2>What about quality?</h2>
+
+      <p>Every converter page includes a quality slider (10-100%). The default is 92% for lossy conversions (JPG, WebP) and 100% for lossless conversions (PNG). At 92%, visual quality is excellent and file sizes stay reasonable. Lower the slider to get smaller files at the cost of some visual fidelity.</p>
+
+      <h2>Technology</h2>
+
+      <ul>
+        <li><strong>HEIC decoding:</strong> <a href="https://github.com/nicolo-ribaudo/heic-to">heic-to</a> (WASM, libheif 1.21.2)</li>
+        <li><strong>Image encoding:</strong> Browser Canvas API (toBlob)</li>
+        <li><strong>Format detection:</strong> Magic bytes (not file extension)</li>
+        <li><strong>ZIP packaging:</strong> fflate (~8KB gzipped)</li>
+        <li><strong>Hosting:</strong> Static files on Vercel (no server-side code)</li>
+      </ul>
+
+      <h2>Open source</h2>
+
+      <p>ConvertFast is open source. You can inspect the code, verify that no files are uploaded, and contribute improvements. The entire application is under 100KB of custom code (excluding the HEIC WASM binary).</p>
+    </article>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-links">
+        <a href="/">All Converters</a>
+        <a href="/heic-to-jpg">HEIC to JPG</a>
+        <a href="/compress">Compress</a>
+      </div>
+      <p>ConvertFast. All processing happens in your browser.</p>
+    </div>
+  </footer>
+</body>
+</html>

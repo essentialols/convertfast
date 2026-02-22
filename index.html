@@ -85,6 +85,7 @@
       <a href="/" class="logo">Convert<span>Fast</span></a>
       <nav class="nav">
         <a href="/about">About</a>
+        <a href="https://buymeacoffee.com/convertfast" class="support-btn" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 8h1.5a2.5 2.5 0 010 5H17"/><path d="M3 8h14v9a4 4 0 01-4 4H7a4 4 0 01-4-4V8z" fill="currentColor" stroke="none" opacity=".15"/><path d="M3 8h14v9a4 4 0 01-4 4H7a4 4 0 01-4-4V8z"/><path d="M6 1v3M10 1v3M14 1v3" opacity=".6"/></svg> Buy me a coffee</a>
       </nav>
     </div>
   </header>
@@ -104,35 +105,64 @@
     <div id="route-panel" class="route-panel" style="display:none"></div>
 
     <section class="tools-section">
-      <h2 class="tools-section__heading">Image Conversion</h2>
-      <div class="tools-grid">
-        <a href="/heic-to-jpg" class="tool-link">HEIC to JPG</a>
-        <a href="/heic-to-png" class="tool-link">HEIC to PNG</a>
-        <a href="/webp-to-jpg" class="tool-link">WebP to JPG</a>
-        <a href="/webp-to-png" class="tool-link">WebP to PNG</a>
-        <a href="/png-to-jpg" class="tool-link">PNG to JPG</a>
-        <a href="/jpg-to-png" class="tool-link">JPG to PNG</a>
-        <a href="/jpg-to-webp" class="tool-link">JPG to WebP</a>
-        <a href="/png-to-webp" class="tool-link">PNG to WebP</a>
-        <a href="/compress" class="tool-link">Compress</a>
-      </div>
-    </section>
-
-    <section class="tools-section">
-      <h2 class="tools-section__heading">Animation</h2>
-      <div class="tools-grid">
-        <a href="/video-to-gif" class="tool-link">Video to GIF</a>
-      </div>
-    </section>
-
-    <section class="tools-section">
-      <h2 class="tools-section__heading">PDF Tools</h2>
-      <div class="tools-grid">
-        <a href="/jpg-to-pdf" class="tool-link">JPG to PDF</a>
-        <a href="/png-to-pdf" class="tool-link">PNG to PDF</a>
-        <a href="/pdf-to-jpg" class="tool-link">PDF to JPG</a>
-        <a href="/pdf-to-png" class="tool-link">PDF to PNG</a>
-        <a href="/merge-pdf" class="tool-link">Merge PDFs</a>
+      <div class="convert-table">
+        <div class="convert-row">
+          <span class="convert-source">HEIC</span>
+          <span class="convert-arrow">→</span>
+          <div class="convert-targets">
+            <a href="/heic-to-jpg" class="tool-link">JPG</a>
+            <a href="/heic-to-png" class="tool-link">PNG</a>
+          </div>
+        </div>
+        <div class="convert-row">
+          <span class="convert-source">WebP</span>
+          <span class="convert-arrow">→</span>
+          <div class="convert-targets">
+            <a href="/webp-to-jpg" class="tool-link">JPG</a>
+            <a href="/webp-to-png" class="tool-link">PNG</a>
+          </div>
+        </div>
+        <div class="convert-row">
+          <span class="convert-source">PNG</span>
+          <span class="convert-arrow">→</span>
+          <div class="convert-targets">
+            <a href="/png-to-jpg" class="tool-link">JPG</a>
+            <a href="/png-to-webp" class="tool-link">WebP</a>
+            <a href="/png-to-pdf" class="tool-link">PDF</a>
+          </div>
+        </div>
+        <div class="convert-row">
+          <span class="convert-source">JPG</span>
+          <span class="convert-arrow">→</span>
+          <div class="convert-targets">
+            <a href="/jpg-to-png" class="tool-link">PNG</a>
+            <a href="/jpg-to-webp" class="tool-link">WebP</a>
+            <a href="/jpg-to-pdf" class="tool-link">PDF</a>
+          </div>
+        </div>
+        <div class="convert-row">
+          <span class="convert-source">PDF</span>
+          <span class="convert-arrow">→</span>
+          <div class="convert-targets">
+            <a href="/pdf-to-jpg" class="tool-link">JPG</a>
+            <a href="/pdf-to-png" class="tool-link">PNG</a>
+            <a href="/merge-pdf" class="tool-link">Merge</a>
+          </div>
+        </div>
+        <div class="convert-row">
+          <span class="convert-source">Video</span>
+          <span class="convert-arrow">→</span>
+          <div class="convert-targets">
+            <a href="/video-to-gif" class="tool-link">GIF</a>
+          </div>
+        </div>
+        <div class="convert-row">
+          <span class="convert-source">Any image</span>
+          <span class="convert-arrow">→</span>
+          <div class="convert-targets">
+            <a href="/compress" class="tool-link">Compress</a>
+          </div>
+        </div>
       </div>
     </section>
 

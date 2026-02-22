@@ -413,27 +413,41 @@ body {
 .tools-section:first-of-type {
   margin-top: 3rem;
 }
-.tools-section__heading {
-  font-size: 0.8rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--text-muted);
-  margin-bottom: 1rem;
+.convert-table {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
 }
-.tools-grid {
+.convert-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.convert-source {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text);
+  min-width: 5.5rem;
+  text-align: right;
+}
+.convert-arrow {
+  color: var(--text-muted);
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+.convert-targets {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 0.4rem;
 }
 .tool-link {
   display: inline-block;
-  padding: 0.6rem 1.2rem;
+  padding: 0.45rem 1rem;
   border: 1px solid var(--border);
   border-radius: 100px;
   text-decoration: none;
   color: var(--text);
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 500;
   transition: border-color .15s, background .15s, color .15s;
 }
@@ -461,6 +475,9 @@ body {
   .controls { gap: 1rem; }
   .file-item { flex-wrap: wrap; }
   .file-item__progress { width: 100%; order: 10; }
-  .tools-grid { gap: 0.4rem; }
-  .tool-link { font-size: 0.85rem; padding: 0.5rem 1rem; }
+  .convert-source { min-width: 4rem; font-size: 0.85rem; }
+  .convert-row { gap: 0.5rem; }
+  .tool-link { font-size: 0.8rem; padding: 0.4rem 0.8rem; }
+  .support-btn { font-size: 0.75rem; padding: 0.35rem 0.75rem; }
+  .support-btn svg { width: 14px; height: 14px; }
 }

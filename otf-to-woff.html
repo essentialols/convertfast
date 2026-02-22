@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OTF to WOFF Font Converter - Free, Private | ConvertFast</title>
+  <meta name="description" content="Convert OTF font files to WOFF format in your browser. No upload needed. Uses opentype.js for accurate conversion.">
+  <meta property="og:title" content="OTF to WOFF Font Converter - Free, Private | ConvertFast">
+  <meta property="og:description" content="Convert OTF font files to WOFF format in your browser. No upload needed. Uses opentype.js for accurate conversion.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://convertfast.app/otf-to-woff">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="OTF to WOFF Font Converter - Free, Private | ConvertFast">
+  <meta name="twitter:description" content="Convert OTF font files to WOFF format in your browser. No upload needed. Uses opentype.js for accurate conversion.">
+  <meta property="og:image" content="https://convertfast.app/img/og-default.png">
+  <meta name="twitter:image" content="https://convertfast.app/img/og-default.png">
+  <link rel="canonical" href="https://convertfast.app/otf-to-woff">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <script type="application/ld+json">
+  [
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "OTF to WOFF Font Converter - ConvertFast",
+      "url": "https://convertfast.app/otf-to-woff",
+      "description": "Convert OTF font files to WOFF format in your browser. No upload needed. Uses opentype.js for accurate conversion.",
+      "applicationCategory": "MultimediaApplication",
+      "operatingSystem": "Any",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "How does OTF to WOFF conversion work?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "ConvertFast uses opentype.js to parse your OTF font file in the browser, then compresses it into WOFF format using DEFLATE. No server upload is needed."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Will glyph data be preserved?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. All glyphs, metrics, and font tables are preserved during conversion. The output font will render identically to the input."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I convert multiple fonts at once?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Drop as many OTF files as you want. ConvertFast converts them sequentially and lets you download all results as a ZIP."
+          }
+        }
+      ]
+    }
+  ]
+  </script>
+</head>
+<body>
+  <header class="header">
+    <div class="container container--wide">
+      <a href="/" class="logo">Convert<span>Fast</span></a>
+      <nav class="nav">
+        <a href="/">All Converters</a>
+        <a href="/about">About</a>
+        <a href="https://buymeacoffee.com/convertfast" class="support-btn" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 8h1.5a2.5 2.5 0 010 5H17"/><path d="M3 8h14v9a4 4 0 01-4 4H7a4 4 0 01-4-4V8z" fill="currentColor" stroke="none" opacity=".15"/><path d="M3 8h14v9a4 4 0 01-4 4H7a4 4 0 01-4-4V8z"/><path d="M6 1v3M10 1v3M14 1v3" opacity=".6"/></svg> Buy me a coffee</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <a href="/" class="back-link"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 12L6 8l4-4"/></svg> All Converters</a>
+    <section class="hero">
+      <h1>OTF to WOFF</h1>
+      <p>Convert OTF fonts to WOFF format. Everything runs in your browser.</p>
+    </section>
+
+    <div class="trust-banner">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 1L3 5v4c0 4.4 3 8.5 7 9.9 4-1.4 7-5.5 7-9.9V5l-7-4z" fill="#16a34a" opacity=".15"/><path d="M10 1L3 5v4c0 4.4 3 8.5 7 9.9 4-1.4 7-5.5 7-9.9V5l-7-4z" stroke="#16a34a" stroke-width="1.5" fill="none"/><path d="M7 10l2 2 4-4" stroke="#16a34a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Your files never leave your browser. Zero server uploads. 100% private.
+    </div>
+
+    <div id="drop-zone" class="drop-zone">
+      <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M28 8H12a4 4 0 00-4 4v24a4 4 0 004 4h24a4 4 0 004-4V20L28 8z"/><path d="M28 8v12h12"/><path d="M24 34v-8m-4 4l4-4 4 4"/></svg>
+      <p>Drag & drop OTF font files here, or <strong>click to browse</strong></p>
+      <p style="font-size:0.8rem;margin-top:0.5rem">Supports batch conversion. Drop multiple files at once.</p>
+      <input type="file" id="file-input" accept=".otf,font/otf" multiple>
+    </div>
+
+    <div id="file-list" class="file-list"></div>
+
+    <div class="batch-actions">
+      <button id="action-btn" class="btn btn--primary" style="display:none">Convert to WOFF</button>
+      <button id="clear-all" class="btn btn--secondary" style="display:none">Clear All</button>
+    </div>
+
+    <div class="related-tools">
+      <h2>Related Tools</h2>
+      <div class="related-tools__links">
+        <a href="/otf-to-ttf">OTF to TTF</a>
+        <a href="/woff-to-ttf">WOFF to TTF</a>
+      </div>
+    </div>
+
+    <section class="faq">
+      <h2>Frequently Asked Questions</h2>
+      <div class="faq-item">
+        <button class="faq-question">How does OTF to WOFF conversion work?</button>
+        <div class="faq-answer">
+          <p>ConvertFast uses opentype.js to parse your OTF font file in the browser, then compresses it into WOFF format using DEFLATE. No server upload is needed.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question">Will glyph data be preserved?</button>
+        <div class="faq-answer">
+          <p>Yes. All glyphs, metrics, and font tables are preserved during conversion. The output font will render identically to the input.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question">Can I convert multiple fonts at once?</button>
+        <div class="faq-answer">
+          <p>Yes. Drop as many OTF files as you want. ConvertFast converts them sequentially and lets you download all results as a ZIP.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-links">
+        <a href="/">All Converters</a>
+        <a href="/otf-to-ttf">OTF to TTF</a>
+        <a href="/about">About</a>
+      </div>
+      <p>ConvertFast. All processing happens in your browser.</p>
+    </div>
+  </footer>
+
+  <div id="converter-config" data-font-target="woff" style="display:none"></div>
+  <script src="js/fflate.min.js"></script>
+  <script type="module" src="js/font-boot.js"></script>
+</body>
+</html>

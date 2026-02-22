@@ -4,14 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ConvertFast - Free Private Image Converter | Files Never Leave Your Browser</title>
-  <meta name="description" content="Convert HEIC, WebP, PNG, JPG images for free. All processing happens in your browser using WebAssembly. Your files never leave your device.">
+  <meta name="description" content="Convert images, audio, documents, fonts, and more for free. All processing happens in your browser. Your files never leave your device.">
   <meta property="og:title" content="ConvertFast - Free Private Image Converter | Files Never Leave Your Browser">
-  <meta property="og:description" content="Convert HEIC, WebP, PNG, JPG images for free. All processing happens in your browser using WebAssembly. Your files never leave your device.">
+  <meta property="og:description" content="Convert images, audio, documents, fonts, and more for free. All processing happens in your browser. Your files never leave your device.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://convertfast.app/">
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="ConvertFast - Free Private Image Converter | Files Never Leave Your Browser">
-  <meta name="twitter:description" content="Convert HEIC, WebP, PNG, JPG images for free. All processing happens in your browser using WebAssembly. Your files never leave your device.">
+  <meta name="twitter:description" content="Convert images, audio, documents, fonts, and more for free. All processing happens in your browser. Your files never leave your device.">
   <meta property="og:image" content="https://convertfast.app/img/og-default.png">
   <meta name="twitter:image" content="https://convertfast.app/img/og-default.png">
   <link rel="canonical" href="https://convertfast.app/">
@@ -55,7 +55,7 @@
           "name": "What formats are supported?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "ConvertFast supports HEIC/HEIF (from iPhones), WebP, PNG, JPG/JPEG, GIF, and BMP as input formats. You can convert to JPG or PNG. HEIC conversion uses a WebAssembly build of libheif, while other formats use the browser's native Canvas API for maximum speed."
+            "text": "ConvertFast supports images (HEIC, WebP, PNG, JPG, GIF, BMP, SVG, AVIF, TIFF, ICO), audio (MP3, WAV, OGG, FLAC, M4A, AAC), documents (EPUB, RTF, DOCX), fonts (TTF, OTF, WOFF), PDFs, video to GIF, and ZIP archives. All conversions happen in your browser."
           }
         },
         {
@@ -100,7 +100,7 @@
       <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M28 8H12a4 4 0 00-4 4v24a4 4 0 004 4h24a4 4 0 004-4V20L28 8z"/><path d="M28 8v12h12"/><path d="M24 34v-8m-4 4l4-4 4 4"/></svg>
       <p>Drop any file here, or <strong>click to browse</strong></p>
       <p style="font-size:0.8rem;margin-top:0.5rem;color:var(--text-muted)">We'll detect the format and show your options.</p>
-      <input type="file" id="smart-file-input" accept="image/*,.heic,.heif,.avif,.svg,.bmp,.gif,.tiff,.tif,.ico,.pdf,application/pdf,video/*,.mp4,.webm,.mov" multiple>
+      <input type="file" id="smart-file-input" accept="image/*,.heic,.heif,.avif,.svg,.bmp,.gif,.tiff,.tif,.ico,.pdf,application/pdf,video/*,.mp4,.webm,.mov,audio/*,.mp3,.wav,.ogg,.flac,.m4a,.aac,.epub,.rtf,.docx,.ttf,.otf,.woff,.zip" multiple>
     </div>
     <div id="route-panel" class="route-panel" style="display:none"></div>
 
@@ -123,6 +123,7 @@
             <a href="/webp-to-jpg" class="tool-link">JPG</a>
             <a href="/webp-to-png" class="tool-link">PNG</a>
             <a href="/webp-to-pdf" class="tool-link">PDF</a>
+            <a href="/compress" class="tool-link">Compress</a>
           </div>
         </div>
         <div class="convert-row">
@@ -132,6 +133,7 @@
             <a href="/png-to-jpg" class="tool-link">JPG</a>
             <a href="/png-to-webp" class="tool-link">WebP</a>
             <a href="/png-to-pdf" class="tool-link">PDF</a>
+            <a href="/compress" class="tool-link">Compress</a>
           </div>
         </div>
         <div class="convert-row">
@@ -141,6 +143,7 @@
             <a href="/jpg-to-png" class="tool-link">PNG</a>
             <a href="/jpg-to-webp" class="tool-link">WebP</a>
             <a href="/jpg-to-pdf" class="tool-link">PDF</a>
+            <a href="/compress" class="tool-link">Compress</a>
           </div>
         </div>
         <div class="convert-row">
@@ -220,10 +223,105 @@
           </div>
         </div>
         <div class="convert-row">
-          <span class="convert-source">Any image</span>
+          <span class="convert-source">MP3</span>
           <span class="convert-arrow">→</span>
           <div class="convert-targets">
-            <a href="/compress" class="tool-link">Compress</a>
+            <a href="/mp3-to-wav" class="tool-link">WAV</a>
+          </div>
+        </div>
+        <div class="convert-row">
+          <span class="convert-source">WAV</span>
+          <span class="convert-arrow">→</span>
+          <div class="convert-targets">
+            <a href="/wav-to-mp3" class="tool-link">MP3</a>
+          </div>
+        </div>
+        <div class="convert-row">
+          <span class="convert-source">OGG</span>
+          <span class="convert-arrow">→</span>
+          <div class="convert-targets">
+            <a href="/ogg-to-wav" class="tool-link">WAV</a>
+            <a href="/ogg-to-mp3" class="tool-link">MP3</a>
+          </div>
+        </div>
+        <div class="convert-row">
+          <span class="convert-source">FLAC</span>
+          <span class="convert-arrow">→</span>
+          <div class="convert-targets">
+            <a href="/flac-to-wav" class="tool-link">WAV</a>
+            <a href="/flac-to-mp3" class="tool-link">MP3</a>
+          </div>
+        </div>
+        <div class="convert-row">
+          <span class="convert-source">M4A</span>
+          <span class="convert-arrow">→</span>
+          <div class="convert-targets">
+            <a href="/m4a-to-wav" class="tool-link">WAV</a>
+            <a href="/m4a-to-mp3" class="tool-link">MP3</a>
+          </div>
+        </div>
+        <div class="convert-row">
+          <span class="convert-source">AAC</span>
+          <span class="convert-arrow">→</span>
+          <div class="convert-targets">
+            <a href="/aac-to-wav" class="tool-link">WAV</a>
+            <a href="/aac-to-mp3" class="tool-link">MP3</a>
+          </div>
+        </div>
+        <div class="convert-row">
+          <span class="convert-source">EPUB</span>
+          <span class="convert-arrow">→</span>
+          <div class="convert-targets">
+            <a href="/epub-to-txt" class="tool-link">TXT</a>
+            <a href="/epub-to-pdf" class="tool-link">PDF</a>
+          </div>
+        </div>
+        <div class="convert-row">
+          <span class="convert-source">RTF</span>
+          <span class="convert-arrow">→</span>
+          <div class="convert-targets">
+            <a href="/rtf-to-txt" class="tool-link">TXT</a>
+            <a href="/rtf-to-pdf" class="tool-link">PDF</a>
+          </div>
+        </div>
+        <div class="convert-row">
+          <span class="convert-source">DOCX</span>
+          <span class="convert-arrow">→</span>
+          <div class="convert-targets">
+            <a href="/docx-to-txt" class="tool-link">TXT</a>
+            <a href="/docx-to-pdf" class="tool-link">PDF</a>
+          </div>
+        </div>
+        <div class="convert-row">
+          <span class="convert-source">TTF</span>
+          <span class="convert-arrow">→</span>
+          <div class="convert-targets">
+            <a href="/ttf-to-otf" class="tool-link">OTF</a>
+            <a href="/ttf-to-woff" class="tool-link">WOFF</a>
+          </div>
+        </div>
+        <div class="convert-row">
+          <span class="convert-source">OTF</span>
+          <span class="convert-arrow">→</span>
+          <div class="convert-targets">
+            <a href="/otf-to-ttf" class="tool-link">TTF</a>
+            <a href="/otf-to-woff" class="tool-link">WOFF</a>
+          </div>
+        </div>
+        <div class="convert-row">
+          <span class="convert-source">WOFF</span>
+          <span class="convert-arrow">→</span>
+          <div class="convert-targets">
+            <a href="/woff-to-ttf" class="tool-link">TTF</a>
+            <a href="/woff-to-otf" class="tool-link">OTF</a>
+          </div>
+        </div>
+        <div class="convert-row">
+          <span class="convert-source">ZIP</span>
+          <span class="convert-arrow">→</span>
+          <div class="convert-targets">
+            <a href="/extract-zip" class="tool-link">Extract</a>
+            <a href="/create-zip" class="tool-link">Create</a>
           </div>
         </div>
       </div>
@@ -246,7 +344,7 @@
       <div class="faq-item">
         <button class="faq-question">What formats are supported?</button>
         <div class="faq-answer">
-          <p>ConvertFast supports HEIC/HEIF (from iPhones), WebP, PNG, JPG/JPEG, GIF, and BMP as input formats. You can convert to JPG or PNG. HEIC conversion uses a WebAssembly build of libheif, while other formats use the browser's native Canvas API for maximum speed.</p>
+          <p>ConvertFast supports images (HEIC, WebP, PNG, JPG, GIF, BMP, SVG, AVIF, TIFF, ICO), audio (MP3, WAV, OGG, FLAC, M4A, AAC), documents (EPUB, RTF, DOCX), fonts (TTF, OTF, WOFF), PDFs, video to GIF, and ZIP archives. All conversions happen in your browser.</p>
         </div>
       </div>
       <div class="faq-item">
@@ -268,9 +366,6 @@
     <div class="container">
       <div class="footer-links">
         <a href="/about">About</a>
-        <a href="/heic-to-jpg">HEIC to JPG</a>
-        <a href="/webp-to-jpg">WebP to JPG</a>
-        <a href="/compress">Compress</a>
       </div>
       <p>ConvertFast. All processing happens in your browser.</p>
     </div>

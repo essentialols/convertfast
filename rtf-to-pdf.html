@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RTF to PDF Converter - Free, Private, No Upload | ConvertFast</title>
+  <meta name="description" content="Convert RTF documents to PDF in your browser. No upload needed. All processing happens locally.">
+  <meta property="og:title" content="RTF to PDF Converter - Free, Private, No Upload | ConvertFast">
+  <meta property="og:description" content="Convert RTF documents to PDF in your browser. No upload needed. All processing happens locally.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://convertfast.app/rtf-to-pdf">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="RTF to PDF Converter - Free, Private, No Upload | ConvertFast">
+  <meta name="twitter:description" content="Convert RTF documents to PDF in your browser. No upload needed. All processing happens locally.">
+  <meta property="og:image" content="https://convertfast.app/img/og-default.png">
+  <meta name="twitter:image" content="https://convertfast.app/img/og-default.png">
+  <link rel="canonical" href="https://convertfast.app/rtf-to-pdf">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <script type="application/ld+json">
+  [
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "RTF to PDF Converter - ConvertFast",
+      "url": "https://convertfast.app/rtf-to-pdf",
+      "description": "Convert RTF documents to PDF in your browser. No upload needed. All processing happens locally.",
+      "applicationCategory": "MultimediaApplication",
+      "operatingSystem": "Any",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "How does RTF to PDF conversion work?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "ConvertFast parses your RTF file entirely in the browser, extracts the text content, and renders it as a PDF using jsPDF. No server is involved."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is my document content private?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Your RTF file never leaves your device. All parsing and conversion happens in your browser using JavaScript."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What RTF features are supported?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Text content is fully extracted. Basic text layout is preserved. Complex formatting, images, and tables are simplified to text."
+          }
+        }
+      ]
+    }
+  ]
+  </script>
+</head>
+<body>
+  <header class="header">
+    <div class="container container--wide">
+      <a href="/" class="logo">Convert<span>Fast</span></a>
+      <nav class="nav">
+        <a href="/">All Converters</a>
+        <a href="/about">About</a>
+        <a href="https://buymeacoffee.com/convertfast" class="support-btn" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 8h1.5a2.5 2.5 0 010 5H17"/><path d="M3 8h14v9a4 4 0 01-4 4H7a4 4 0 01-4-4V8z" fill="currentColor" stroke="none" opacity=".15"/><path d="M3 8h14v9a4 4 0 01-4 4H7a4 4 0 01-4-4V8z"/><path d="M6 1v3M10 1v3M14 1v3" opacity=".6"/></svg> Buy me a coffee</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <a href="/" class="back-link"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 12L6 8l4-4"/></svg> All Converters</a>
+    <section class="hero">
+      <h1>RTF to PDF</h1>
+      <p>Convert RTF files to PDF. Everything runs in your browser, nothing is uploaded.</p>
+    </section>
+
+    <div class="trust-banner">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 1L3 5v4c0 4.4 3 8.5 7 9.9 4-1.4 7-5.5 7-9.9V5l-7-4z" fill="#16a34a" opacity=".15"/><path d="M10 1L3 5v4c0 4.4 3 8.5 7 9.9 4-1.4 7-5.5 7-9.9V5l-7-4z" stroke="#16a34a" stroke-width="1.5" fill="none"/><path d="M7 10l2 2 4-4" stroke="#16a34a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Your files never leave your browser. Zero server uploads. 100% private.
+    </div>
+
+    <div id="drop-zone" class="drop-zone">
+      <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M28 8H12a4 4 0 00-4 4v24a4 4 0 004 4h24a4 4 0 004-4V20L28 8z"/><path d="M28 8v12h12"/><path d="M24 34v-8m-4 4l4-4 4 4"/></svg>
+      <p>Drop a RTF file here, or <strong>click to browse</strong></p>
+      <input type="file" id="file-input" accept=".rtf">
+    </div>
+
+    <div id="file-list" class="file-list"></div>
+
+    <div class="batch-actions">
+      <button id="action-btn" class="btn btn--primary" style="display:none">Convert to PDF</button>
+      <button id="clear-all" class="btn btn--secondary" style="display:none">Clear</button>
+    </div>
+
+    <div class="related-tools">
+      <h2>Related Tools</h2>
+      <div class="related-tools__links">
+        <a href="/rtf-to-txt">RTF to TXT</a>
+        <a href="/docx-to-pdf">DOCX to PDF</a>
+      </div>
+    </div>
+
+    <section class="faq">
+      <h2>Frequently Asked Questions</h2>
+      <div class="faq-item">
+        <button class="faq-question">How does RTF to PDF conversion work?</button>
+        <div class="faq-answer">
+          <p>ConvertFast parses your RTF file entirely in the browser, extracts the text content, and renders it as a PDF using jsPDF. No server is involved.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question">Is my document content private?</button>
+        <div class="faq-answer">
+          <p>Yes. Your RTF file never leaves your device. All parsing and conversion happens in your browser using JavaScript.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question">What RTF features are supported?</button>
+        <div class="faq-answer">
+          <p>Text content is fully extracted. Basic text layout is preserved. Complex formatting, images, and tables are simplified to text.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-links">
+        <a href="/">All Converters</a>
+        <a href="/rtf-to-txt">RTF to TXT</a>
+        <a href="/about">About</a>
+      </div>
+      <p>ConvertFast. All processing happens in your browser.</p>
+    </div>
+  </footer>
+
+  <div id="converter-config" data-doc-mode="rtf-to-pdf" style="display:none"></div>
+  <script src="js/fflate.min.js"></script>
+  <script type="module" src="js/doc-boot.js"></script>
+</body>
+</html>

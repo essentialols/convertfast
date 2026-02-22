@@ -17,6 +17,13 @@ const SIGS = [
   { mime: 'application/pdf', ext: 'pdf', label: 'PDF', offsets: [[0,[0x25,0x50,0x44,0x46]]] },
   { mime: 'video/mp4',  ext: 'mp4',  label: 'MP4',  offsets: [[4,[0x66,0x74,0x79,0x70]]] },
   { mime: 'video/webm', ext: 'webm', label: 'WebM', offsets: [[0,[0x1A,0x45,0xDF,0xA3]]] },
+  { mime: 'audio/wav',  ext: 'wav',  label: 'WAV',  offsets: [[8,[0x57,0x41,0x56,0x45]]] },
+  { mime: 'audio/ogg',  ext: 'ogg',  label: 'OGG',  offsets: [[0,[0x4F,0x67,0x67,0x53]]] },
+  { mime: 'audio/flac', ext: 'flac', label: 'FLAC', offsets: [[0,[0x66,0x4C,0x61,0x43]]] },
+  { mime: 'audio/mpeg', ext: 'mp3',  label: 'MP3',  offsets: [[0,[0x49,0x44,0x33]],[0,[0xFF,0xFB]],[0,[0xFF,0xF3]],[0,[0xFF,0xF2]]] },
+  { mime: 'font/ttf',   ext: 'ttf',  label: 'TTF',  offsets: [[0,[0x00,0x01,0x00,0x00]]] },
+  { mime: 'font/otf',   ext: 'otf',  label: 'OTF',  offsets: [[0,[0x4F,0x54,0x54,0x4F]]] },
+  { mime: 'font/woff',  ext: 'woff', label: 'WOFF', offsets: [[0,[0x77,0x4F,0x46,0x46]]] },
 ];
 
 // Format -> available conversion targets
@@ -34,6 +41,19 @@ const ROUTES = {
   'application/pdf': [{ label: 'Convert to JPG', href: '/pdf-to-jpg' }, { label: 'Convert to PNG', href: '/pdf-to-png' }, { label: 'Merge PDFs', href: '/merge-pdf' }],
   'video/mp4':  [{ label: 'Convert to GIF', href: '/video-to-gif' }],
   'video/webm': [{ label: 'Convert to GIF', href: '/video-to-gif' }],
+  'audio/mpeg': [{ label: 'Convert to WAV', href: '/mp3-to-wav' }],
+  'audio/wav':  [{ label: 'Convert to MP3', href: '/wav-to-mp3' }],
+  'audio/ogg':  [{ label: 'Convert to WAV', href: '/ogg-to-wav' }, { label: 'Convert to MP3', href: '/ogg-to-mp3' }],
+  'audio/flac': [{ label: 'Convert to WAV', href: '/flac-to-wav' }, { label: 'Convert to MP3', href: '/flac-to-mp3' }],
+  'audio/mp4':  [{ label: 'Convert to WAV', href: '/m4a-to-wav' }, { label: 'Convert to MP3', href: '/m4a-to-mp3' }],
+  'audio/aac':  [{ label: 'Convert to WAV', href: '/aac-to-wav' }, { label: 'Convert to MP3', href: '/aac-to-mp3' }],
+  'application/epub+zip': [{ label: 'Convert to TXT', href: '/epub-to-txt' }, { label: 'Convert to PDF', href: '/epub-to-pdf' }],
+  'application/rtf': [{ label: 'Convert to TXT', href: '/rtf-to-txt' }, { label: 'Convert to PDF', href: '/rtf-to-pdf' }],
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document': [{ label: 'Convert to TXT', href: '/docx-to-txt' }, { label: 'Convert to PDF', href: '/docx-to-pdf' }],
+  'font/ttf':  [{ label: 'Convert to OTF', href: '/ttf-to-otf' }, { label: 'Convert to WOFF', href: '/ttf-to-woff' }],
+  'font/otf':  [{ label: 'Convert to TTF', href: '/otf-to-ttf' }, { label: 'Convert to WOFF', href: '/otf-to-woff' }],
+  'font/woff': [{ label: 'Convert to TTF', href: '/woff-to-ttf' }, { label: 'Convert to OTF', href: '/woff-to-otf' }],
+  'application/zip': [{ label: 'Extract Files', href: '/extract-zip' }],
 };
 
 async function detect(file) {
@@ -54,6 +74,23 @@ async function detect(file) {
   if (ext === 'ico') return SIGS.find(s => s.mime === 'image/x-icon');
   if (ext === 'tif' || ext === 'tiff') return SIGS.find(s => s.mime === 'image/tiff');
   if (ext === 'avif') return SIGS.find(s => s.mime === 'image/avif');
+  // Audio fallbacks
+  if (ext === 'mp3') return SIGS.find(s => s.mime === 'audio/mpeg');
+  if (ext === 'wav') return SIGS.find(s => s.mime === 'audio/wav');
+  if (ext === 'ogg') return SIGS.find(s => s.mime === 'audio/ogg');
+  if (ext === 'flac') return SIGS.find(s => s.mime === 'audio/flac');
+  if (ext === 'm4a') return { mime: 'audio/mp4', ext: 'm4a', label: 'M4A' };
+  if (ext === 'aac') return { mime: 'audio/aac', ext: 'aac', label: 'AAC' };
+  // Document fallbacks
+  if (ext === 'epub') return { mime: 'application/epub+zip', ext: 'epub', label: 'EPUB' };
+  if (ext === 'docx') return { mime: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', ext: 'docx', label: 'DOCX' };
+  if (ext === 'rtf') return { mime: 'application/rtf', ext: 'rtf', label: 'RTF' };
+  // Font fallbacks
+  if (ext === 'ttf') return SIGS.find(s => s.mime === 'font/ttf');
+  if (ext === 'otf') return SIGS.find(s => s.mime === 'font/otf');
+  if (ext === 'woff') return SIGS.find(s => s.mime === 'font/woff');
+  // Archive fallback
+  if (ext === 'zip') return { mime: 'application/zip', ext: 'zip', label: 'ZIP' };
   return null;
 }
 

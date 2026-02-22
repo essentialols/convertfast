@@ -18,6 +18,14 @@ const PAGES = [
   '/avif-to-jpg', '/avif-to-png', '/avif-to-webp', '/avif-to-pdf',
   '/ico-to-jpg', '/ico-to-png', '/ico-to-webp', '/ico-to-pdf',
   '/tiff-to-jpg', '/tiff-to-png', '/tiff-to-webp', '/tiff-to-pdf',
+  '/mp3-to-wav', '/wav-to-mp3', '/ogg-to-wav', '/ogg-to-mp3',
+  '/flac-to-wav', '/flac-to-mp3', '/m4a-to-wav', '/m4a-to-mp3',
+  '/aac-to-wav', '/aac-to-mp3',
+  '/epub-to-txt', '/epub-to-pdf', '/rtf-to-txt', '/rtf-to-pdf',
+  '/docx-to-txt', '/docx-to-pdf',
+  '/otf-to-ttf', '/woff-to-ttf', '/ttf-to-otf', '/woff-to-otf',
+  '/ttf-to-woff', '/otf-to-woff',
+  '/extract-zip', '/create-zip',
   '/about'
 ];
 
@@ -159,7 +167,7 @@ async function globalChecks() {
   const urls = [];
   let m;
   while ((m = locRe.exec(sitemap)) !== null) urls.push(m[1]);
-  ok(urls.length === 44, `sitemap.xml: has ${urls.length} URLs (expected 44)`);
+  ok(urls.length === 68, `sitemap.xml: has ${urls.length} URLs (expected 68)`);
 
   // each sitemap URL corresponds to a real page
   for (const url of urls) {

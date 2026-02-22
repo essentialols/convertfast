@@ -5,7 +5,7 @@
  */
 
 import { imagesToPdf, pdfToImages, mergePdfs, splitPdf } from './pdf-engine.js';
-import { formatSize, downloadBlob, downloadAsZip } from './converter.js';
+import { formatSize, downloadBlob, downloadAsZip, needsHeicDecoder, convertHeic } from './converter.js';
 import { loadPendingFiles } from './smart-drop.js';
 
 let mode = '';  // 'img-to-pdf', 'pdf-to-img', 'merge', 'split'
@@ -173,7 +173,16 @@ async function runAction() {
 
   try {
     if (mode === 'img-to-pdf') {
-      const inputs = files.map(f => ({ blob: f, mime: f.type || 'image/jpeg' }));
+      const inputs = [];
+      for (const f of files) {
+        if (needsHeicDecoder(f.type)) {
+          actionBtn.textContent = 'Decoding HEIC...';
+          const decoded = await convertHeic(f, 'image/jpeg', 0.92, () => {});
+          inputs.push({ blob: decoded, mime: 'image/jpeg' });
+        } else {
+          inputs.push({ blob: f, mime: f.type || 'image/jpeg' });
+        }
+      }
       const blob = await imagesToPdf(inputs, pct => { actionBtn.textContent = `Converting... ${pct}%`; });
       const dur = Math.round(performance.now() - t0);
       showSingleResult(blob, 'converted.pdf', dur);

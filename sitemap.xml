@@ -16,12 +16,22 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://convertfast.app/heic-to-pdf</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://convertfast.app/webp-to-jpg</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://convertfast.app/webp-to-png</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://convertfast.app/webp-to-pdf</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>

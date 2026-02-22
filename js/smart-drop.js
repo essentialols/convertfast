@@ -17,10 +17,10 @@ const SIGS = [
 
 // Format -> available conversion targets
 const ROUTES = {
-  'image/heic':  [{ label: 'Convert to JPG', href: '/heic-to-jpg' }, { label: 'Convert to PNG', href: '/heic-to-png' }],
+  'image/heic':  [{ label: 'Convert to JPG', href: '/heic-to-jpg' }, { label: 'Convert to PNG', href: '/heic-to-png' }, { label: 'Convert to PDF', href: '/heic-to-pdf' }],
   'image/png':   [{ label: 'Convert to JPG', href: '/png-to-jpg' }, { label: 'Convert to WebP', href: '/png-to-webp' }, { label: 'Compress', href: '/compress' }, { label: 'Convert to PDF', href: '/png-to-pdf' }],
   'image/jpeg':  [{ label: 'Convert to WebP', href: '/jpg-to-webp' }, { label: 'Convert to PNG', href: '/jpg-to-png' }, { label: 'Compress', href: '/compress' }, { label: 'Convert to PDF', href: '/jpg-to-pdf' }],
-  'image/webp':  [{ label: 'Convert to JPG', href: '/webp-to-jpg' }, { label: 'Convert to PNG', href: '/webp-to-png' }],
+  'image/webp':  [{ label: 'Convert to JPG', href: '/webp-to-jpg' }, { label: 'Convert to PNG', href: '/webp-to-png' }, { label: 'Convert to PDF', href: '/webp-to-pdf' }],
   'image/gif':   [{ label: 'Compress', href: '/compress' }],
   'image/bmp':   [{ label: 'Compress', href: '/compress' }],
   'application/pdf': [{ label: 'Convert to JPG', href: '/pdf-to-jpg' }, { label: 'Convert to PNG', href: '/pdf-to-png' }, { label: 'Merge PDFs', href: '/merge-pdf' }],

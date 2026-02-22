@@ -68,10 +68,16 @@ export function init() {
     fileInput.value = '';
   });
 
-  // Quality slider
+  // Quality slider with localStorage persistence
   if (qualitySlider && qualityValue) {
+    const saved = localStorage.getItem('cf-quality');
+    if (saved && saved >= 10 && saved <= 100) {
+      qualitySlider.value = saved;
+      qualityValue.textContent = saved + '%';
+    }
     qualitySlider.addEventListener('input', () => {
       qualityValue.textContent = qualitySlider.value + '%';
+      localStorage.setItem('cf-quality', qualitySlider.value);
     });
   }
 

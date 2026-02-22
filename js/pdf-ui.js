@@ -35,7 +35,15 @@ export function init() {
   fileInput.addEventListener('change', () => { addFiles(fileInput.files); fileInput.value = ''; });
 
   if (qualitySlider && qualityValue) {
-    qualitySlider.addEventListener('input', () => { qualityValue.textContent = qualitySlider.value + '%'; });
+    const saved = localStorage.getItem('cf-quality');
+    if (saved && saved >= 10 && saved <= 100) {
+      qualitySlider.value = saved;
+      qualityValue.textContent = saved + '%';
+    }
+    qualitySlider.addEventListener('input', () => {
+      qualityValue.textContent = qualitySlider.value + '%';
+      localStorage.setItem('cf-quality', qualitySlider.value);
+    });
   }
 
   if (actionBtn) actionBtn.addEventListener('click', runAction);
@@ -69,7 +77,10 @@ function addFiles(fileList_) {
 function renderFileEntry(file) {
   const div = document.createElement('div');
   div.className = 'file-item';
+  const canReorder = mode === 'merge';
+  if (canReorder) div.draggable = true;
   div.innerHTML = `
+    ${canReorder ? '<span class="drag-handle" title="Drag to reorder">&#x2630;</span>' : ''}
     <div class="file-item__info">
       <div class="file-item__name">${esc(file.name)}</div>
       <div class="file-item__meta">${formatSize(file.size)}</div>
@@ -84,7 +95,42 @@ function renderFileEntry(file) {
     div.remove();
     updateControls();
   });
+  if (canReorder) setupDragReorder(div);
   fileList.appendChild(div);
+}
+
+let dragSrc = null;
+function setupDragReorder(el) {
+  el.addEventListener('dragstart', e => {
+    dragSrc = el;
+    el.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+  });
+  el.addEventListener('dragend', () => {
+    el.classList.remove('dragging');
+    dragSrc = null;
+    fileList.querySelectorAll('.file-item.drag-over').forEach(x => x.classList.remove('drag-over'));
+  });
+  el.addEventListener('dragover', e => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    if (dragSrc && dragSrc !== el) el.classList.add('drag-over');
+  });
+  el.addEventListener('dragleave', () => el.classList.remove('drag-over'));
+  el.addEventListener('drop', e => {
+    e.preventDefault();
+    el.classList.remove('drag-over');
+    if (!dragSrc || dragSrc === el) return;
+    // Swap DOM positions
+    const items = [...fileList.children];
+    const fromIdx = items.indexOf(dragSrc);
+    const toIdx = items.indexOf(el);
+    if (fromIdx < toIdx) el.after(dragSrc);
+    else el.before(dragSrc);
+    // Sync the files array to match new DOM order
+    const [moved] = files.splice(fromIdx, 1);
+    files.splice(toIdx, 0, moved);
+  });
 }
 
 function updateControls() {

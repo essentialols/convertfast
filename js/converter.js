@@ -79,40 +79,31 @@ export { MAX_BATCH_SIZE };
  * @param {number} quality - 0-1 quality for lossy formats
  * @returns {Promise<Blob>}
  */
-export function convertWithCanvas(file, targetMime, quality) {
+export async function convertWithCanvas(file, targetMime, quality) {
+  // createImageBitmap with imageOrientation auto-corrects EXIF rotation from iPhone photos
+  const bmp = await createImageBitmap(file, { imageOrientation: 'from-image' });
+  try {
+    validateDimensions(bmp.width, bmp.height);
+  } catch (e) {
+    bmp.close();
+    throw e;
+  }
+  const canvas = document.createElement('canvas');
+  canvas.width = bmp.width;
+  canvas.height = bmp.height;
+  const ctx = canvas.getContext('2d');
+  if (targetMime === 'image/jpeg') {
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
+  ctx.drawImage(bmp, 0, 0);
+  bmp.close();
   return new Promise((resolve, reject) => {
-    const img = new Image();
-    const url = URL.createObjectURL(file);
-    img.onload = () => {
-      try {
-        validateDimensions(img.naturalWidth, img.naturalHeight);
-      } catch (e) {
-        URL.revokeObjectURL(url);
-        reject(e);
-        return;
-      }
-      const canvas = document.createElement('canvas');
-      canvas.width = img.naturalWidth;
-      canvas.height = img.naturalHeight;
-      const ctx = canvas.getContext('2d');
-      // Fill white background for JPG (transparent areas would be black otherwise)
-      if (targetMime === 'image/jpeg') {
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-      }
-      ctx.drawImage(img, 0, 0);
-      URL.revokeObjectURL(url);
-      canvas.toBlob(
-        blob => blob ? resolve(blob) : reject(new Error('Canvas toBlob failed')),
-        targetMime,
-        quality
-      );
-    };
-    img.onerror = () => {
-      URL.revokeObjectURL(url);
-      reject(new Error('Failed to load image'));
-    };
-    img.src = url;
+    canvas.toBlob(
+      blob => blob ? resolve(blob) : reject(new Error('Canvas toBlob failed')),
+      targetMime,
+      quality
+    );
   });
 }
 

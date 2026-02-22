@@ -223,6 +223,17 @@ body {
 .file-item__status.done { color: var(--success); }
 .file-item__status.error { color: var(--danger); }
 
+/* Drag reorder (merge page) */
+.drag-handle {
+  cursor: grab;
+  font-size: 1.1rem;
+  color: var(--text-muted);
+  user-select: none;
+  padding: 0 0.25rem;
+}
+.file-item.dragging { opacity: 0.4; }
+.file-item.drag-over { border-color: var(--primary); background: #eff6ff; }
+
 /* Notice (warnings/limits) */
 .notice {
   background: #fefce8;
@@ -300,6 +311,23 @@ body {
   font-size: 0.95rem;
   line-height: 1.7;
 }
+
+/* Related tools */
+.related-tools { padding: 0 0 1rem; }
+.related-tools h2 { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.75rem; }
+.related-tools__links { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.related-tools__links a {
+  display: inline-block;
+  padding: 0.4rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  text-decoration: none;
+  color: var(--text);
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: border-color .15s, background .15s;
+}
+.related-tools__links a:hover { border-color: var(--primary); background: #eff6ff; color: var(--primary); }
 
 /* Footer */
 .footer {

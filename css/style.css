@@ -355,7 +355,6 @@ body {
   border-radius: 8px;
   text-decoration: none;
   transition: background .15s, transform .1s;
-  margin-top: 0.5rem;
 }
 .support-btn:hover { background: #ffca00; transform: translateY(-1px); color: #0a0a0a; }
 .support-btn svg { width: 18px; height: 18px; }

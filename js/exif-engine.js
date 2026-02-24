@@ -191,7 +191,8 @@ function fileToDataUrl(file) {
 }
 
 function dataUrlToBlob(dataUrl) {
-  const [header, b64] = dataUrl.split(',');
+  const [header, ...rest] = dataUrl.split(',');
+  const b64 = rest.join(',');
   const match = header.match(/:(.*?);/);
   const mime = match ? match[1] : 'image/jpeg';
   const bin = atob(b64);

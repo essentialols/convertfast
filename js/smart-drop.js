@@ -240,7 +240,7 @@ async function renderPdfPreview(file, container) {
 }
 
 async function extractVideoFrames(file, container, count) {
-  count = count || 4;
+  count = count || 6;
   try {
     const url = URL.createObjectURL(file);
     const v = document.createElement('video');
@@ -262,8 +262,8 @@ async function extractVideoFrames(file, container, count) {
       });
       const canvas = document.createElement('canvas');
       const aspect = v.videoWidth / v.videoHeight;
-      canvas.height = 80;
-      canvas.width = Math.round(80 * aspect);
+      canvas.height = 60;
+      canvas.width = Math.round(60 * aspect);
       canvas.className = 'route-frame';
       const ctx = canvas.getContext('2d');
       ctx.drawImage(v, 0, 0, canvas.width, canvas.height);
@@ -350,8 +350,42 @@ export function initSmartDrop() {
     // File info section
     let inlineMetaEl = null;
 
-    if (isSingle && hasPreview) {
-      // Preview row: preview left, details right
+    if (isSingle && isVideo) {
+      // Video: full-width filmstrip above file details
+      const wrapper = document.createElement('div');
+      wrapper.className = 'route-video-preview';
+
+      const filmstrip = document.createElement('div');
+      filmstrip.className = 'route-filmstrip';
+      wrapper.appendChild(filmstrip);
+      extractVideoFrames(files[0], filmstrip);
+
+      const det = document.createElement('div');
+      det.className = 'route-file-details';
+      det.style.marginTop = '0.5rem';
+
+      const nameEl = document.createElement('div');
+      nameEl.className = 'route-file-name';
+      nameEl.textContent = files[0].name;
+      det.appendChild(nameEl);
+
+      const metaEl = document.createElement('div');
+      metaEl.className = 'route-file-meta';
+      metaEl.innerHTML = formatSize(files[0].size) + ' &middot; ' + esc(dominantInfo.label);
+      det.appendChild(metaEl);
+
+      inlineMetaEl = document.createElement('div');
+      inlineMetaEl.className = 'route-inline-meta';
+      det.appendChild(inlineMetaEl);
+
+      wrapper.appendChild(det);
+      wrapper.style.paddingBottom = '0.75rem';
+      wrapper.style.borderBottom = '1px solid var(--border)';
+      wrapper.style.marginBottom = '0.75rem';
+      wrapper.style.textAlign = 'left';
+      routePanel.appendChild(wrapper);
+    } else if (isSingle && (isImage || isPdf)) {
+      // Image/PDF: preview left, details right
       const row = document.createElement('div');
       row.className = 'route-preview-row';
 
@@ -366,12 +400,7 @@ export function initSmartDrop() {
         img.className = 'route-preview-img';
         img.alt = files[0].name;
         previewDiv.appendChild(img);
-      } else if (isVideo) {
-        const filmstrip = document.createElement('div');
-        filmstrip.className = 'route-filmstrip';
-        previewDiv.appendChild(filmstrip);
-        extractVideoFrames(files[0], filmstrip);
-      } else if (isPdf) {
+      } else {
         renderPdfPreview(files[0], previewDiv);
       }
 

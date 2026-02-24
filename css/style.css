@@ -582,10 +582,12 @@ body {
 }
 .route-filmstrip {
   display: flex;
+  flex-wrap: wrap;
   gap: 2px;
+  width: 100%;
 }
 .route-frame {
-  height: 80px;
+  height: 60px;
   border-radius: 3px;
   display: block;
 }

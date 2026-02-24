@@ -81,7 +81,12 @@ export { MAX_BATCH_SIZE };
  */
 export async function convertWithCanvas(file, targetMime, quality) {
   // createImageBitmap with imageOrientation auto-corrects EXIF rotation from iPhone photos
-  const bmp = await createImageBitmap(file, { imageOrientation: 'from-image' });
+  let bmp;
+  try {
+    bmp = await createImageBitmap(file, { imageOrientation: 'from-image' });
+  } catch (e) {
+    throw new Error('Failed to decode image: file may be corrupted or unsupported');
+  }
   try {
     validateDimensions(bmp.width, bmp.height);
   } catch (e) {

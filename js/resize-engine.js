@@ -72,7 +72,12 @@ export async function resizeImage(file, opts, onProgress) {
  * @returns {Promise<{width: number, height: number}>}
  */
 export async function getImageDimensions(file) {
-  const bmp = await createImageBitmap(file, { imageOrientation: 'from-image' });
+  let bmp;
+  try {
+    bmp = await createImageBitmap(file, { imageOrientation: 'from-image' });
+  } catch {
+    throw new Error('Failed to decode image');
+  }
   const { width, height } = bmp;
   bmp.close();
   return { width, height };

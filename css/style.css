@@ -426,10 +426,6 @@ body {
   margin-bottom: 1.5rem;
   text-align: center;
 }
-.route-panel__info {
-  font-weight: 600;
-  margin-bottom: 0.75rem;
-}
 .route-panel__detecting {
   color: var(--text-muted);
   font-style: italic;
@@ -437,12 +433,67 @@ body {
 .route-panel__error {
   color: var(--danger);
 }
-.route-panel__buttons {
+.route-file-info {
   display: flex;
-  gap: 0.5rem;
-  justify-content: center;
-  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 0.75rem;
+  text-align: left;
 }
+.route-file-thumb {
+  width: 48px;
+  height: 48px;
+  border-radius: 6px;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: var(--border);
+}
+.route-file-details { flex: 1; min-width: 0; }
+.route-file-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.route-file-meta {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+.route-section { text-align: left; margin-bottom: 0.5rem; }
+.route-section:last-child { margin-bottom: 0; }
+.route-section-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin-bottom: 0.4rem;
+}
+.route-option {
+  display: block;
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  margin-bottom: 0.35rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  text-align: left;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text);
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+}
+.route-option:last-child { margin-bottom: 0; }
+.route-option:hover:not(:disabled) {
+  border-color: var(--primary);
+  background: #eff6ff;
+  color: var(--primary);
+}
+.route-option:disabled { opacity: 0.5; cursor: not-allowed; }
 
 /* Back link on converter pages */
 .back-link {

@@ -15,6 +15,9 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
+# Allow running from inside a Claude Code session
+unset CLAUDECODE 2>/dev/null || true
+
 # --- Args ---
 DRY_RUN=false
 CLEANUP=false

@@ -638,6 +638,12 @@ body {
   font-size: 0.85rem; font-weight: 500; min-width: 3.5rem;
   text-align: right; color: var(--text-muted);
 }
+.route-convert-estimate {
+  font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;
+}
+.route-convert-estimate--warn {
+  font-size: 0.85rem; color: #92400e; font-weight: 500; margin-bottom: 0.5rem;
+}
 
 /* Back link on converter pages */
 .back-link {

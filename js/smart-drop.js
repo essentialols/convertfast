@@ -185,11 +185,13 @@ async function getMediaMeta(file, mime) {
       const info = await new Promise((resolve, reject) => {
         const v = document.createElement('video');
         v.preload = 'metadata';
+        const timeout = setTimeout(() => { URL.revokeObjectURL(v.src); resolve({ dur: 0, w: 0, h: 0 }); }, 5000);
         v.onloadedmetadata = () => {
+          clearTimeout(timeout);
           resolve({ dur: v.duration, w: v.videoWidth, h: v.videoHeight });
           URL.revokeObjectURL(v.src);
         };
-        v.onerror = () => { URL.revokeObjectURL(v.src); reject(); };
+        v.onerror = () => { clearTimeout(timeout); URL.revokeObjectURL(v.src); reject(); };
         v.src = URL.createObjectURL(file);
       });
       if (info.w && info.h) meta.push(info.w + ' x ' + info.h);
@@ -325,7 +327,7 @@ function resolveEngine(sourceMime, href) {
   if (sourceMime === 'image/gif-video')
     return { type: 'gif-to-video', targetExt: tgt, targetFormat: tgt };
   if (sourceMime.startsWith('video/') && tgt === 'gif')
-    return { type: 'vid-to-gif', targetExt: 'gif', notice: 'GIF files from video are often very large (easily 20 MB+ for a few seconds of footage).' };
+    return { type: 'vid-to-gif', targetExt: 'gif' };
   if (sourceMime.startsWith('video/'))
     return { type: 'video', targetExt: tgt, targetFormat: tgt };
   if (sourceMime.startsWith('audio/') && (tgt === 'mp3' || tgt === 'wav'))
@@ -341,6 +343,33 @@ function resolveEngine(sourceMime, href) {
 
 function inlineOutputName(name, ext) {
   return name.replace(/\.[^.]+$/, '') + '.' + ext;
+}
+
+function loadVideoMeta(file) {
+  return new Promise((resolve, reject) => {
+    const v = document.createElement('video');
+    v.muted = true;
+    v.playsInline = true;
+    const url = URL.createObjectURL(file);
+    v.onloadedmetadata = () => {
+      const meta = { duration: v.duration, width: v.videoWidth, height: v.videoHeight };
+      URL.revokeObjectURL(url);
+      resolve(meta);
+    };
+    v.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Cannot read video')); };
+    v.src = url;
+  });
+}
+
+function estimateGifSize(videoWidth, videoHeight, duration, maxWidth, fps) {
+  const maxDuration = 60;
+  const clip = Math.min(duration, maxDuration);
+  const scale = Math.min(1, maxWidth / videoWidth);
+  const w = Math.round(videoWidth * scale);
+  const h = Math.round(videoHeight * scale);
+  const totalFrames = Math.ceil(clip * fps);
+  // ~0.5 bytes/pixel after LZW, ~80% frames kept after dedup
+  return Math.round(w * h * 0.5 * totalFrames * 0.8);
 }
 
 function getConversionSettings(resolved) {
@@ -529,6 +558,7 @@ async function runInlineConversion(file, sourceMime, resolved, routePanel, onDis
       range.addEventListener('input', () => {
         settingValues[desc.key] = parseInt(range.value, 10);
         valueEl.textContent = range.value + desc.unit;
+        if (updateEstimate) updateEstimate();
       });
 
       row.appendChild(rangeWrap);
@@ -536,6 +566,32 @@ async function runInlineConversion(file, sourceMime, resolved, routePanel, onDis
     }
 
     wrap.appendChild(settingsWrap);
+  }
+
+  // GIF size estimate (loaded async, updates with sliders)
+  let updateEstimate = null;
+  if (resolved.type === 'vid-to-gif') {
+    const estimateEl = document.createElement('div');
+    estimateEl.className = 'route-convert-estimate';
+    estimateEl.textContent = 'Estimating file size\u2026';
+    wrap.appendChild(estimateEl);
+
+    loadVideoMeta(file).then(meta => {
+      updateEstimate = () => {
+        const est = estimateGifSize(meta.width, meta.height, meta.duration, settingValues.maxWidth || 480, settingValues.fps || 10);
+        const label = 'Estimated size: ~' + formatSize(est);
+        if (est > 20 * 1024 * 1024) {
+          estimateEl.className = 'route-convert-estimate route-convert-estimate--warn';
+          estimateEl.textContent = label + ' (large file, consider reducing width or frame rate)';
+        } else {
+          estimateEl.className = 'route-convert-estimate';
+          estimateEl.textContent = label;
+        }
+      };
+      updateEstimate();
+    }).catch(() => {
+      estimateEl.textContent = '';
+    });
   }
 
   const btnRow = document.createElement('div');

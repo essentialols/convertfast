@@ -87,7 +87,12 @@ let pdfjsLib = null;
 
 async function getPdfjs() {
   if (pdfjsLib) return pdfjsLib;
-  pdfjsLib = await import('https://cdn.jsdelivr.net/npm/pdfjs-dist@5.4.624/build/pdf.min.mjs');
+  try {
+    pdfjsLib = await import('https://cdn.jsdelivr.net/npm/pdfjs-dist@5.4.624/build/pdf.min.mjs');
+  } catch (e) {
+    pdfjsLib = null;
+    throw e;
+  }
   pdfjsLib.GlobalWorkerOptions.workerSrc =
     'https://cdn.jsdelivr.net/npm/pdfjs-dist@5.4.624/build/pdf.worker.min.mjs';
   return pdfjsLib;

@@ -136,7 +136,14 @@ function seekTo(video, time) {
       resolve();
       return;
     }
-    video.onseeked = () => resolve();
+    const timeout = setTimeout(() => {
+      video.onseeked = null;
+      resolve();
+    }, 5000);
+    video.onseeked = () => {
+      clearTimeout(timeout);
+      resolve();
+    };
     video.currentTime = time;
   });
 }

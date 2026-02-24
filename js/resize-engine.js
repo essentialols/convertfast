@@ -13,7 +13,12 @@
 export async function resizeImage(file, opts, onProgress) {
   if (onProgress) onProgress(10);
 
-  const bmp = await createImageBitmap(file, { imageOrientation: 'from-image' });
+  let bmp;
+  try {
+    bmp = await createImageBitmap(file, { imageOrientation: 'from-image' });
+  } catch (e) {
+    throw new Error('Failed to decode image: ' + (e.message || e));
+  }
   const origW = bmp.width;
   const origH = bmp.height;
 

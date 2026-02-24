@@ -72,7 +72,7 @@ export function init() {
   // Quality slider with localStorage persistence
   if (qualitySlider && qualityValue) {
     const saved = localStorage.getItem('cf-quality');
-    if (saved && saved >= 10 && saved <= 100) {
+    if (saved && parseInt(saved) >= 10 && parseInt(saved) <= 100) {
       const snapped = Math.round(saved / 10) * 10;
       qualitySlider.value = snapped;
       qualityValue.textContent = snapped + '%';

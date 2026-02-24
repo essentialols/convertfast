@@ -10,6 +10,7 @@
  * @returns {Promise<Array<{name: string, blob: Blob, size: number}>>}
  */
 export async function extractZip(file, onProgress) {
+  if (typeof fflate === 'undefined') throw new Error('ZIP library not loaded');
   if (onProgress) onProgress(10);
   const buffer = await file.arrayBuffer();
   if (onProgress) onProgress(30);

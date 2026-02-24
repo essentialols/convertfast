@@ -54,6 +54,7 @@ export async function imagesToGif(files, opts = {}) {
     }
   }
 
+  if (typeof gifenc === 'undefined') throw new Error('GIF library not loaded');
   const { GIFEncoder, quantize, applyPalette } = gifenc;
   const palette = quantize(new Uint8Array(samplePixels), 256);
 

@@ -77,7 +77,7 @@ export async function videoToGif(file, opts = {}) {
     }
   }
 
-  // Build global palette using gifenc's quantize
+  if (typeof gifenc === 'undefined') throw new Error('GIF library not loaded');
   const { GIFEncoder, quantize, applyPalette } = gifenc;
   const palette = quantize(new Uint8Array(samplePixels), 256);
 

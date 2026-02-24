@@ -102,6 +102,7 @@ function wrapAsWoff(sfnt) {
   }
 
   // Compress each table with fflate DEFLATE
+  if (typeof fflate === 'undefined') throw new Error('ZIP library not loaded');
   const compressed = tables.map(t => {
     const comp = fflate.deflateSync(t.rawData);
     // Only use compressed version if it is actually smaller

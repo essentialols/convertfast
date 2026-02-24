@@ -62,6 +62,7 @@ async function textToPdfBlob(text, onProgress) {
 async function extractEpubText(file, onProgress) {
   if (onProgress) onProgress(10);
   const buf = new Uint8Array(await file.arrayBuffer());
+  if (typeof fflate === 'undefined') throw new Error('ZIP library not loaded');
   const zip = fflate.unzipSync(buf);
   if (onProgress) onProgress(20);
 
@@ -332,6 +333,7 @@ export async function rtfToPdf(file, onProgress) {
 async function extractDocxText(file, onProgress) {
   if (onProgress) onProgress(10);
   const buf = new Uint8Array(await file.arrayBuffer());
+  if (typeof fflate === 'undefined') throw new Error('ZIP library not loaded');
   const zip = fflate.unzipSync(buf);
   if (onProgress) onProgress(30);
 

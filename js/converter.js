@@ -151,7 +151,7 @@ export function downloadBlob(blob, filename) {
  * @param {string} zipName
  */
 export async function downloadAsZip(files, zipName) {
-  // fflate is loaded as a global from fflate.min.js
+  if (typeof fflate === 'undefined') throw new Error('ZIP library not loaded');
   const zipData = fflate.zipSync(
     Object.fromEntries(files.map(f => [f.name, f.data])),
     { level: 0 } // images are already compressed, no point re-compressing

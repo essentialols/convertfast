@@ -136,7 +136,8 @@ function seekTo(video, time) {
       resolve();
       return;
     }
-    video.onseeked = () => resolve();
+    const fallback = setTimeout(resolve, 2000);
+    video.onseeked = () => { clearTimeout(fallback); resolve(); };
     video.currentTime = time;
   });
 }

@@ -198,8 +198,9 @@ async function getMediaMeta(file, mime) {
       const dur = await new Promise((resolve, reject) => {
         const a = document.createElement('audio');
         a.preload = 'metadata';
-        a.onloadedmetadata = () => { resolve(a.duration); URL.revokeObjectURL(a.src); };
-        a.onerror = () => { URL.revokeObjectURL(a.src); reject(); };
+        const tid = setTimeout(() => { URL.revokeObjectURL(a.src); reject(); }, 10000);
+        a.onloadedmetadata = () => { clearTimeout(tid); resolve(a.duration); URL.revokeObjectURL(a.src); };
+        a.onerror = () => { clearTimeout(tid); URL.revokeObjectURL(a.src); reject(); };
         a.src = URL.createObjectURL(file);
       });
       if (dur && isFinite(dur)) meta.push(formatDuration(dur));

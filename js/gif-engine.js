@@ -131,12 +131,30 @@ export async function videoToGif(file, opts = {}) {
 }
 
 function seekTo(video, time) {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     if (Math.abs(video.currentTime - time) < 0.01) {
       resolve();
       return;
     }
-    video.onseeked = () => resolve();
+    const timeout = setTimeout(() => {
+      video.removeEventListener('seeked', onSeeked);
+      video.removeEventListener('error', onError);
+      reject(new Error('Seek timeout'));
+    }, 5000);
+    const onSeeked = () => {
+      clearTimeout(timeout);
+      video.removeEventListener('seeked', onSeeked);
+      video.removeEventListener('error', onError);
+      resolve();
+    };
+    const onError = () => {
+      clearTimeout(timeout);
+      video.removeEventListener('seeked', onSeeked);
+      video.removeEventListener('error', onError);
+      reject(new Error('Video playback error'));
+    };
+    video.addEventListener('seeked', onSeeked);
+    video.addEventListener('error', onError);
     video.currentTime = time;
   });
 }

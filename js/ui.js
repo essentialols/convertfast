@@ -1,5 +1,5 @@
 /**
- * ConvertFast - UI controller
+ * IrisFiles - UI controller
  * Handles drag-drop, file queue, progress bars, quality slider, batch operations.
  */
 
@@ -343,7 +343,7 @@ async function handleDownloadAll() {
     data: new Uint8Array(await f.outputBlob.arrayBuffer())
   })));
 
-  await downloadAsZip(entries, 'convertfast-batch.zip');
+  await downloadAsZip(entries, 'irisfiles-batch.zip');
   downloadAllBtn.disabled = false;
   downloadAllBtn.textContent = 'Download All as ZIP';
 }

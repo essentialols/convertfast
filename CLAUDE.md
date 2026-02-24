@@ -1,27 +1,17 @@
-# ConvertFast
+# IrisFiles
 
-Privacy-first client-side image converter. See ARCHITECTURE.md for full details.
+Privacy-first client-side file converter. See [README.md](README.md) for project overview and [ARCHITECTURE.md](ARCHITECTURE.md) for technical details.
 
-## Quick Reference
-- **Build**: `bash build.sh` (copies WASM + bundles fflate from node_modules)
-- **Dev server**: `npx serve . -p 3000`
-- **No tests yet**: Manual testing with real image files
-- **Deploy**: Push to GitHub main, auto-deploy on Vercel
-
-## Key Files
-- `js/converter.js` - Core image conversion (format detection, Canvas encode, HEIC lazy-load, ZIP)
-- `js/ui.js` - Image converter DOM (drag-drop, file queue, progress, FAQ)
-- `js/heic-worker.js` - Lazy HEIC WASM loader (main thread, not a Worker despite name)
-- `js/pdf-engine.js` - PDF operations (image-to-PDF, PDF-to-image, merge) via pdf-lib/jsPDF/PDF.js
-- `js/pdf-ui.js` - PDF page DOM controller (4 modes: img-to-pdf, pdf-to-img, merge, split)
-- `js/boot.js` - Image converter page bootstrapper
-- `js/pdf-boot.js` - PDF page bootstrapper
-- `wasm/heic/heic-to.iife.js` - Pre-built HEIC decoder (~2.5MB, committed, also on jsDelivr CDN)
-- `js/fflate.min.js` - Pre-built ZIP library (~32KB, committed)
+## Commands
+- `npx serve . -p 3000` - Dev server
+- `node test/validate.mjs` - Validation suite (78 pages, 9200+ checks)
+- `bash build.sh` - Rebuild WASM + fflate (rarely needed)
+- `git push origin main` - Deploy (Vercel auto-deploy)
 
 ## Conventions
-- Each converter page: separate HTML with unique SEO meta, shared JS via ES module imports
+- One HTML page per tool, unique SEO meta, shared JS via ES module imports
 - Format detection uses magic bytes, not file extensions
-- HEIC is the only format needing WASM; everything else uses native Canvas API
-- Heavy libraries (heic-to, pdf-lib, jsPDF, PDF.js) loaded from jsDelivr CDN with local fallback
+- Heavy libraries lazy-loaded from jsDelivr CDN (ExifReader, piexifjs, FFmpeg.wasm, pdf-lib, etc.)
+- Engine/UI/Boot pattern: `*-engine.js` (pure functions), `*-ui.js` (DOM controller), `*-boot.js` (2-line bootstrapper)
 - Safeguards: 100MB file limit, 100MP pixel limit, 50-file batch cap, 50MB PDF merge limit
+- Adding a new tool: create HTML + engine + UI + boot, add to index.html Image Tools row, smart-drop.js routes, sitemap.xml, test/validate.mjs PAGES array + sitemap count

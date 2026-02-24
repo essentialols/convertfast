@@ -1,5 +1,5 @@
 /**
- * ConvertFast - Video transcoding UI controller
+ * IrisFiles - Video transcoding UI controller
  * Single-file, two-step flow: drop file, then click "Convert".
  * Uses FFmpeg.wasm via vidconv-engine.js for client-side transcoding.
  */

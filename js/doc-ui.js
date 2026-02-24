@@ -1,5 +1,5 @@
 /**
- * ConvertFast - Document/ebook UI controller
+ * IrisFiles - Document/ebook UI controller
  * Handles EPUB, RTF, DOCX conversion pages.
  * Single-file conversion (not batch).
  */

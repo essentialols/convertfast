@@ -1,5 +1,5 @@
 /**
- * ConvertFast - Archive engine
+ * IrisFiles - Archive engine
  * ZIP extraction and creation using fflate (window.fflate from js/fflate.min.js).
  */
 

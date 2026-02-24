@@ -1,5 +1,5 @@
 /**
- * ConvertFast - Smart Drop (landing page)
+ * IrisFiles - Smart Drop (landing page)
  * Detects file types via magic bytes, stores in IndexedDB, routes to the right converter.
  */
 
@@ -28,16 +28,16 @@ const SIGS = [
 
 // Format -> available conversion targets
 const ROUTES = {
-  'image/heic':  [{ label: 'Convert to JPG', href: '/heic-to-jpg' }, { label: 'Convert to PNG', href: '/heic-to-png' }, { label: 'Convert to WebP', href: '/heic-to-webp' }, { label: 'Compress', href: '/compress' }],
-  'image/png':   [{ label: 'Convert to JPG', href: '/png-to-jpg' }, { label: 'Convert to WebP', href: '/png-to-webp' }, { label: 'Convert to PDF', href: '/png-to-pdf' }, { label: 'Compress', href: '/compress' }],
-  'image/jpeg':  [{ label: 'Convert to WebP', href: '/jpg-to-webp' }, { label: 'Convert to PNG', href: '/jpg-to-png' }, { label: 'Convert to PDF', href: '/jpg-to-pdf' }, { label: 'Compress', href: '/compress' }],
-  'image/webp':  [{ label: 'Convert to JPG', href: '/webp-to-jpg' }, { label: 'Convert to PNG', href: '/webp-to-png' }, { label: 'Convert to PDF', href: '/webp-to-pdf' }, { label: 'Compress', href: '/compress' }],
-  'image/gif':   [{ label: 'Convert to JPG', href: '/gif-to-jpg' }, { label: 'Convert to PNG', href: '/gif-to-png' }, { label: 'Convert to WebP', href: '/gif-to-webp' }, { label: 'Compress', href: '/compress' }],
-  'image/bmp':   [{ label: 'Convert to JPG', href: '/bmp-to-jpg' }, { label: 'Convert to PNG', href: '/bmp-to-png' }, { label: 'Convert to WebP', href: '/bmp-to-webp' }, { label: 'Compress', href: '/compress' }],
-  'image/avif':  [{ label: 'Convert to JPG', href: '/avif-to-jpg' }, { label: 'Convert to PNG', href: '/avif-to-png' }, { label: 'Convert to WebP', href: '/avif-to-webp' }, { label: 'Compress', href: '/compress' }],
-  'image/tiff':  [{ label: 'Convert to JPG', href: '/tiff-to-jpg' }, { label: 'Convert to PNG', href: '/tiff-to-png' }, { label: 'Convert to WebP', href: '/tiff-to-webp' }, { label: 'Compress', href: '/compress' }],
-  'image/x-icon': [{ label: 'Convert to JPG', href: '/ico-to-jpg' }, { label: 'Convert to PNG', href: '/ico-to-png' }, { label: 'Convert to WebP', href: '/ico-to-webp' }, { label: 'Compress', href: '/compress' }],
-  'image/svg+xml': [{ label: 'Convert to JPG', href: '/svg-to-jpg' }, { label: 'Convert to PNG', href: '/svg-to-png' }, { label: 'Convert to WebP', href: '/svg-to-webp' }, { label: 'Compress', href: '/compress' }],
+  'image/heic':  [{ label: 'Convert to JPG', href: '/heic-to-jpg' }, { label: 'Convert to PNG', href: '/heic-to-png' }, { label: 'Convert to WebP', href: '/heic-to-webp' }, { label: 'View Metadata', href: '/image-metadata' }, { label: 'Compress', href: '/compress' }],
+  'image/png':   [{ label: 'Convert to JPG', href: '/png-to-jpg' }, { label: 'Convert to WebP', href: '/png-to-webp' }, { label: 'Convert to PDF', href: '/png-to-pdf' }, { label: 'View Metadata', href: '/image-metadata' }, { label: 'Compress', href: '/compress' }],
+  'image/jpeg':  [{ label: 'Convert to WebP', href: '/jpg-to-webp' }, { label: 'Convert to PNG', href: '/jpg-to-png' }, { label: 'Convert to PDF', href: '/jpg-to-pdf' }, { label: 'View Metadata', href: '/image-metadata' }, { label: 'Compress', href: '/compress' }],
+  'image/webp':  [{ label: 'Convert to JPG', href: '/webp-to-jpg' }, { label: 'Convert to PNG', href: '/webp-to-png' }, { label: 'Convert to PDF', href: '/webp-to-pdf' }, { label: 'View Metadata', href: '/image-metadata' }, { label: 'Compress', href: '/compress' }],
+  'image/gif':   [{ label: 'Convert to JPG', href: '/gif-to-jpg' }, { label: 'Convert to PNG', href: '/gif-to-png' }, { label: 'Convert to WebP', href: '/gif-to-webp' }, { label: 'View Metadata', href: '/image-metadata' }, { label: 'Compress', href: '/compress' }],
+  'image/bmp':   [{ label: 'Convert to JPG', href: '/bmp-to-jpg' }, { label: 'Convert to PNG', href: '/bmp-to-png' }, { label: 'Convert to WebP', href: '/bmp-to-webp' }, { label: 'View Metadata', href: '/image-metadata' }, { label: 'Compress', href: '/compress' }],
+  'image/avif':  [{ label: 'Convert to JPG', href: '/avif-to-jpg' }, { label: 'Convert to PNG', href: '/avif-to-png' }, { label: 'Convert to WebP', href: '/avif-to-webp' }, { label: 'View Metadata', href: '/image-metadata' }, { label: 'Compress', href: '/compress' }],
+  'image/tiff':  [{ label: 'Convert to JPG', href: '/tiff-to-jpg' }, { label: 'Convert to PNG', href: '/tiff-to-png' }, { label: 'Convert to WebP', href: '/tiff-to-webp' }, { label: 'View Metadata', href: '/image-metadata' }, { label: 'Compress', href: '/compress' }],
+  'image/x-icon': [{ label: 'Convert to JPG', href: '/ico-to-jpg' }, { label: 'Convert to PNG', href: '/ico-to-png' }, { label: 'Convert to WebP', href: '/ico-to-webp' }, { label: 'View Metadata', href: '/image-metadata' }, { label: 'Compress', href: '/compress' }],
+  'image/svg+xml': [{ label: 'Convert to JPG', href: '/svg-to-jpg' }, { label: 'Convert to PNG', href: '/svg-to-png' }, { label: 'Convert to WebP', href: '/svg-to-webp' }, { label: 'View Metadata', href: '/image-metadata' }, { label: 'Compress', href: '/compress' }],
   'application/pdf': [{ label: 'Convert to JPG', href: '/pdf-to-jpg' }, { label: 'Convert to PNG', href: '/pdf-to-png' }, { label: 'Merge PDFs', href: '/merge-pdf' }, { label: 'Split PDF', href: '/split-pdf' }],
   'video/mp4':       [{ label: 'Convert to WebM', href: '/mp4-to-webm' }, { label: 'Convert to GIF', href: '/video-to-gif' }, { label: 'Compress', href: '/compress-video' }],
   'video/webm':      [{ label: 'Convert to MP4', href: '/webm-to-mp4' }, { label: 'Convert to GIF', href: '/video-to-gif' }, { label: 'Compress', href: '/compress-video' }],
@@ -103,7 +103,7 @@ async function detect(file) {
 
 function openDB() {
   return new Promise((resolve, reject) => {
-    const req = indexedDB.open('convertfast', 1);
+    const req = indexedDB.open('irisfiles', 1);
     req.onupgradeneeded = () => req.result.createObjectStore('pending');
     req.onsuccess = () => resolve(req.result);
     req.onerror = () => reject(req.error);

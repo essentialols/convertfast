@@ -1,5 +1,5 @@
 /**
- * ConvertFast - MOV to MP4 remux UI controller
+ * IrisFiles - MOV to MP4 remux UI controller
  * Single-file mode with auto-process on drop (remux is instant).
  * Shows original name, before/after size, video duration, download button.
  */

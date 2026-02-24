@@ -3,28 +3,28 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>About ConvertFast - How It Works & Why Privacy Matters</title>
-  <meta name="description" content="Learn how ConvertFast converts images entirely in your browser using WebAssembly. No servers, no uploads, no tracking. Built in response to FBI warnings about malicious online converters.">
-  <meta property="og:title" content="About ConvertFast - How It Works & Why Privacy Matters">
-  <meta property="og:description" content="Learn how ConvertFast converts images entirely in your browser using WebAssembly. No servers, no uploads, no tracking. Built in response to FBI warnings about malicious online converters.">
+  <title>About IrisFiles - How It Works & Why Privacy Matters</title>
+  <meta name="description" content="Learn how IrisFiles converts images entirely in your browser using WebAssembly. No servers, no uploads, no tracking. Built in response to FBI warnings about malicious online converters.">
+  <meta property="og:title" content="About IrisFiles - How It Works & Why Privacy Matters">
+  <meta property="og:description" content="Learn how IrisFiles converts images entirely in your browser using WebAssembly. No servers, no uploads, no tracking. Built in response to FBI warnings about malicious online converters.">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://convertfast.app/about">
+  <meta property="og:url" content="https://irisfiles.com/about">
   <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="About ConvertFast - How It Works & Why Privacy Matters">
-  <meta name="twitter:description" content="Learn how ConvertFast converts images entirely in your browser using WebAssembly. No servers, no uploads, no tracking. Built in response to FBI warnings about malicious online converters.">
-  <meta property="og:image" content="https://convertfast.app/img/og-default.png">
-  <meta name="twitter:image" content="https://convertfast.app/img/og-default.png">
-  <link rel="canonical" href="https://convertfast.app/about">
+  <meta name="twitter:title" content="About IrisFiles - How It Works & Why Privacy Matters">
+  <meta name="twitter:description" content="Learn how IrisFiles converts images entirely in your browser using WebAssembly. No servers, no uploads, no tracking. Built in response to FBI warnings about malicious online converters.">
+  <meta property="og:image" content="https://irisfiles.com/img/og-default.png">
+  <meta name="twitter:image" content="https://irisfiles.com/img/og-default.png">
+  <link rel="canonical" href="https://irisfiles.com/about">
   <link rel="stylesheet" href="css/style.css">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 </head>
 <body>
   <header class="header">
     <div class="container container--wide">
-      <a href="/" class="logo">Convert<span>Fast</span></a>
+      <a href="/" class="logo">Iris<span>Files</span></a>
       <nav class="nav">
         <a href="/">All Converters</a>
-        <a href="https://buymeacoffee.com/convertfast" class="support-btn" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 8h1.5a2.5 2.5 0 010 5H17"/><path d="M3 8h14v9a4 4 0 01-4 4H7a4 4 0 01-4-4V8z" fill="currentColor" stroke="none" opacity=".15"/><path d="M3 8h14v9a4 4 0 01-4 4H7a4 4 0 01-4-4V8z"/><path d="M6 1v3M10 1v3M14 1v3" opacity=".6"/></svg> Buy me a coffee</a>
+        <a href="https://ko-fi.com/irisfiles" class="support-btn" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 8h1.5a2.5 2.5 0 010 5H17"/><path d="M3 8h14v9a4 4 0 01-4 4H7a4 4 0 01-4-4V8z" fill="currentColor" stroke="none" opacity=".15"/><path d="M3 8h14v9a4 4 0 01-4 4H7a4 4 0 01-4-4V8z"/><path d="M6 1v3M10 1v3M14 1v3" opacity=".6"/></svg> Support this project</a>
       </nav>
     </div>
   </header>
@@ -32,21 +32,21 @@
   <main class="container">
     <a href="/" class="back-link"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 12L6 8l4-4"/></svg> All Converters</a>
     <article class="prose">
-      <h1>About ConvertFast</h1>
+      <h1>About IrisFiles</h1>
 
-      <p>ConvertFast is a free image converter that works entirely in your browser. Your files are never uploaded to a server. Every conversion happens on your device using WebAssembly and the Canvas API.</p>
+      <p>IrisFiles is a free image converter that works entirely in your browser. Your files are never uploaded to a server. Every conversion happens on your device using WebAssembly and the Canvas API.</p>
 
       <h2>Why this exists</h2>
 
       <p>In March 2025, the FBI issued a public warning about free online file converters being used to distribute malware. The warning highlighted a fundamental problem: most online converters require you to upload your files to a remote server. You have no way of knowing what happens to your files after they leave your device.</p>
 
-      <p>ConvertFast takes a different approach. There is no server. The entire application is static HTML, CSS, and JavaScript. When you drop a file into ConvertFast, it stays on your device. The conversion runs in your browser, and the result is downloaded directly, just like any other file.</p>
+      <p>IrisFiles takes a different approach. There is no server. The entire application is static HTML, CSS, and JavaScript. When you drop a file into IrisFiles, it stays on your device. The conversion runs in your browser, and the result is downloaded directly, just like any other file.</p>
 
       <h2>How it works</h2>
 
-      <p><strong>For HEIC/HEIF files</strong> (iPhone photos): ConvertFast loads a WebAssembly build of <a href="https://github.com/strukturag/libheif">libheif</a> (version 1.21.2), the reference HEIC decoder. The WASM binary is lazy-loaded on the main thread only when you actually need it (roughly 2.5MB). It decodes the HEIC file, then re-encodes it as JPG or PNG.</p>
+      <p><strong>For HEIC/HEIF files</strong> (iPhone photos): IrisFiles loads a WebAssembly build of <a href="https://github.com/strukturag/libheif">libheif</a> (version 1.21.2), the reference HEIC decoder. The WASM binary is lazy-loaded on the main thread only when you actually need it (roughly 2.5MB). It decodes the HEIC file, then re-encodes it as JPG or PNG.</p>
 
-      <p><strong>For JPG, PNG, and WebP files</strong>: Modern browsers already know how to decode these formats. ConvertFast loads the image into a Canvas element, then exports it in the target format using the browser's built-in encoding. This takes milliseconds, even for large images.</p>
+      <p><strong>For JPG, PNG, and WebP files</strong>: Modern browsers already know how to decode these formats. IrisFiles loads the image into a Canvas element, then exports it in the target format using the browser's built-in encoding. This takes milliseconds, even for large images.</p>
 
       <p><strong>For batch downloads</strong>: Multiple files are packaged into a ZIP using <a href="https://github.com/101arrowz/fflate">fflate</a>, a fast JavaScript compression library. The ZIP is assembled in your browser and downloaded as a single file.</p>
 
@@ -66,7 +66,7 @@
 
       <h2>Open source</h2>
 
-      <p>ConvertFast is open source. You can inspect the code, verify that no files are uploaded, and contribute improvements. The entire application is under 100KB of custom code (excluding the HEIC WASM binary).</p>
+      <p>IrisFiles is open source. You can inspect the code, verify that no files are uploaded, and contribute improvements. The entire application is under 100KB of custom code (excluding the HEIC WASM binary).</p>
     </article>
   </main>
 
@@ -77,7 +77,7 @@
         <a href="/heic-to-jpg">HEIC to JPG</a>
         <a href="/compress">Compress</a>
       </div>
-      <p>ConvertFast. All processing happens in your browser.</p>
+      <p>IrisFiles. All processing happens in your browser.</p>
     </div>
   </footer>
 </body>

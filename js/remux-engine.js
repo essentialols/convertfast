@@ -1,5 +1,5 @@
 /**
- * ConvertFast - MOV to MP4 remux engine
+ * IrisFiles - MOV to MP4 remux engine
  * Repackages MOV container as MP4 by rewriting the ftyp (file type) box.
  * Zero dependencies, near-instant execution.
  *

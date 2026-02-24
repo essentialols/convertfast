@@ -1,5 +1,5 @@
 /**
- * ConvertFast - Image resize UI controller
+ * IrisFiles - Image resize UI controller
  * Handles drag-drop, file queue, progress bars, batch resize, ZIP download.
  * Supports resize by dimensions (with optional aspect ratio lock) or by percentage.
  */
@@ -347,7 +347,7 @@ async function handleDownloadAll() {
     data: new Uint8Array(await f.outputBlob.arrayBuffer()),
   })));
 
-  await downloadAsZip(entries, 'convertfast-resized.zip');
+  await downloadAsZip(entries, 'irisfiles-resized.zip');
   downloadAllBtn.disabled    = false;
   downloadAllBtn.textContent = 'Download All as ZIP';
 }

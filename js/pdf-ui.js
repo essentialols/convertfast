@@ -273,7 +273,7 @@ function showMultiResult(results, durationMs) {
         name: r.name,
         data: new Uint8Array(await r.blob.arrayBuffer()),
       })));
-      await downloadAsZip(entries, 'convertfast-batch.zip');
+      await downloadAsZip(entries, 'irisfiles-batch.zip');
       zipBtn.disabled = false;
       zipBtn.textContent = 'Download All as ZIP';
     });

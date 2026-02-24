@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 50" width="260" height="50">
+  <text x="0" y="38" font-family="'Inter','Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="40" letter-spacing="-0.7">
+    <tspan fill="#059669" font-weight="700">Iris</tspan><tspan fill="#0f172a" font-weight="500" dx="-1">Files</tspan>
+  </text>
+</svg>

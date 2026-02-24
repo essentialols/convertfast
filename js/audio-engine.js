@@ -1,5 +1,5 @@
 /**
- * ConvertFast - Audio conversion engine
+ * IrisFiles - Audio conversion engine
  * Decodes audio via Web Audio API, encodes to WAV (native) or MP3 (lamejs, lazy-loaded).
  */
 

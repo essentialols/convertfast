@@ -1,5 +1,5 @@
 /**
- * ConvertFast - Document/ebook conversion engine
+ * IrisFiles - Document/ebook conversion engine
  * Handles EPUB, RTF, DOCX -> text/PDF conversions.
  * Uses fflate (global) for ZIP, jsPDF (lazy CDN) for PDF output.
  */

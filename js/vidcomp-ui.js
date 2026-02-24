@@ -1,5 +1,5 @@
 /**
- * ConvertFast - Video compression UI controller
+ * IrisFiles - Video compression UI controller
  * Single-file, two-step flow with quality and resolution controls.
  */
 

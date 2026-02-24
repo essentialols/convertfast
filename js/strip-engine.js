@@ -1,5 +1,5 @@
 /**
- * ConvertFast - EXIF/metadata strip engine
+ * IrisFiles - EXIF/metadata strip engine
  * Re-encodes images through Canvas, which naturally drops all EXIF/metadata.
  */
 

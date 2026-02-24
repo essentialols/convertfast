@@ -1,5 +1,5 @@
 /**
- * ConvertFast - Video transcoding engine (experimental)
+ * IrisFiles - Video transcoding engine (experimental)
  * Uses FFmpeg.wasm (single-threaded) for client-side video conversion.
  * Lazy-loads ~25MB WASM binary from CDN on first use (~10MB with Brotli).
  * Cached by the browser after first download.

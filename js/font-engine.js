@@ -1,5 +1,5 @@
 /**
- * ConvertFast - Font conversion engine
+ * IrisFiles - Font conversion engine
  * Lazy-loads opentype.js from CDN for TTF/OTF parsing and generation.
  * Uses fflate (window.fflate) for WOFF DEFLATE compression.
  */

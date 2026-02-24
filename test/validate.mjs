@@ -29,6 +29,7 @@ const PAGES = [
   '/split-pdf', '/resize-image', '/strip-exif',
   '/mov-to-mp4', '/avi-to-mp4', '/mkv-to-mp4', '/webm-to-mp4', '/mp4-to-webm',
   '/compress-video',
+  '/image-metadata',
   '/about'
 ];
 
@@ -112,7 +113,7 @@ async function validatePage(path) {
   const canonMatch = html.match(/<link\s+rel=["']canonical["']\s+href=["']([^"']+)["']/);
   ok(canonMatch, `${label}: missing canonical link`);
   if (canonMatch) {
-    ok(canonMatch[1].startsWith('https://convertfast.app'), `${label}: canonical doesn't start with https://convertfast.app`);
+    ok(canonMatch[1].startsWith('https://irisfiles.com'), `${label}: canonical doesn't start with https://irisfiles.com`);
   }
 
   // Favicon
@@ -170,11 +171,11 @@ async function globalChecks() {
   const urls = [];
   let m;
   while ((m = locRe.exec(sitemap)) !== null) urls.push(m[1]);
-  ok(urls.length === 77, `sitemap.xml: has ${urls.length} URLs (expected 77)`);
+  ok(urls.length === 78, `sitemap.xml: has ${urls.length} URLs (expected 78)`);
 
   // each sitemap URL corresponds to a real page
   for (const url of urls) {
-    const path = url.replace('https://convertfast.app', '');
+    const path = url.replace('https://irisfiles.com', '');
     const filePath = (path === '' || path === '/') ? 'index.html' : `${path.replace(/^\//, '')}.html`;
     ok(existsSync(join(ROOT, filePath)), `sitemap.xml: ${url} has no corresponding file (${filePath})`);
   }

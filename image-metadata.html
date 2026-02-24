@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image Metadata Viewer & Editor - Free, Private | IrisFiles</title>
+  <meta name="description" content="View, edit, and strip EXIF metadata from photos in your browser. See GPS location, camera info, dates, and more. Lossless JPEG editing. No upload required.">
+  <meta property="og:title" content="Image Metadata Viewer & Editor - Free, Private | IrisFiles">
+  <meta property="og:description" content="View, edit, and strip EXIF metadata from photos in your browser. See GPS location, camera info, dates, and more. Lossless JPEG editing. No upload required.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://irisfiles.com/image-metadata">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Image Metadata Viewer & Editor - Free, Private | IrisFiles">
+  <meta name="twitter:description" content="View, edit, and strip EXIF metadata from photos in your browser. See GPS location, camera info, dates, and more. Lossless JPEG editing. No upload required.">
+  <meta property="og:image" content="https://irisfiles.com/img/og-default.png">
+  <meta name="twitter:image" content="https://irisfiles.com/img/og-default.png">
+  <link rel="canonical" href="https://irisfiles.com/image-metadata">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <script type="application/ld+json">
+  [
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Image Metadata Viewer & Editor - IrisFiles",
+      "url": "https://irisfiles.com/image-metadata",
+      "description": "View, edit, and strip EXIF metadata from photos in your browser. Lossless JPEG editing. No server upload.",
+      "applicationCategory": "MultimediaApplication",
+      "operatingSystem": "Any",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What metadata do photos contain?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Photos can contain EXIF metadata including GPS coordinates (your exact location), camera make and model, lens information, date and time, exposure settings (ISO, aperture, shutter speed), software used, and descriptive fields like artist and copyright. This data is embedded by cameras and phones automatically."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I edit metadata without losing image quality?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes, for JPEG images. IrisFiles uses piexifjs to modify only the metadata bytes in the file, never re-encoding the pixel data. This means zero quality loss. For non-JPEG formats (PNG, WebP, etc.), metadata can be viewed but stripping requires Canvas re-encoding."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Why should I remove GPS data from photos?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "GPS coordinates in photo metadata reveal the exact location where the photo was taken. When you share photos online, anyone can extract this data and determine your home address, workplace, or travel patterns. Removing GPS data before sharing protects your privacy and safety."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Are my photos uploaded to a server?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. All metadata reading, editing, and stripping happens entirely in your browser. Your photos never leave your device. This is critical for a privacy tool: the tool inspecting your location data should not be uploading your files."
+          }
+        }
+      ]
+    }
+  ]
+  </script>
+</head>
+<body>
+  <header class="header">
+    <div class="container container--wide">
+      <a href="/" class="logo">Iris<span>Files</span></a>
+      <nav class="nav">
+        <a href="/">All Converters</a>
+        <a href="/about">About</a>
+        <a href="https://ko-fi.com/irisfiles" class="support-btn" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 8h1.5a2.5 2.5 0 010 5H17"/><path d="M3 8h14v9a4 4 0 01-4 4H7a4 4 0 01-4-4V8z" fill="currentColor" stroke="none" opacity=".15"/><path d="M3 8h14v9a4 4 0 01-4 4H7a4 4 0 01-4-4V8z"/><path d="M6 1v3M10 1v3M14 1v3" opacity=".6"/></svg> Support this project</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <a href="/" class="back-link"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 12L6 8l4-4"/></svg> All Converters</a>
+    <section class="hero">
+      <h1>Image Metadata Viewer & Editor</h1>
+      <p>View, edit, and strip EXIF metadata from your photos. See GPS location, camera info, dates, and more. JPEG editing is lossless. All processing happens in your browser.</p>
+    </section>
+
+    <div class="trust-banner">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 1L3 5v4c0 4.4 3 8.5 7 9.9 4-1.4 7-5.5 7-9.9V5l-7-4z" fill="#16a34a" opacity=".15"/><path d="M10 1L3 5v4c0 4.4 3 8.5 7 9.9 4-1.4 7-5.5 7-9.9V5l-7-4z" stroke="#16a34a" stroke-width="1.5" fill="none"/><path d="M7 10l2 2 4-4" stroke="#16a34a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Your files never leave your browser. Zero server uploads. 100% private.
+    </div>
+
+    <div id="drop-zone" class="drop-zone">
+      <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M28 8H12a4 4 0 00-4 4v24a4 4 0 004 4h24a4 4 0 004-4V20L28 8z"/><path d="M28 8v12h12"/><path d="M24 34v-8m-4 4l4-4 4 4"/></svg>
+      <p>Drag & drop a photo here, or <strong>click to browse</strong></p>
+      <p style="font-size:0.8rem;margin-top:0.5rem">Supports JPG, PNG, WebP, HEIC, TIFF, AVIF, GIF, and more.</p>
+      <input type="file" id="file-input" accept="image/*,.heic,.heif,.avif,.bmp,.tiff,.tif,.ico">
+    </div>
+
+    <div id="file-list" class="file-list"></div>
+
+    <div id="metadata-panel" class="metadata-panel"></div>
+
+    <div class="batch-actions">
+      <button id="save-changes" class="btn btn--primary" style="display:none">Save Changes</button>
+      <button id="strip-gps" class="btn btn--secondary" style="display:none">Strip GPS Only</button>
+      <button id="strip-all" class="btn btn--danger" style="display:none;border:1px solid var(--danger);padding:0.6rem 1.25rem;font-size:0.9rem">Strip All Metadata</button>
+      <button id="clear-all" class="btn btn--secondary" style="display:none">Clear</button>
+    </div>
+
+    <div class="related-tools">
+      <h2>Related Tools</h2>
+      <div class="related-tools__links">
+        <a href="/strip-exif">Strip EXIF (Batch)</a>
+        <a href="/resize-image">Resize Images</a>
+        <a href="/compress">Compress Images</a>
+      </div>
+    </div>
+
+    <section class="faq">
+      <h2>Frequently Asked Questions</h2>
+      <div class="faq-item">
+        <button class="faq-question">What metadata do photos contain?</button>
+        <div class="faq-answer">
+          <p>Photos can contain EXIF metadata including GPS coordinates (your exact location), camera make and model, lens information, date and time, exposure settings (ISO, aperture, shutter speed), software used, and descriptive fields like artist and copyright. This data is embedded by cameras and phones automatically.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question">Can I edit metadata without losing image quality?</button>
+        <div class="faq-answer">
+          <p>Yes, for JPEG images. IrisFiles uses piexifjs to modify only the metadata bytes in the file, never re-encoding the pixel data. This means zero quality loss. For non-JPEG formats (PNG, WebP, etc.), metadata can be viewed but stripping requires Canvas re-encoding.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question">Why should I remove GPS data from photos?</button>
+        <div class="faq-answer">
+          <p>GPS coordinates in photo metadata reveal the exact location where the photo was taken. When you share photos online, anyone can extract this data and determine your home address, workplace, or travel patterns. Removing GPS data before sharing protects your privacy and safety.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question">Are my photos uploaded to a server?</button>
+        <div class="faq-answer">
+          <p>No. All metadata reading, editing, and stripping happens entirely in your browser. Your photos never leave your device. This is critical for a privacy tool: the tool inspecting your location data should not be uploading your files.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-links">
+        <a href="/">All Converters</a>
+        <a href="/strip-exif">Strip EXIF</a>
+        <a href="/compress">Compress</a>
+        <a href="/about">About</a>
+      </div>
+      <p>IrisFiles. All processing happens in your browser.</p>
+    </div>
+  </footer>
+
+  <script type="module" src="js/exif-boot.js"></script>
+</body>
+</html>

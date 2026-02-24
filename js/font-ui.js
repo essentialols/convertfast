@@ -1,5 +1,5 @@
 /**
- * ConvertFast - Font converter UI controller.
+ * IrisFiles - Font converter UI controller.
  * Handles drag-drop, file list, batch conversion, download.
  * Reads target format from #converter-config data-font-target attribute.
  */
@@ -183,7 +183,7 @@ function showResults(durationMs) {
         name: r.name,
         data: new Uint8Array(await r.blob.arrayBuffer()),
       })));
-      await downloadAsZip(entries, 'convertfast-fonts.zip');
+      await downloadAsZip(entries, 'irisfiles-fonts.zip');
       zipBtn.disabled = false;
       zipBtn.textContent = 'Download All as ZIP';
     });

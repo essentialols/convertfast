@@ -1,5 +1,5 @@
 /**
- * ConvertFast - Archive UI controller
+ * IrisFiles - Archive UI controller
  * Two modes: "extract" (unzip) and "create" (zip).
  * Reads mode from #converter-config data-archive-mode attribute.
  */

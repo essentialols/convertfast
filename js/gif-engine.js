@@ -1,5 +1,5 @@
 /**
- * ConvertFast - Video to GIF engine
+ * IrisFiles - Video to GIF engine
  * Stream-encodes frames one at a time. Peak memory: ~2 frames regardless of video length.
  * Uses frame deduplication and global palette for efficiency on low-resource devices.
  */

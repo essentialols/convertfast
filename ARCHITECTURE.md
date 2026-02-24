@@ -1,11 +1,11 @@
-# ConvertFast Architecture
+# IrisFiles Architecture
 
 Privacy-first client-side image converter. All conversion happens in the browser. Files never leave the user's device.
 
 ## Project Structure
 
 ```
-convertfast/
+irisfiles/
 ├── index.html                # Landing page / hub linking to all converters
 ├── heic-to-jpg.html          # HEIC→JPG (hero page, WASM-powered)
 ├── heic-to-png.html          # HEIC→PNG (WASM-powered)
@@ -50,6 +50,29 @@ File → detectFormat(magic bytes) → route:
 - `converter.js` (ES module): Pure functions for format detection, Canvas conversion, HEIC worker management, download, ZIP. No DOM access.
 - `ui.js` (ES module): All DOM interaction. Imported by each page's inline `<script type="module">`. Each page calls `configure()` with its source/target formats, then `init()`.
 - `heic-worker.js` (ES module): Lazy-loads the HEIC IIFE build via `<script>` tag on first use. Runs on main thread because heic-to needs Canvas/DOM for encoding. The ~2.5MB WASM is only fetched when a HEIC file is actually dropped.
+
+## Image Metadata Viewer/Editor
+
+A privacy-first tool for viewing, editing, and stripping EXIF metadata from photos.
+
+**Files:** `image-metadata.html`, `js/exif-engine.js`, `js/exif-ui.js`, `js/exif-boot.js`
+
+**Libraries (lazy-loaded from jsDelivr CDN):**
+- **ExifReader** (~8KB gzipped): Reads metadata from all image formats (JPEG, PNG, WebP, TIFF, HEIC, AVIF, GIF)
+- **piexifjs** (85KB): Reads and writes EXIF for JPEG only. Lossless: modifies metadata bytes, never re-encodes pixels
+
+**Capabilities by format:**
+- **JPEG**: Full read/write. Edit individual fields, strip GPS only, or strip all metadata. All operations lossless (piexifjs manipulates metadata bytes directly).
+- **Non-JPEG**: Read-only metadata display. Strip All delegates to `strip-engine.js` (Canvas re-encode).
+
+**Engine exports (`exif-engine.js`):**
+- `readMetadata(file)` - Returns structured object grouped by category (basic, camera, settings, dates, gps, description)
+- `isJpeg(file)` - Magic byte check (0xFF 0xD8 0xFF)
+- `editExifFields(file, changes)` - JPEG only. Applies `{field: value}` map losslessly
+- `stripAllMetadata(file)` - JPEG: `piexif.remove()` (lossless). Non-JPEG: Canvas re-encode
+- `stripGpsOnly(file)` - JPEG only. Clears GPS IFD, preserves everything else
+
+**UI (`exif-ui.js`):** Single-file tool (not batch). Renders grouped metadata table with editable inputs for JPEG, read-only spans for others. GPS shown as decimal degrees with inline "Remove GPS" button.
 
 ## Deployment
 

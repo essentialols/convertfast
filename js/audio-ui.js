@@ -1,5 +1,5 @@
 /**
- * ConvertFast - Audio converter UI controller
+ * IrisFiles - Audio converter UI controller
  * Handles drag-drop, file queue, progress bars, batch conversion, ZIP download.
  */
 
@@ -246,7 +246,7 @@ async function handleDownloadAll() {
     data: new Uint8Array(await f.outputBlob.arrayBuffer()),
   })));
 
-  await downloadAsZip(entries, 'convertfast-audio.zip');
+  await downloadAsZip(entries, 'irisfiles-audio.zip');
   downloadAllBtn.disabled = false;
   downloadAllBtn.textContent = 'Download All as ZIP';
 }

@@ -1,5 +1,5 @@
 /**
- * ConvertFast - Image resize engine
+ * IrisFiles - Image resize engine
  * Resizes images via Canvas API. Supports target dimensions or percentage scaling.
  */
 

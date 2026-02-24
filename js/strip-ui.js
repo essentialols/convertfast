@@ -1,5 +1,5 @@
 /**
- * ConvertFast - Strip EXIF/metadata UI controller
+ * IrisFiles - Strip EXIF/metadata UI controller
  * Handles drag-drop, file queue, progress bars, batch processing, ZIP download.
  */
 
@@ -257,7 +257,7 @@ async function handleDownloadAll() {
     data: new Uint8Array(await f.outputBlob.arrayBuffer()),
   })));
 
-  await downloadAsZip(entries, 'convertfast-clean.zip');
+  await downloadAsZip(entries, 'irisfiles-clean.zip');
   downloadAllBtn.disabled = false;
   downloadAllBtn.textContent = 'Download All as ZIP';
 }

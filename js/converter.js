@@ -1,5 +1,5 @@
 /**
- * ConvertFast - Core conversion engine
+ * IrisFiles - Core conversion engine
  * Format detection via magic bytes, Canvas-based conversion, HEIC via lazy WASM, ZIP packaging
  */
 

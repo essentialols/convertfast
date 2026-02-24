@@ -295,6 +295,331 @@ async function extractVideoFrames(file, container, count) {
   } catch { /* graceful failure: filmstrip stays empty */ }
 }
 
+// --- Inline conversion support ---
+
+const INLINE_MIME_MAP = {
+  jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp',
+  gif: 'image/gif', bmp: 'image/bmp', pdf: 'application/pdf',
+  mp4: 'video/mp4', webm: 'video/webm', avi: 'video/x-msvideo',
+  mkv: 'video/x-matroska', mov: 'video/quicktime',
+  mp3: 'audio/mpeg', wav: 'audio/wav', ogg: 'audio/ogg',
+  flac: 'audio/flac', m4a: 'audio/mp4', aac: 'audio/aac',
+  ttf: 'font/ttf', otf: 'font/otf', woff: 'font/woff',
+  txt: 'text/plain',
+};
+
+function resolveEngine(sourceMime, href) {
+  const m = href.match(/\/(\w+)-to-(\w+)/);
+  if (!m) return null;
+  const [, src, tgt] = m;
+  const targetMime = INLINE_MIME_MAP[tgt];
+  if (!targetMime) return null;
+  if (sourceMime === 'image/heic' && targetMime.startsWith('image/'))
+    return { type: 'heic', targetMime, targetExt: tgt };
+  if (sourceMime.startsWith('image/') && sourceMime !== 'image/gif-video' && targetMime.startsWith('image/'))
+    return { type: 'image', targetMime, targetExt: tgt };
+  if (sourceMime.startsWith('image/') && tgt === 'pdf')
+    return { type: 'img-to-pdf', targetExt: 'pdf' };
+  if (sourceMime === 'application/pdf' && targetMime.startsWith('image/'))
+    return { type: 'pdf-to-img', targetMime, targetExt: tgt };
+  if (sourceMime === 'image/gif-video')
+    return { type: 'gif-to-video', targetExt: tgt, targetFormat: tgt };
+  if (sourceMime.startsWith('video/') && tgt === 'gif')
+    return { type: 'vid-to-gif', targetExt: 'gif', notice: 'GIF files from video are often very large (easily 20 MB+ for a few seconds of footage).' };
+  if (sourceMime.startsWith('video/'))
+    return { type: 'video', targetExt: tgt, targetFormat: tgt };
+  if (sourceMime.startsWith('audio/') && (tgt === 'mp3' || tgt === 'wav'))
+    return { type: 'audio', targetExt: tgt, targetFormat: tgt };
+  if (sourceMime.startsWith('audio/'))
+    return { type: 'audio-ff', targetExt: tgt, targetFormat: tgt };
+  if (sourceMime.startsWith('font/'))
+    return { type: 'font', targetExt: tgt, targetFormat: tgt };
+  if (['epub', 'rtf', 'docx', 'mobi'].includes(src))
+    return { type: 'doc', targetExt: tgt, srcFmt: src, tgtFmt: tgt };
+  return null;
+}
+
+function inlineOutputName(name, ext) {
+  return name.replace(/\.[^.]+$/, '') + '.' + ext;
+}
+
+async function executeConversion(file, sourceMime, resolved, onProgress, onStatus) {
+  switch (resolved.type) {
+    case 'image': {
+      onProgress(20);
+      const { convertWithCanvas } = await import('./converter.js');
+      onProgress(50);
+      const blob = await convertWithCanvas(file, resolved.targetMime, 0.92);
+      return { blob, name: inlineOutputName(file.name, resolved.targetExt) };
+    }
+    case 'heic': {
+      const { convertHeic } = await import('./converter.js');
+      const blob = await convertHeic(file, resolved.targetMime, 0.92, onProgress);
+      return { blob, name: inlineOutputName(file.name, resolved.targetExt) };
+    }
+    case 'img-to-pdf': {
+      let imgBlob = file, imgMime = sourceMime;
+      if (sourceMime === 'image/heic') {
+        const { convertHeic } = await import('./converter.js');
+        imgBlob = await convertHeic(file, 'image/jpeg', 0.92, p => onProgress(Math.round(p * 0.5)));
+        imgMime = 'image/jpeg';
+      }
+      const { imagesToPdf } = await import('./pdf-engine.js');
+      const blob = await imagesToPdf(
+        [{ blob: imgBlob, mime: imgMime }],
+        p => onProgress(sourceMime === 'image/heic' ? 50 + Math.round(p * 0.5) : p)
+      );
+      return { blob, name: inlineOutputName(file.name, 'pdf') };
+    }
+    case 'pdf-to-img': {
+      const { pdfToImages } = await import('./pdf-engine.js');
+      const pages = await pdfToImages(file, resolved.targetMime, 0.92, onProgress);
+      if (pages.length === 1) return { blob: pages[0].blob, name: pages[0].name };
+      return { pages };
+    }
+    case 'vid-to-gif': {
+      if (!window.gifenc) {
+        onStatus('Loading GIF encoder\u2026');
+        await new Promise((resolve, reject) => {
+          const s = document.createElement('script');
+          s.src = '/js/gifenc.min.js';
+          s.onload = resolve;
+          s.onerror = () => reject(new Error('Failed to load GIF encoder'));
+          document.head.appendChild(s);
+        });
+      }
+      const { videoToGif } = await import('./gif-engine.js');
+      const blob = await videoToGif(file, {
+        onProgress: (pct, msg) => { onProgress(pct); if (msg) onStatus(msg); },
+      });
+      return { blob, name: inlineOutputName(file.name, 'gif') };
+    }
+    case 'gif-to-video': {
+      const { gifToVideo } = await import('./vidconv-engine.js');
+      const blob = await gifToVideo(file, resolved.targetFormat, onProgress, onStatus);
+      return { blob, name: inlineOutputName(file.name, resolved.targetExt) };
+    }
+    case 'video': {
+      const { convertVideo } = await import('./vidconv-engine.js');
+      const blob = await convertVideo(file, resolved.targetFormat, onProgress, onStatus);
+      return { blob, name: inlineOutputName(file.name, resolved.targetExt) };
+    }
+    case 'audio': {
+      const { convertAudio } = await import('./audio-engine.js');
+      const blob = await convertAudio(file, resolved.targetFormat, onProgress);
+      return { blob, name: inlineOutputName(file.name, resolved.targetExt) };
+    }
+    case 'audio-ff': {
+      const { convertAudioFFmpeg } = await import('./audio-engine.js');
+      const blob = await convertAudioFFmpeg(file, resolved.targetFormat, onProgress);
+      return { blob, name: inlineOutputName(file.name, resolved.targetExt) };
+    }
+    case 'font': {
+      const { convertFont } = await import('./font-engine.js');
+      const blob = await convertFont(file, resolved.targetFormat, onProgress);
+      return { blob, name: inlineOutputName(file.name, resolved.targetExt) };
+    }
+    case 'doc': {
+      const mod = await import('./doc-engine.js');
+      const fnName = resolved.srcFmt + 'To' + (resolved.tgtFmt === 'txt' ? 'Text' : 'Pdf');
+      const fn = mod[fnName];
+      if (!fn) throw new Error('Conversion not supported');
+      const blob = await fn(file, onProgress);
+      return { blob, name: inlineOutputName(file.name, resolved.targetExt) };
+    }
+  }
+  throw new Error('Unknown conversion type');
+}
+
+function triggerDownload(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
+}
+
+async function runInlineConversion(file, sourceMime, resolved, routePanel, onDismiss) {
+  routePanel.querySelectorAll('.route-section').forEach(s => s.style.display = 'none');
+  const prev = routePanel.querySelector('.route-inline-convert');
+  if (prev) prev.remove();
+
+  const wrap = document.createElement('div');
+  wrap.className = 'route-inline-convert';
+
+  const statusEl = document.createElement('div');
+  statusEl.className = 'route-convert-status';
+  statusEl.textContent = 'Converting to ' + resolved.targetExt.toUpperCase() + '\u2026';
+  wrap.appendChild(statusEl);
+
+  if (resolved.notice) {
+    const noticeEl = document.createElement('div');
+    noticeEl.className = 'route-convert-notice';
+    noticeEl.textContent = resolved.notice;
+    wrap.appendChild(noticeEl);
+  }
+
+  const progressWrap = document.createElement('div');
+  progressWrap.className = 'route-convert-progress';
+  const bar = document.createElement('div');
+  bar.className = 'route-convert-bar';
+  progressWrap.appendChild(bar);
+  wrap.appendChild(progressWrap);
+
+  const resultEl = document.createElement('div');
+  resultEl.className = 'route-convert-result';
+  resultEl.style.display = 'none';
+  wrap.appendChild(resultEl);
+
+  const errorEl = document.createElement('div');
+  errorEl.className = 'route-convert-error';
+  errorEl.style.display = 'none';
+  wrap.appendChild(errorEl);
+
+  const actionsEl = document.createElement('div');
+  actionsEl.className = 'route-convert-actions';
+  actionsEl.style.display = 'none';
+  wrap.appendChild(actionsEl);
+
+  routePanel.appendChild(wrap);
+
+  const resultUrls = [];
+  const cleanup = () => { resultUrls.forEach(u => URL.revokeObjectURL(u)); resultUrls.length = 0; };
+  const onProgress = pct => { bar.style.width = Math.min(100, Math.max(0, pct)) + '%'; };
+  const onStatus = msg => { if (msg) statusEl.textContent = msg; };
+
+  const showActions = (includeRetry) => {
+    actionsEl.style.display = '';
+    if (includeRetry) {
+      const retryBtn = document.createElement('button');
+      retryBtn.className = 'btn btn--primary';
+      retryBtn.textContent = 'Try again';
+      retryBtn.addEventListener('click', () => {
+        cleanup();
+        wrap.remove();
+        runInlineConversion(file, sourceMime, resolved, routePanel, onDismiss);
+      });
+      actionsEl.appendChild(retryBtn);
+    }
+    const anotherBtn = document.createElement('button');
+    anotherBtn.className = 'btn btn--secondary';
+    anotherBtn.textContent = 'Convert to another format';
+    anotherBtn.addEventListener('click', () => {
+      cleanup();
+      wrap.remove();
+      routePanel.querySelectorAll('.route-section').forEach(s => s.style.display = '');
+    });
+    actionsEl.appendChild(anotherBtn);
+    const newBtn = document.createElement('button');
+    newBtn.className = 'btn btn--secondary';
+    newBtn.textContent = 'Drop new file';
+    newBtn.addEventListener('click', () => { cleanup(); onDismiss(); });
+    actionsEl.appendChild(newBtn);
+  };
+
+  try {
+    const result = await executeConversion(file, sourceMime, resolved, onProgress, onStatus);
+    bar.style.width = '100%';
+    bar.classList.add('done');
+    progressWrap.style.display = 'none';
+
+    if (result.pages) {
+      // Multi-page PDF-to-image
+      statusEl.textContent = result.pages.length + ' pages converted';
+      resultEl.style.display = '';
+      resultEl.style.flexDirection = 'column';
+      resultEl.style.alignItems = 'stretch';
+      if (result.pages.length > 1) {
+        const zipBtn = document.createElement('button');
+        zipBtn.className = 'btn btn--success';
+        zipBtn.textContent = 'Download All as ZIP (' + result.pages.length + ' files)';
+        zipBtn.addEventListener('click', async () => {
+          zipBtn.textContent = 'Preparing ZIP\u2026';
+          zipBtn.disabled = true;
+          if (!window.fflate) {
+            await new Promise((resolve, reject) => {
+              const s = document.createElement('script');
+              s.src = '/js/fflate.min.js';
+              s.onload = resolve;
+              s.onerror = reject;
+              document.head.appendChild(s);
+            });
+          }
+          const entries = {};
+          for (const pg of result.pages) entries[pg.name] = new Uint8Array(await pg.blob.arrayBuffer());
+          const zipBlob = new Blob([fflate.zipSync(entries, { level: 0 })], { type: 'application/zip' });
+          triggerDownload(zipBlob, file.name.replace(/\.[^.]+$/, '') + '-pages.zip');
+          zipBtn.textContent = 'Download All as ZIP (' + result.pages.length + ' files)';
+          zipBtn.disabled = false;
+        });
+        resultEl.appendChild(zipBtn);
+      }
+      for (const pg of result.pages) {
+        const dlBtn = document.createElement('button');
+        dlBtn.className = 'btn btn--secondary';
+        dlBtn.textContent = pg.name + ' (' + formatSize(pg.blob.size) + ')';
+        dlBtn.addEventListener('click', () => triggerDownload(pg.blob, pg.name));
+        resultEl.appendChild(dlBtn);
+      }
+    } else {
+      // Single blob result
+      statusEl.textContent = 'Done!';
+      // Show constrained preview for image results
+      if (result.blob.type && result.blob.type.startsWith('image/')) {
+        const previewImg = document.createElement('img');
+        previewImg.className = 'route-convert-preview';
+        const previewUrl = URL.createObjectURL(result.blob);
+        resultUrls.push(previewUrl);
+        previewImg.src = previewUrl;
+        previewImg.alt = result.name;
+        wrap.insertBefore(previewImg, resultEl);
+      }
+      resultEl.style.display = '';
+      const dlBtn = document.createElement('button');
+      dlBtn.className = 'btn btn--success';
+      dlBtn.textContent = 'Download ' + result.name + ' (' + formatSize(result.blob.size) + ')';
+      const dlUrl = URL.createObjectURL(result.blob);
+      resultUrls.push(dlUrl);
+      dlBtn.addEventListener('click', () => {
+        const a = document.createElement('a');
+        a.href = dlUrl;
+        a.download = result.name;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      });
+      resultEl.appendChild(dlBtn);
+      if (result.blob.size < file.size) {
+        const pct = Math.round((1 - result.blob.size / file.size) * 100);
+        if (pct > 0) {
+          const savingsEl = document.createElement('span');
+          savingsEl.className = 'route-convert-savings';
+          savingsEl.textContent = pct + '% smaller';
+          resultEl.appendChild(savingsEl);
+        }
+      } else if (result.blob.size > file.size * 1.5) {
+        const warningEl = document.createElement('span');
+        warningEl.className = 'route-convert-warning';
+        const ratio = result.blob.size / file.size;
+        warningEl.textContent = (ratio >= 2
+          ? ratio.toFixed(1) + 'x larger than original'
+          : Math.round((ratio - 1) * 100) + '% larger than original');
+        resultEl.appendChild(warningEl);
+      }
+    }
+    showActions(false);
+  } catch (err) {
+    progressWrap.style.display = 'none';
+    statusEl.style.display = 'none';
+    errorEl.style.display = '';
+    errorEl.textContent = 'Conversion failed: ' + (err.message || 'Unknown error');
+    showActions(true);
+  }
+}
+
 export function initSmartDrop() {
   const dropZone = document.getElementById('smart-drop');
   const fileInput = document.getElementById('smart-file-input');
@@ -529,10 +854,21 @@ export function initSmartDrop() {
 
     routePanel.querySelectorAll('.route-option').forEach(btn => {
       btn.addEventListener('click', async () => {
-        btn.textContent = 'Loading...';
-        btn.disabled = true;
-        await storeFiles(files);
-        window.location.href = btn.dataset.href;
+        const resolved = isSingle ? resolveEngine(dominant, btn.dataset.href) : null;
+        if (resolved) {
+          runInlineConversion(files[0], dominant, resolved, routePanel, () => {
+            for (const u of prevBlobUrls) URL.revokeObjectURL(u);
+            prevBlobUrls = [];
+            routePanel.innerHTML = '';
+            routePanel.style.display = 'none';
+            dropZone.classList.remove('compact');
+          });
+        } else {
+          btn.textContent = 'Loading...';
+          btn.disabled = true;
+          await storeFiles(files);
+          window.location.href = btn.dataset.href;
+        }
       });
     });
   }

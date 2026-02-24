@@ -257,15 +257,18 @@ export function getVideoDuration(file) {
     const video = document.createElement('video');
     video.preload = 'metadata';
     const url = URL.createObjectURL(file);
-    video.src = url;
+    const timeout = setTimeout(() => { URL.revokeObjectURL(url); resolve(0); }, 5000);
     video.onloadedmetadata = () => {
+      clearTimeout(timeout);
       URL.revokeObjectURL(url);
       resolve(isFinite(video.duration) ? video.duration : 0);
     };
     video.onerror = () => {
+      clearTimeout(timeout);
       URL.revokeObjectURL(url);
       resolve(0);
     };
+    video.src = url;
   });
 }
 
@@ -279,8 +282,9 @@ export function getVideoMetadata(file) {
     const video = document.createElement('video');
     video.preload = 'metadata';
     const url = URL.createObjectURL(file);
-    video.src = url;
+    const timeout = setTimeout(() => { URL.revokeObjectURL(url); resolve({ width: 0, height: 0, duration: 0 }); }, 5000);
     video.onloadedmetadata = () => {
+      clearTimeout(timeout);
       URL.revokeObjectURL(url);
       resolve({
         width: video.videoWidth || 0,
@@ -289,8 +293,10 @@ export function getVideoMetadata(file) {
       });
     };
     video.onerror = () => {
+      clearTimeout(timeout);
       URL.revokeObjectURL(url);
       resolve({ width: 0, height: 0, duration: 0 });
     };
+    video.src = url;
   });
 }

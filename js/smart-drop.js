@@ -185,11 +185,13 @@ async function getMediaMeta(file, mime) {
       const info = await new Promise((resolve, reject) => {
         const v = document.createElement('video');
         v.preload = 'metadata';
+        const timer = setTimeout(() => { URL.revokeObjectURL(v.src); reject(); }, 10000);
         v.onloadedmetadata = () => {
+          clearTimeout(timer);
           resolve({ dur: v.duration, w: v.videoWidth, h: v.videoHeight });
           URL.revokeObjectURL(v.src);
         };
-        v.onerror = () => { URL.revokeObjectURL(v.src); reject(); };
+        v.onerror = () => { clearTimeout(timer); URL.revokeObjectURL(v.src); reject(); };
         v.src = URL.createObjectURL(file);
       });
       if (info.w && info.h) meta.push(info.w + ' x ' + info.h);

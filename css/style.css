@@ -45,6 +45,13 @@ body {
   letter-spacing: -0.03em;
 }
 .logo span { color: #0f172a; font-weight: 500; }
+.header-tagline {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: -0.01em;
+  margin: 0;
+}
 .nav { display: flex; gap: 1.5rem; align-items: center; }
 .nav a {
   color: var(--text-muted);
@@ -136,6 +143,23 @@ body {
 .drop-zone p { color: var(--text-muted); }
 .drop-zone strong { color: var(--primary); }
 .drop-zone input { display: none; }
+
+/* Drop zone compact state (after file drop) */
+.drop-zone.compact {
+  padding: 1rem 2rem;
+  min-height: 0;
+  margin-bottom: 0.75rem;
+}
+.drop-zone.compact svg { display: none; }
+.drop-zone.compact p:last-of-type { display: none; }
+
+/* Disclaimer footnote */
+.disclaimer-footnote {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
 
 /* Controls */
 .controls {
@@ -764,6 +788,7 @@ body {
   .support-btn svg { width: 14px; height: 14px; }
   .meta-row { flex-direction: column; align-items: flex-start; gap: 0.25rem; }
   .meta-label { min-width: 0; }
+  .header-tagline { display: none; }
   .route-preview-row { flex-direction: column; }
   .route-preview { max-width: 100%; }
 }

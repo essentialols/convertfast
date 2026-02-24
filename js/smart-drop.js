@@ -267,6 +267,7 @@ export function initSmartDrop() {
 
     routePanel.innerHTML = '<p class="route-panel__detecting">Detecting file type...</p>';
     routePanel.style.display = '';
+    dropZone.classList.add('compact');
 
     const detected = await Promise.all(files.map(f => detect(f)));
     const known = detected.filter(Boolean);
@@ -309,6 +310,7 @@ export function initSmartDrop() {
       prevBlobUrls = [];
       routePanel.innerHTML = '';
       routePanel.style.display = 'none';
+      dropZone.classList.remove('compact');
     });
     routePanel.appendChild(dismissBtn);
 

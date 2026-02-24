@@ -519,13 +519,14 @@ function getConversionSettings(resolved, sourceMime) {
   const settings = [];
   const lossy = resolved.targetMime === 'image/jpeg' || resolved.targetMime === 'image/webp';
 
-  // Image/HEIC/PDF → lossy image: quality
+  // Image/HEIC/PDF → lossy image: quality (step 1, ticks at 10s)
   if ((resolved.type === 'image' || resolved.type === 'heic' || resolved.type === 'pdf-to-img') && lossy) {
     const saved = parseInt(localStorage.getItem('cf-quality'), 10);
-    const def = saved >= 10 && saved <= 100 ? Math.round(saved / 10) * 10 : 90;
+    const def = saved >= 10 && saved <= 100 ? saved : 90;
     settings.push({
       key: 'quality', label: 'Quality', type: 'range',
-      min: 10, max: 100, step: 10, default: def, unit: '%',
+      min: 10, max: 100, step: 1, default: def, unit: '%',
+      ticks: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
     });
   }
 
@@ -533,7 +534,8 @@ function getConversionSettings(resolved, sourceMime) {
   if (resolved.type === 'img-to-pdf' && sourceMime !== 'image/png') {
     settings.push({
       key: 'quality', label: 'Image quality', type: 'range',
-      min: 10, max: 100, step: 10, default: 90, unit: '%',
+      min: 10, max: 100, step: 1, default: 90, unit: '%',
+      ticks: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
     });
   }
 
@@ -551,13 +553,16 @@ function getConversionSettings(resolved, sourceMime) {
     });
   }
 
-  // Video → video / GIF → video: quality
+  // Video → video / GIF → video: quality (segmented control)
   if (resolved.type === 'video' || resolved.type === 'gif-to-video') {
     settings.push({
-      key: 'videoQuality', label: 'Quality', type: 'range',
-      min: 0, max: 2, step: 1, default: 2,
-      values: ['low', 'medium', 'high'],
-      labels: ['Small file', 'Balanced', 'High quality'], unit: '',
+      key: 'videoQuality', label: 'Quality', type: 'segment',
+      options: [
+        { value: 'low', label: 'Small file' },
+        { value: 'medium', label: 'Balanced' },
+        { value: 'high', label: 'High quality' },
+      ],
+      default: 'high',
     });
   }
 
@@ -715,9 +720,6 @@ async function runInlineConversion(file, sourceMime, resolved, routePanel, onDis
     settingsWrap.className = 'route-convert-settings';
 
     for (const desc of descriptors) {
-      const isIndexed = !!desc.values;
-      settingValues[desc.key] = isIndexed ? desc.values[desc.default] : desc.default;
-
       const row = document.createElement('div');
       row.className = 'route-convert-setting';
 
@@ -726,43 +728,104 @@ async function runInlineConversion(file, sourceMime, resolved, routePanel, onDis
       labelEl.textContent = desc.label;
       row.appendChild(labelEl);
 
-      const rangeWrap = document.createElement('div');
-      rangeWrap.className = 'route-convert-setting-range-wrap';
-
-      const range = document.createElement('input');
-      range.type = 'range';
-      range.className = 'route-convert-setting-range';
-      range.min = desc.min;
-      range.max = desc.max;
-      range.step = desc.step;
-      range.value = desc.default;
-      rangeWrap.appendChild(range);
-
-      const valueEl = document.createElement('span');
-      valueEl.className = 'route-convert-setting-value';
-      if (isIndexed) {
-        valueEl.textContent = (desc.labels ? desc.labels[desc.default] : desc.values[desc.default]) + desc.unit;
+      if (desc.type === 'segment') {
+        // Segmented control for limited discrete options
+        settingValues[desc.key] = desc.default;
+        const segWrap = document.createElement('div');
+        segWrap.className = 'route-convert-segments';
+        for (const opt of desc.options) {
+          const btn = document.createElement('button');
+          btn.className = 'route-convert-segment' + (opt.value === desc.default ? ' active' : '');
+          btn.textContent = opt.label;
+          btn.type = 'button';
+          btn.addEventListener('click', () => {
+            segWrap.querySelectorAll('.route-convert-segment').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            settingValues[desc.key] = opt.value;
+            if (updateEstimate) updateEstimate();
+          });
+          segWrap.appendChild(btn);
+        }
+        row.appendChild(segWrap);
       } else {
-        valueEl.textContent = desc.default + desc.unit;
-      }
-      rangeWrap.appendChild(valueEl);
+        // Range slider
+        const isIndexed = !!desc.values;
+        settingValues[desc.key] = isIndexed ? desc.values[desc.default] : desc.default;
 
-      if (isIndexed) {
-        range.addEventListener('input', () => {
-          const idx = parseInt(range.value, 10);
-          settingValues[desc.key] = desc.values[idx];
-          valueEl.textContent = (desc.labels ? desc.labels[idx] : desc.values[idx]) + desc.unit;
-          if (updateEstimate) updateEstimate();
-        });
-      } else {
-        range.addEventListener('input', () => {
-          settingValues[desc.key] = parseInt(range.value, 10);
-          valueEl.textContent = range.value + desc.unit;
-          if (updateEstimate) updateEstimate();
-        });
+        const rangeWrap = document.createElement('div');
+        rangeWrap.className = 'route-convert-setting-range-wrap';
+
+        const range = document.createElement('input');
+        range.type = 'range';
+        range.className = 'route-convert-setting-range';
+        range.min = desc.min;
+        range.max = desc.max;
+        range.step = desc.step;
+        range.value = desc.default;
+
+        // Add tick marks via datalist
+        if (desc.ticks || isIndexed) {
+          const listId = 'sd-ticks-' + desc.key;
+          range.setAttribute('list', listId);
+          const datalist = document.createElement('datalist');
+          datalist.id = listId;
+          if (desc.ticks) {
+            for (const t of desc.ticks) {
+              const opt = document.createElement('option');
+              opt.value = t;
+              datalist.appendChild(opt);
+            }
+          } else {
+            for (let i = desc.min; i <= desc.max; i++) {
+              const opt = document.createElement('option');
+              opt.value = i;
+              datalist.appendChild(opt);
+            }
+          }
+          rangeWrap.appendChild(datalist);
+        }
+
+        rangeWrap.appendChild(range);
+
+        const valueEl = document.createElement('span');
+        valueEl.className = 'route-convert-setting-value';
+        if (isIndexed) {
+          valueEl.textContent = desc.values[desc.default] + desc.unit;
+        } else {
+          valueEl.textContent = desc.default + desc.unit;
+        }
+        rangeWrap.appendChild(valueEl);
+
+        if (isIndexed) {
+          range.addEventListener('input', () => {
+            const idx = parseInt(range.value, 10);
+            settingValues[desc.key] = desc.values[idx];
+            valueEl.textContent = desc.values[idx] + desc.unit;
+            if (updateEstimate) updateEstimate();
+          });
+        } else {
+          range.addEventListener('input', () => {
+            settingValues[desc.key] = parseInt(range.value, 10);
+            valueEl.textContent = range.value + desc.unit;
+            if (updateEstimate) updateEstimate();
+          });
+        }
+
+        row.appendChild(rangeWrap);
+
+        // Label row for indexed sliders
+        if (isIndexed) {
+          const labelsRow = document.createElement('div');
+          labelsRow.className = 'route-convert-setting-labels';
+          for (const v of desc.values) {
+            const span = document.createElement('span');
+            span.textContent = v;
+            labelsRow.appendChild(span);
+          }
+          row.appendChild(labelsRow);
+        }
       }
 
-      row.appendChild(rangeWrap);
       settingsWrap.appendChild(row);
     }
 

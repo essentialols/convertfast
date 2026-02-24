@@ -638,6 +638,26 @@ body {
   font-size: 0.85rem; font-weight: 500; min-width: 3.5rem;
   text-align: right; color: var(--text-muted);
 }
+.route-convert-segments {
+  display: flex; border: 1px solid var(--border); border-radius: 6px;
+  overflow: hidden;
+}
+.route-convert-segment {
+  flex: 1; padding: 0.4rem 0.5rem; font-size: 0.8rem; font-weight: 500;
+  border: none; background: var(--bg); color: var(--text-muted);
+  cursor: pointer; border-right: 1px solid var(--border);
+  transition: background 0.15s, color 0.15s;
+}
+.route-convert-segment:last-child { border-right: none; }
+.route-convert-segment:hover { background: var(--bg-muted, #f3f4f6); }
+.route-convert-segment.active {
+  background: var(--primary); color: #fff; font-weight: 600;
+}
+.route-convert-setting-labels {
+  display: flex; justify-content: space-between;
+  font-size: 0.6rem; color: var(--text-muted);
+  padding: 0 2px; margin-top: -1px;
+}
 .route-convert-estimate {
   font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;
 }

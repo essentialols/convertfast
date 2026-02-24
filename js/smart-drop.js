@@ -194,6 +194,13 @@ async function getMediaMeta(file, mime) {
       });
       if (info.w && info.h) meta.push(info.w + ' x ' + info.h);
       if (info.dur && isFinite(info.dur)) meta.push(formatDuration(info.dur));
+    } else if (mime === 'application/pdf') {
+      const pdfjs = await import('https://cdn.jsdelivr.net/npm/pdfjs-dist@5.4.624/build/pdf.min.mjs');
+      pdfjs.GlobalWorkerOptions.workerSrc =
+        'https://cdn.jsdelivr.net/npm/pdfjs-dist@5.4.624/build/pdf.worker.min.mjs';
+      const data = new Uint8Array(await file.arrayBuffer());
+      const pdf = await pdfjs.getDocument({ data }).promise;
+      meta.push(pdf.numPages + (pdf.numPages === 1 ? ' page' : ' pages'));
     } else if (mime.startsWith('audio/')) {
       const dur = await new Promise((resolve, reject) => {
         const a = document.createElement('audio');
@@ -206,6 +213,30 @@ async function getMediaMeta(file, mime) {
     }
   } catch { /* graceful failure */ }
   return meta;
+}
+
+async function renderPdfPreview(file, container) {
+  try {
+    const pdfjs = await import('https://cdn.jsdelivr.net/npm/pdfjs-dist@5.4.624/build/pdf.min.mjs');
+    pdfjs.GlobalWorkerOptions.workerSrc =
+      'https://cdn.jsdelivr.net/npm/pdfjs-dist@5.4.624/build/pdf.worker.min.mjs';
+    const data = new Uint8Array(await file.arrayBuffer());
+    const pdf = await pdfjs.getDocument({ data }).promise;
+    const page = await pdf.getPage(1);
+    const vp = page.getViewport({ scale: 1 });
+    const scale = 200 / vp.width;
+    const viewport = page.getViewport({ scale });
+    const canvas = document.createElement('canvas');
+    canvas.width = viewport.width;
+    canvas.height = viewport.height;
+    canvas.className = 'route-preview-img';
+    canvas.style.background = '#fff';
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    await page.render({ canvasContext: ctx, viewport }).promise;
+    container.appendChild(canvas);
+  } catch { /* graceful failure */ }
 }
 
 async function extractVideoFrames(file, container, count) {
@@ -294,6 +325,8 @@ export function initSmartDrop() {
     const isImage = dominant.startsWith('image/');
     const isVideo = dominant.startsWith('video/');
     const isAudio = dominant.startsWith('audio/');
+    const isPdf = dominant === 'application/pdf';
+    const hasPreview = isImage || isVideo || isPdf;
     const conversions = routes.filter(r => r.label.startsWith('Convert to'));
     const tools = routes.filter(r => !r.label.startsWith('Convert to'));
 
@@ -317,7 +350,7 @@ export function initSmartDrop() {
     // File info section
     let inlineMetaEl = null;
 
-    if (isSingle && (isImage || isVideo)) {
+    if (isSingle && hasPreview) {
       // Preview row: preview left, details right
       const row = document.createElement('div');
       row.className = 'route-preview-row';
@@ -337,8 +370,9 @@ export function initSmartDrop() {
         const filmstrip = document.createElement('div');
         filmstrip.className = 'route-filmstrip';
         previewDiv.appendChild(filmstrip);
-        // Extract frames async
         extractVideoFrames(files[0], filmstrip);
+      } else if (isPdf) {
+        renderPdfPreview(files[0], previewDiv);
       }
 
       row.appendChild(previewDiv);

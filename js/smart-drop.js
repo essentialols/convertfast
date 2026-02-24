@@ -185,12 +185,15 @@ async function getMediaMeta(file, mime) {
       const info = await new Promise((resolve, reject) => {
         const v = document.createElement('video');
         v.preload = 'metadata';
+        const url = URL.createObjectURL(file);
+        const timeout = setTimeout(() => { URL.revokeObjectURL(url); reject(); }, 10000);
         v.onloadedmetadata = () => {
+          clearTimeout(timeout);
           resolve({ dur: v.duration, w: v.videoWidth, h: v.videoHeight });
-          URL.revokeObjectURL(v.src);
+          URL.revokeObjectURL(url);
         };
-        v.onerror = () => { URL.revokeObjectURL(v.src); reject(); };
-        v.src = URL.createObjectURL(file);
+        v.onerror = () => { clearTimeout(timeout); URL.revokeObjectURL(url); reject(); };
+        v.src = url;
       });
       if (info.w && info.h) meta.push(info.w + ' x ' + info.h);
       if (info.dur && isFinite(info.dur)) meta.push(formatDuration(info.dur));
@@ -198,9 +201,11 @@ async function getMediaMeta(file, mime) {
       const dur = await new Promise((resolve, reject) => {
         const a = document.createElement('audio');
         a.preload = 'metadata';
-        a.onloadedmetadata = () => { resolve(a.duration); URL.revokeObjectURL(a.src); };
-        a.onerror = () => { URL.revokeObjectURL(a.src); reject(); };
-        a.src = URL.createObjectURL(file);
+        const url = URL.createObjectURL(file);
+        const timeout = setTimeout(() => { URL.revokeObjectURL(url); reject(); }, 10000);
+        a.onloadedmetadata = () => { clearTimeout(timeout); resolve(a.duration); URL.revokeObjectURL(url); };
+        a.onerror = () => { clearTimeout(timeout); URL.revokeObjectURL(url); reject(); };
+        a.src = url;
       });
       if (dur && isFinite(dur)) meta.push(formatDuration(dur));
     }

@@ -194,7 +194,8 @@ function dataUrlToBlob(dataUrl) {
   const [header, b64] = dataUrl.split(',');
   const match = header.match(/:(.*?);/);
   const mime = match ? match[1] : 'image/jpeg';
-  const bin = atob(b64);
+  let bin;
+  try { bin = atob(b64); } catch { throw new Error('Invalid base64 data in data URL'); }
   const arr = new Uint8Array(bin.length);
   for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
   return new Blob([arr], { type: mime });

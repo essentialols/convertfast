@@ -33,6 +33,7 @@ export async function ensureFFmpeg(onStatus) {
 
     await loadScript(`${CDN}/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.js`);
 
+    if (!window.FFmpegWASM) throw new Error('FFmpeg script failed to load');
     const { FFmpeg } = window.FFmpegWASM;
     const ffmpeg = new FFmpeg();
 

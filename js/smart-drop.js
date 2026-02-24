@@ -278,8 +278,9 @@ async function extractVideoFrames(file, container, count) {
     for (let i = 0; i < count; i++) {
       const t = dur * ((i + 1) / (count + 1));
       v.currentTime = t;
-      await new Promise((resolve) => {
-        const onSeeked = () => { v.removeEventListener('seeked', onSeeked); resolve(); };
+      await new Promise((resolve, reject) => {
+        const timeout = setTimeout(() => { v.removeEventListener('seeked', onSeeked); reject(new Error('Video seek timeout')); }, 5000);
+        const onSeeked = () => { clearTimeout(timeout); v.removeEventListener('seeked', onSeeked); resolve(); };
         v.addEventListener('seeked', onSeeked);
       });
       if (!v.videoWidth) continue;

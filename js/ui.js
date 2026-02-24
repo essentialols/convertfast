@@ -267,6 +267,7 @@ function renderFileItem(entry) {
     const img = document.createElement('img');
     img.src = url;
     img.onload = () => URL.revokeObjectURL(url);
+    img.onerror = () => URL.revokeObjectURL(url);
     thumb.appendChild(img);
   }
   fileList.appendChild(div);

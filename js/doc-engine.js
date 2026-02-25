@@ -494,6 +494,7 @@ async function extractMobiText(file, onProgress) {
   const rec0Start = recordOffsets[0];
   const rec0End = recordOffsets.length > 1 ? recordOffsets[1] : buf.length;
   if (rec0Start >= buf.length) throw new Error('Invalid MOBI file: record 0 out of bounds.');
+  if (rec0End - rec0Start < 14) throw new Error('Invalid MOBI file: record 0 header too short.');
 
   // PalmDOC header (first 16 bytes of record 0)
   const compression = view.getUint16(rec0Start, false);

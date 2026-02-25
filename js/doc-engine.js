@@ -135,8 +135,7 @@ async function extractEpubText(file, onProgress) {
     // Try exact match first, then try decoding URI components
     let data = zip[path];
     if (!data) {
-      const decoded = decodeURIComponent(path);
-      data = zip[decoded];
+      try { const decoded = decodeURIComponent(path); data = zip[decoded]; } catch { }
     }
     if (!data) continue;
 

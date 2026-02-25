@@ -10,7 +10,7 @@
 #
 # Triggers:
 #   - Daily via launchd (com.irisfiles.patrol.plist)
-#   - On push via .git/hooks/post-push
+#   - On push via .git/hooks/pre-push
 
 set -euo pipefail
 PROJECT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -59,6 +59,8 @@ if [[ "$CLEANUP" == true ]]; then
     done
   # Delete local patrol branches
   git branch --list 'patrol/*' | xargs git branch -D 2>/dev/null || true
+  # Clean up worktree directory
+  rm -rf .patrol/worktree
   echo "Done."
   exit 0
 fi
@@ -70,12 +72,13 @@ if [[ "$BRANCH" != "main" ]]; then
   exit 1
 fi
 
+# Only check for dirty tree if not triggered by pre-push hook
+# (pre-push runs before push completes, tree may have just-committed changes)
 if [[ -n "$(git status --porcelain)" ]]; then
-  echo "ERROR: Working tree dirty. Commit or stash first."
-  exit 1
+  echo "WARNING: Working tree has uncommitted changes. Patrol will use worktrees to avoid interference."
 fi
 
-# Pull latest before patrolling
+# Pull latest before patrolling (skip if it fails, e.g. during concurrent push)
 git pull --ff-only origin main 2>/dev/null || true
 
 TIMESTAMP=$(date +%Y%m%d-%H%M%S)
@@ -146,9 +149,9 @@ if [[ "$DRY_RUN" == true ]]; then
   exit 0
 fi
 
-# --- Phase 2: Fix each issue on its own branch, push, create PR ---
+# --- Phase 2: Fix each issue in an isolated worktree ---
 echo "" | tee -a "$LOG"
-echo "Phase 2: Fixing issues..." | tee -a "$LOG"
+echo "Phase 2: Fixing issues (using worktrees for isolation)..." | tee -a "$LOG"
 
 # Write issues to temp file to avoid pipeline subshell
 ISSUES_FILE=$(mktemp)
@@ -159,6 +162,7 @@ for i, issue in enumerate(json.load(sys.stdin)):
 
 FIXED=0
 SKIPPED=0
+WORKTREE_DIR="$PROJECT_DIR/.patrol/worktree"
 
 while IFS='|' read -r idx file severity desc fix; do
   FIX_BRANCH="patrol/${TIMESTAMP}-${idx}"
@@ -167,9 +171,12 @@ while IFS='|' read -r idx file severity desc fix; do
   echo "--- Fix $idx ($severity): $desc ---" | tee -a "$LOG"
   echo "File: $file | Branch: $FIX_BRANCH" | tee -a "$LOG"
 
-  git checkout -b "$FIX_BRANCH" main
+  # Create an isolated worktree so we never touch the main working tree
+  rm -rf "$WORKTREE_DIR" 2>/dev/null || true
+  git branch -D "$FIX_BRANCH" 2>/dev/null || true
+  git worktree add -b "$FIX_BRANCH" "$WORKTREE_DIR" main 2>>"$LOG"
 
-  FIX_PROMPT="You are a code patrol bot for IrisFiles. Your working directory is $PROJECT_DIR.
+  FIX_PROMPT="You are a code patrol bot for IrisFiles. Your working directory is $WORKTREE_DIR.
 Read PATROL.md first for guidelines.
 
 Fix this specific issue:
@@ -181,7 +188,7 @@ Steps:
 1. Read the file and understand the surrounding code
 2. Make the MINIMAL change to fix the issue
 3. Do not modify any other files or refactor nearby code
-4. After editing, run the validation: node test/validate.mjs
+4. After editing, run the validation: cd $WORKTREE_DIR && node test/validate.mjs
 5. If validation fails, undo your change (git checkout -- .) and output VALIDATION_FAILED
 6. If validation passes, output VALIDATION_PASSED"
 
@@ -192,16 +199,17 @@ Steps:
 
   echo "$FIX_OUTPUT" | tail -5 | tee -a "$LOG"
 
-  # Check if there are actual changes to commit
-  if [[ -n "$(git status --porcelain)" ]]; then
+  # Check if there are actual changes to commit (in the worktree)
+  if [[ -n "$(git -C "$WORKTREE_DIR" status --porcelain)" ]]; then
     # Double-check validation ourselves
-    if node test/validate.mjs > /dev/null 2>&1; then
-      git add -A
-      git commit -m "patrol: $desc" --no-verify
+    if (cd "$WORKTREE_DIR" && node test/validate.mjs > /dev/null 2>&1); then
+      git -C "$WORKTREE_DIR" add -A
+      git -C "$WORKTREE_DIR" commit -m "patrol: $desc" --no-verify
 
       # Push branch and create PR
-      git push -u origin "$FIX_BRANCH" 2>>"$LOG"
+      git -C "$WORKTREE_DIR" push -u origin "$FIX_BRANCH" 2>>"$LOG"
       PR_URL=$(gh pr create \
+        --repo "$(git remote get-url origin | sed 's/\.git$//' | sed 's|.*github.com[:/]||')" \
         --base main \
         --head "$FIX_BRANCH" \
         --title "patrol: $desc" \
@@ -227,21 +235,19 @@ PREOF
       FIXED=$((FIXED + 1))
     else
       echo "SKIPPED: validation failed after fix" | tee -a "$LOG"
-      git checkout -- .
-      git checkout main
-      git branch -D "$FIX_BRANCH" 2>/dev/null || true
       SKIPPED=$((SKIPPED + 1))
-      continue
     fi
   else
     echo "SKIPPED: no changes made" | tee -a "$LOG"
-    git checkout main
-    git branch -D "$FIX_BRANCH" 2>/dev/null || true
     SKIPPED=$((SKIPPED + 1))
-    continue
   fi
 
-  git checkout main
+  # Clean up worktree
+  git worktree remove "$WORKTREE_DIR" --force 2>/dev/null || rm -rf "$WORKTREE_DIR"
+  # If nothing was pushed, delete the branch
+  if ! git rev-parse --verify "origin/$FIX_BRANCH" &>/dev/null; then
+    git branch -D "$FIX_BRANCH" 2>/dev/null || true
+  fi
 done < "$ISSUES_FILE"
 
 rm -f "$ISSUES_FILE"

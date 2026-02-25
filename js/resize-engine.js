@@ -43,6 +43,7 @@ export async function resizeImage(file, opts, onProgress) {
   canvas.width = targetW;
   canvas.height = targetH;
   const ctx = canvas.getContext('2d');
+  if (!ctx) throw new Error('Could not get canvas context');
 
   const mime = opts.outputMime || 'image/jpeg';
   if (mime === 'image/jpeg') {

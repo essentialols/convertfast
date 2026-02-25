@@ -50,6 +50,8 @@ export async function resizeImage(file, opts, onProgress) {
     ctx.fillRect(0, 0, targetW, targetH);
   }
 
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
   ctx.drawImage(bmp, 0, 0, targetW, targetH);
   bmp.close();
 

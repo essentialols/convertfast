@@ -59,6 +59,7 @@ export function init() {
   }
 
   // Aspect ratio lock: when width changes, recalculate height and vice versa
+  // Also re-queue done items so changing dimensions re-processes them
   if (widthInput) {
     widthInput.addEventListener('input', () => {
       if (lockAspect && lockAspect.checked && aspectRatio > 0) {
@@ -67,6 +68,7 @@ export function init() {
           heightInput.value = Math.round(w / aspectRatio);
         }
       }
+      requeueDoneItems();
     });
   }
   if (heightInput) {
@@ -77,7 +79,14 @@ export function init() {
           widthInput.value = Math.round(h * aspectRatio);
         }
       }
+      requeueDoneItems();
     });
+  }
+  if (percentInput) {
+    percentInput.addEventListener('input', () => requeueDoneItems());
+  }
+  if (resizeMode) {
+    resizeMode.addEventListener('change', () => requeueDoneItems());
   }
 
   // FAQ accordion
@@ -205,6 +214,25 @@ function addFile(file) {
   processQueue();
 }
 
+let _requeueTimer = null;
+function requeueDoneItems() {
+  clearTimeout(_requeueTimer);
+  _requeueTimer = setTimeout(() => {
+    let changed = false;
+    for (const entry of fileQueue) {
+      if (entry.status === 'done') {
+        entry.outputBlob = null;
+        entry.outputName = null;
+        entry.status = 'queued';
+        entry.progress = 0;
+        updateFileItem(entry);
+        changed = true;
+      }
+    }
+    if (changed) processQueue();
+  }, 400);
+}
+
 async function processQueue() {
   while (activeCount < CONCURRENCY) {
     const next = fileQueue.find(f => f.status === 'queued');
@@ -216,6 +244,14 @@ async function processQueue() {
     try {
       const mime = next.file.type || 'image/jpeg';
       const opts = getResizeOpts(mime);
+      // Upscale warning
+      const dims = await getImageDimensions(next.file).catch(() => null);
+      if (dims) {
+        const isUpscale = (opts.width && opts.width > dims.width) ||
+                          (opts.height && opts.height > dims.height) ||
+                          (opts.percent && opts.percent > 100);
+        if (isUpscale) showNotice('Upscaling beyond original dimensions. Quality may be reduced.');
+      }
       next.outputName = resizeOutputFilename(next.file.name, opts);
       next.outputBlob = await resizeImage(next.file, opts, pct => {
         next.progress = pct;
@@ -242,7 +278,9 @@ function renderFileItem(entry) {
   const div = document.createElement('div');
   div.className = 'file-item';
   div.id = `file-${entry.id}`;
+  const isImage = entry.file.type && entry.file.type.startsWith('image/');
   div.innerHTML = `
+    ${isImage ? '<div class="file-item__thumb"></div>' : ''}
     <div class="file-item__info">
       <div class="file-item__name">${esc(entry.file.name)}</div>
       <div class="file-item__meta">${formatSize(entry.file.size)}</div>
@@ -254,6 +292,15 @@ function renderFileItem(entry) {
       <span class="file-item__status">Queued</span>
     </div>
   `;
+  if (isImage) {
+    const thumb = div.querySelector('.file-item__thumb');
+    const url = URL.createObjectURL(entry.file);
+    const img = document.createElement('img');
+    img.src = url;
+    img.onload = () => URL.revokeObjectURL(url);
+    img.onerror = () => URL.revokeObjectURL(url);
+    thumb.appendChild(img);
+  }
   fileList.appendChild(div);
   updateBatchActions();
 }

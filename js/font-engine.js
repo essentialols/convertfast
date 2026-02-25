@@ -83,6 +83,7 @@ export async function convertFont(file, targetFormat, onProgress) {
  * @returns {ArrayBuffer} WOFF binary
  */
 function wrapAsWoff(sfnt) {
+  if (typeof fflate === 'undefined') throw new Error('Font library not loaded. Please reload the page.');
   const view = new DataView(sfnt.buffer, sfnt.byteOffset, sfnt.byteLength);
 
   // Read sfnt header

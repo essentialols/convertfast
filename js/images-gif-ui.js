@@ -73,7 +73,7 @@ function renderFrames() {
       <span class="frame-item__num">${i + 1}</span>
       <div class="frame-item__thumb"><img src="${frame.thumbUrl}" alt=""></div>
       <div class="frame-item__info">
-        <div class="frame-item__name">${escapeHtml(frame.file.name)}</div>
+        <div class="frame-item__name">${esc(frame.file.name)}</div>
         <div class="frame-item__meta">${formatSize(frame.file.size)}</div>
       </div>
       <button class="frame-item__remove" title="Remove">&times;</button>
@@ -176,14 +176,14 @@ async function convert() {
     });
   } catch (err) {
     progressDiv.style.display = 'none';
-    resultDiv.innerHTML = `<div class="notice">${escapeHtml(err.message)}</div>`;
+    resultDiv.innerHTML = `<div class="notice">${esc(err.message)}</div>`;
   }
 
   convertBtn.disabled = false;
   updateUI();
 }
 
-function escapeHtml(str) {
+function esc(str) {
   const div = document.createElement('div');
   div.textContent = str;
   return div.innerHTML;

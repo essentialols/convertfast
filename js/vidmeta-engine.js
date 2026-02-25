@@ -6,28 +6,20 @@
 
 import { ensureFFmpeg } from './ffmpeg-shared.js';
 
-const MEDIAINFO_CDN = 'https://cdn.jsdelivr.net/npm/mediainfo.js@0.3.7/dist/mediainfo.min.js';
+const MEDIAINFO_BASE = 'https://cdn.jsdelivr.net/npm/mediainfo.js@0.3.7';
 
 let mediaInfoReady = null;
 
-function loadScript(url) {
-  return new Promise((resolve, reject) => {
-    const existing = document.querySelector(`script[src="${url}"]`);
-    if (existing) { resolve(); return; }
-    const s = document.createElement('script');
-    s.src = url;
-    s.onload = resolve;
-    s.onerror = () => reject(new Error('Failed to load ' + url));
-    document.head.appendChild(s);
-  });
-}
-
 function ensureMediaInfo() {
   if (mediaInfoReady) return mediaInfoReady;
-  mediaInfoReady = loadScript(MEDIAINFO_CDN).then(() => {
-    if (!window.MediaInfo) throw new Error('MediaInfo library failed to initialize.');
-    return window.MediaInfo({ format: 'JSON' });
-  });
+  mediaInfoReady = (async () => {
+    const mod = await import(`${MEDIAINFO_BASE}/dist/esm-bundle/index.min.js`);
+    const factory = mod.default || mod.MediaInfo || mod;
+    return factory({
+      format: 'JSON',
+      locateFile: (path) => `${MEDIAINFO_BASE}/dist/${path}`,
+    });
+  })();
   return mediaInfoReady;
 }
 

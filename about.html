@@ -4,14 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>About IrisFiles - How It Works & Why Privacy Matters</title>
-  <meta name="description" content="Learn how IrisFiles converts images entirely in your browser using WebAssembly. No servers, no uploads, no tracking. Built in response to FBI warnings about malicious online converters.">
+  <meta name="description" content="Learn how IrisFiles converts images, video, audio, documents, and more entirely in your browser using WebAssembly. No servers, no uploads, no tracking. Built in response to FBI warnings about malicious online converters.">
   <meta property="og:title" content="About IrisFiles - How It Works & Why Privacy Matters">
-  <meta property="og:description" content="Learn how IrisFiles converts images entirely in your browser using WebAssembly. No servers, no uploads, no tracking. Built in response to FBI warnings about malicious online converters.">
+  <meta property="og:description" content="Learn how IrisFiles converts images, video, audio, documents, and more entirely in your browser using WebAssembly. No servers, no uploads, no tracking. Built in response to FBI warnings about malicious online converters.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://irisfiles.com/about">
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="About IrisFiles - How It Works & Why Privacy Matters">
-  <meta name="twitter:description" content="Learn how IrisFiles converts images entirely in your browser using WebAssembly. No servers, no uploads, no tracking. Built in response to FBI warnings about malicious online converters.">
+  <meta name="twitter:description" content="Learn how IrisFiles converts images, video, audio, documents, and more entirely in your browser using WebAssembly. No servers, no uploads, no tracking. Built in response to FBI warnings about malicious online converters.">
   <meta property="og:image" content="https://irisfiles.com/img/og-default.png">
   <meta name="twitter:image" content="https://irisfiles.com/img/og-default.png">
   <link rel="canonical" href="https://irisfiles.com/about">
@@ -35,7 +35,7 @@
     <article class="prose">
       <h1>About IrisFiles</h1>
 
-      <p>IrisFiles is a free file converter that works entirely in your browser. Your files are never uploaded to a server. Every conversion happens on your device using WebAssembly and the Canvas API.</p>
+      <p>IrisFiles is a free file converter that works entirely in your browser. Your files are never uploaded to a server. Every conversion happens on your device using WebAssembly and the browser's built-in APIs.</p>
 
       <h2>Why this exists</h2>
 
@@ -43,31 +43,57 @@
 
       <p>IrisFiles takes a different approach. There is no server. The entire application is static HTML, CSS, and JavaScript. When you drop a file into IrisFiles, it stays on your device. The conversion runs in your browser, and the result is downloaded directly, just like any other file.</p>
 
+      <h2>What it can do</h2>
+
+      <p>IrisFiles currently has 128 tools across several categories:</p>
+
+      <ul>
+        <li><strong>Images:</strong> Convert between 10 formats (HEIC, AVIF, PNG, JPG, WebP, GIF, BMP, TIFF, ICO, SVG). Also compress, resize, strip EXIF data, view metadata, and combine images into an animated GIF.</li>
+        <li><strong>Video:</strong> Convert between MP4, WebM, MOV, AVI, and MKV, or extract to GIF. Compress video with quality presets and optional resolution scaling.</li>
+        <li><strong>Audio:</strong> Convert between MP3, WAV, OGG, FLAC, M4A, and AAC. Compress audio with standard bitrate tiers.</li>
+        <li><strong>PDF:</strong> Merge PDFs, split a PDF into pages, convert PDF pages to images, and assemble images into a PDF.</li>
+        <li><strong>Documents:</strong> Convert EPUB, RTF, DOCX, and MOBI files to plain text or PDF.</li>
+        <li><strong>Fonts:</strong> Convert between TTF, OTF, and WOFF.</li>
+        <li><strong>Archives:</strong> Create and extract ZIP files.</li>
+        <li><strong>Unknown files:</strong> Drop any unrecognized file to identify its type. IrisFiles checks magic bytes against a 600+ format signature database and shows you what it found.</li>
+      </ul>
+
       <h2>How it works</h2>
 
-      <p><strong>For HEIC/HEIF files</strong> (iPhone photos): IrisFiles loads a WebAssembly build of <a href="https://github.com/strukturag/libheif">libheif</a> (version 1.21.2), the reference HEIC decoder. The WASM binary is lazy-loaded on the main thread only when you actually need it (roughly 2.5MB). It decodes the HEIC file, then re-encodes it as JPG or PNG.</p>
+      <p><strong>Image conversion:</strong> For common formats (JPG, PNG, WebP, etc.), IrisFiles loads the image into a Canvas element and re-encodes it using the browser's built-in encoder. For HEIC/HEIF (iPhone photos), it lazy-loads a WebAssembly build of <a href="https://github.com/strukturag/libheif">libheif</a> (version 1.21.2) from the CDN. AVIF conversion also uses a WASM decoder when needed.</p>
 
-      <p><strong>For JPG, PNG, and WebP files</strong>: Modern browsers already know how to decode these formats. IrisFiles loads the image into a Canvas element, then exports it in the target format using the browser's built-in encoding. This takes milliseconds, even for large images.</p>
+      <p><strong>Video and audio conversion:</strong> IrisFiles lazy-loads <a href="https://github.com/ffmpegwasm/ffmpeg.wasm">FFmpeg.wasm</a> (version 0.12, roughly 10MB) from the CDN only when you use a video or audio tool. FFmpeg runs entirely in your browser; no media ever leaves your device. MP3 encoding uses lamejs; WAV encoding uses the Web Audio API directly.</p>
 
-      <p><strong>For batch downloads</strong>: Multiple files are packaged into a ZIP using <a href="https://github.com/101arrowz/fflate">fflate</a>, a fast JavaScript compression library. The ZIP is assembled in your browser and downloaded as a single file.</p>
+      <p><strong>PDF operations:</strong> Merge and split use <a href="https://github.com/Hopding/pdf-lib">pdf-lib</a>. Image-to-PDF uses jsPDF. PDF-to-image rendering uses pdfjs-dist. All lazy-loaded from the CDN.</p>
+
+      <p><strong>Format detection:</strong> IrisFiles reads the first few bytes of every file (magic bytes) and checks them against a 601-entry signature database. It never relies on file extensions.</p>
+
+      <p><strong>Batch downloads:</strong> Multiple output files are packaged into a ZIP using <a href="https://github.com/101arrowz/fflate">fflate</a>, assembled entirely in your browser.</p>
 
       <h2>What about quality?</h2>
 
-      <p>Image converters include a quality slider that snaps to clean increments (100%, 90%, 80%, etc.). The default is 100% for all formats, so conversions are lossless by default. Lower the slider to reduce file size at the cost of some visual fidelity. The image compressor defaults to 80% for more aggressive size reduction. Video and audio compression use preset quality levels (High, Medium, Low) instead of a percentage slider. Some tools (image-to-GIF, PDF, document, font, and ZIP tools) have no quality control because their output format uses fixed encoding.</p>
+      <p>Image quality sliders are continuous (1-100%) with snap points at common values. The default is 100%, meaning full quality with no extra compression applied. Lower the slider to trade some visual fidelity for a smaller file. Video compression uses CRF-based presets (High, Medium, Low). Audio compression uses standard bitrate tiers. Some tools (image-to-GIF, PDF, document, font, and ZIP tools) have no quality control because their output format uses fixed encoding.</p>
 
       <h2>Technology</h2>
 
       <ul>
-        <li><strong>HEIC decoding:</strong> <a href="https://github.com/nicolo-ribaudo/heic-to">heic-to</a> (WASM, libheif 1.21.2)</li>
+        <li><strong>HEIC decoding:</strong> <a href="https://github.com/nicolo-ribaudo/heic-to">heic-to</a> (WASM, libheif 1.21.2), lazy-loaded from CDN</li>
         <li><strong>Image encoding:</strong> Browser Canvas API (toBlob)</li>
-        <li><strong>Format detection:</strong> Magic bytes (not file extension)</li>
-        <li><strong>ZIP packaging:</strong> fflate (~8KB gzipped)</li>
-        <li><strong>Hosting:</strong> Static files on Vercel (no server-side code)</li>
+        <li><strong>Video and audio processing:</strong> FFmpeg.wasm 0.12 (~10MB WASM), lazy-loaded from CDN</li>
+        <li><strong>GIF encoding:</strong> gifenc (local bundle)</li>
+        <li><strong>Audio encoding:</strong> lamejs for MP3, Web Audio API for WAV, FFmpeg.wasm for OGG/FLAC/M4A/AAC</li>
+        <li><strong>PDF operations:</strong> pdf-lib (merge/split), jsPDF (image-to-PDF), pdfjs-dist (PDF-to-image)</li>
+        <li><strong>EXIF metadata:</strong> ExifReader + piexifjs (lossless JPEG EXIF editing)</li>
+        <li><strong>Font parsing:</strong> opentype.js</li>
+        <li><strong>ZIP packaging:</strong> fflate (~8KB gzipped, local bundle)</li>
+        <li><strong>Format detection:</strong> Magic bytes, 601-entry signature database</li>
+        <li><strong>Hosting:</strong> Static files on Vercel (zero server-side code)</li>
+        <li><strong>Privacy:</strong> No analytics, no tracking, no cookies</li>
       </ul>
 
       <h2>Open source</h2>
 
-      <p>IrisFiles is open source. You can inspect the code, verify that no files are uploaded, and contribute improvements. The entire application is under 100KB of custom code (excluding the HEIC WASM binary).</p>
+      <p>The source code is available for inspection. You can verify that no files are uploaded and see exactly how each tool works.</p>
     </article>
   </main>
 

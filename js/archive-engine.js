@@ -14,6 +14,7 @@ export async function extractZip(file, onProgress) {
   const buffer = await file.arrayBuffer();
   if (onProgress) onProgress(30);
 
+  if (typeof fflate === 'undefined') throw new Error('ZIP library not loaded. Please reload the page.');
   const unzipped = fflate.unzipSync(new Uint8Array(buffer));
   if (onProgress) onProgress(80);
 

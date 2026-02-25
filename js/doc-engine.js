@@ -486,6 +486,8 @@ async function extractMobiText(file, onProgress) {
     recordOffsets.push(view.getUint32(recInfoOffset, false));
   }
 
+  if (recordOffsets.length === 0) throw new Error('Invalid MOBI file: no record entries found.');
+
   if (onProgress) onProgress(10);
 
   // Record 0 contains the MOBI header
@@ -518,6 +520,7 @@ async function extractMobiText(file, onProgress) {
 
   for (let r = startRec; r < endRec; r++) {
     const start = recordOffsets[r];
+    if (start >= buf.length) continue;
     const end = r + 1 < recordOffsets.length ? recordOffsets[r + 1] : buf.length;
     const recordData = buf.slice(start, end);
 

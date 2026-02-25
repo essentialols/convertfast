@@ -13,7 +13,12 @@
 export async function resizeImage(file, opts, onProgress) {
   if (onProgress) onProgress(10);
 
-  const bmp = await createImageBitmap(file, { imageOrientation: 'from-image' });
+  let bmp;
+  try {
+    bmp = await createImageBitmap(file, { imageOrientation: 'from-image' });
+  } catch {
+    throw new Error('Could not decode image. The file may be corrupted or in an unsupported format.');
+  }
   const origW = bmp.width;
   const origH = bmp.height;
 
@@ -72,7 +77,12 @@ export async function resizeImage(file, opts, onProgress) {
  * @returns {Promise<{width: number, height: number}>}
  */
 export async function getImageDimensions(file) {
-  const bmp = await createImageBitmap(file, { imageOrientation: 'from-image' });
+  let bmp;
+  try {
+    bmp = await createImageBitmap(file, { imageOrientation: 'from-image' });
+  } catch {
+    throw new Error('Could not decode image. The file may be corrupted or in an unsupported format.');
+  }
   const { width, height } = bmp;
   bmp.close();
   return { width, height };

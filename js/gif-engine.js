@@ -136,7 +136,17 @@ function seekTo(video, time) {
       resolve();
       return;
     }
-    video.onseeked = () => resolve();
+    let timer;
+    const cleanup = () => {
+      clearTimeout(timer);
+      video.removeEventListener('seeked', onSeeked);
+      video.removeEventListener('error', onError);
+    };
+    const onSeeked = () => { cleanup(); resolve(); };
+    const onError = () => { cleanup(); resolve(); };
+    video.addEventListener('seeked', onSeeked);
+    video.addEventListener('error', onError);
+    timer = setTimeout(() => { cleanup(); resolve(); }, 5000);
     video.currentTime = time;
   });
 }

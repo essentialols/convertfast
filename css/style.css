@@ -196,6 +196,11 @@ body {
   min-width: 3ch;
   text-align: right;
 }
+.quality-note {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  min-height: 1rem;
+}
 .resize-controls {
   display: flex;
   align-items: center;
@@ -506,6 +511,10 @@ body {
   font-size: 0.8rem;
   color: var(--text-muted);
 }
+.route-format-badge {
+  cursor: default;
+  border-bottom: 1px dotted var(--text-muted);
+}
 .route-section { text-align: left; margin-bottom: 0.5rem; }
 .route-section:last-child { margin-bottom: 0; }
 .route-section-label {
@@ -637,6 +646,9 @@ body {
   background: #fefce8; border: 1px solid #fde68a; border-radius: 6px;
   padding: 0.5rem 0.75rem; font-size: 0.8rem; color: #92400e;
   margin-bottom: 0.5rem;
+}
+.route-convert-quality-note {
+  font-size: 0.75rem; color: var(--text-muted); margin-top: 0.15rem;
 }
 .route-convert-settings { margin-bottom: 0.75rem; }
 .route-convert-setting { margin-bottom: 0.5rem; }

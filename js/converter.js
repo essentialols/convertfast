@@ -27,7 +27,7 @@ const FORMAT_SIGNATURES = [
  * @returns {Promise<{mime: string, ext: string}|null>}
  */
 export async function detectFormat(file) {
-  const buf = new Uint8Array(await file.slice(0, 16).arrayBuffer());
+  const buf = new Uint8Array(await file.slice(0, 32).arrayBuffer());
   for (const fmt of FORMAT_SIGNATURES) {
     for (const [offset, sig] of fmt.offsets) {
       if (buf.length >= offset + sig.length &&
@@ -81,7 +81,12 @@ export { MAX_BATCH_SIZE };
  */
 export async function convertWithCanvas(file, targetMime, quality) {
   // createImageBitmap with imageOrientation auto-corrects EXIF rotation from iPhone photos
-  const bmp = await createImageBitmap(file, { imageOrientation: 'from-image' });
+  let bmp;
+  try {
+    bmp = await createImageBitmap(file, { imageOrientation: 'from-image' });
+  } catch {
+    throw new Error('Could not decode image. The file may be corrupted or in an unsupported format.');
+  }
   try {
     validateDimensions(bmp.width, bmp.height);
   } catch (e) {
@@ -152,6 +157,7 @@ export function downloadBlob(blob, filename) {
  */
 export async function downloadAsZip(files, zipName) {
   // fflate is loaded as a global from fflate.min.js
+  if (typeof fflate === 'undefined') throw new Error('ZIP library not loaded. Please reload the page.');
   const zipData = fflate.zipSync(
     Object.fromEntries(files.map(f => [f.name, f.data])),
     { level: 0 } // images are already compressed, no point re-compressing

@@ -12,7 +12,12 @@
 export async function stripMetadata(file, onProgress) {
   if (onProgress) onProgress(10);
 
-  const bmp = await createImageBitmap(file, { imageOrientation: 'from-image' });
+  let bmp;
+  try {
+    bmp = await createImageBitmap(file, { imageOrientation: 'from-image' });
+  } catch {
+    throw new Error('Could not decode image. The file may be corrupted or in an unsupported format.');
+  }
 
   if (onProgress) onProgress(30);
 

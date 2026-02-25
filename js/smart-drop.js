@@ -114,6 +114,16 @@ async function loadFileTypesDB() {
   return _fileTypesDB;
 }
 
+async function getClassificationTooltip(ext) {
+  try {
+    const db = await loadFileTypesDB();
+    const e = ext.toLowerCase();
+    const match = db.find(entry => entry.ext.includes(e));
+    if (!match) return '';
+    return match.label + ' | ' + match.category + ' | ' + match.description;
+  } catch { return ''; }
+}
+
 async function identifyFileType(file) {
   const db = await loadFileTypesDB();
   const buf = new Uint8Array(await file.slice(0, 32770).arrayBuffer());
@@ -250,8 +260,9 @@ async function getMediaMeta(file, mime) {
       const dur = await new Promise((resolve, reject) => {
         const a = document.createElement('audio');
         a.preload = 'metadata';
-        a.onloadedmetadata = () => { resolve(a.duration); URL.revokeObjectURL(a.src); };
-        a.onerror = () => { URL.revokeObjectURL(a.src); reject(); };
+        const timeout = setTimeout(() => { URL.revokeObjectURL(a.src); resolve(0); }, 5000);
+        a.onloadedmetadata = () => { clearTimeout(timeout); resolve(a.duration); URL.revokeObjectURL(a.src); };
+        a.onerror = () => { clearTimeout(timeout); URL.revokeObjectURL(a.src); reject(); };
         a.src = URL.createObjectURL(file);
       });
       if (dur && isFinite(dur)) meta.push(formatDuration(dur));
@@ -322,7 +333,8 @@ async function extractVideoFrames(file, container, count) {
       const t = dur * ((i + 1) / (count + 1));
       v.currentTime = t;
       await new Promise((resolve) => {
-        const onSeeked = () => { v.removeEventListener('seeked', onSeeked); resolve(); };
+        const timeout = setTimeout(() => { v.removeEventListener('seeked', onSeeked); resolve(); }, 5000);
+        const onSeeked = () => { clearTimeout(timeout); v.removeEventListener('seeked', onSeeked); resolve(); };
         v.addEventListener('seeked', onSeeked);
       });
       if (!v.videoWidth) continue;
@@ -840,6 +852,25 @@ async function runInlineConversion(file, sourceMime, resolved, routePanel, onDis
         }
         rangeWrap.appendChild(valueEl);
 
+        // Quality note (for quality sliders only)
+        let qualityNote = null;
+        if (desc.key === 'quality') {
+          qualityNote = document.createElement('div');
+          qualityNote.className = 'route-convert-quality-note';
+          const updateNote = (v) => {
+            if (v >= 100) {
+              qualityNote.textContent = 'Full quality. Converting between formats may still affect encoding.';
+            } else {
+              qualityNote.textContent = '';
+            }
+          };
+          updateNote(desc.default);
+          row.appendChild(rangeWrap);
+          row.appendChild(qualityNote);
+        } else {
+          row.appendChild(rangeWrap);
+        }
+
         if (isIndexed) {
           range.addEventListener('input', () => {
             const idx = parseInt(range.value, 10);
@@ -854,11 +885,16 @@ async function runInlineConversion(file, sourceMime, resolved, routePanel, onDis
             range.value = v;
             settingValues[desc.key] = v;
             valueEl.textContent = v + desc.unit;
+            if (qualityNote) {
+              if (v >= 100) {
+                qualityNote.textContent = 'Full quality. Converting between formats may still affect encoding.';
+              } else {
+                qualityNote.textContent = '';
+              }
+            }
             if (updateEstimate) updateEstimate();
           });
         }
-
-        row.appendChild(rangeWrap);
 
         // Label row for indexed sliders
         if (isIndexed) {
@@ -1257,7 +1293,7 @@ export function initSmartDrop() {
 
       const metaEl = document.createElement('div');
       metaEl.className = 'route-file-meta';
-      metaEl.innerHTML = formatSize(files[0].size) + ' &middot; ' + esc(dominantInfo.label);
+      metaEl.innerHTML = formatSize(files[0].size) + ' &middot; <span class="route-format-badge">' + esc(dominantInfo.label) + '</span>';
       det.appendChild(metaEl);
 
       inlineMetaEl = document.createElement('div');
@@ -1302,7 +1338,7 @@ export function initSmartDrop() {
 
       const metaEl = document.createElement('div');
       metaEl.className = 'route-file-meta';
-      metaEl.innerHTML = formatSize(files[0].size) + ' &middot; ' + esc(dominantInfo.label);
+      metaEl.innerHTML = formatSize(files[0].size) + ' &middot; <span class="route-format-badge">' + esc(dominantInfo.label) + '</span>';
       detCol.appendChild(metaEl);
 
       inlineMetaEl = document.createElement('div');
@@ -1326,7 +1362,7 @@ export function initSmartDrop() {
 
       const metaEl = document.createElement('div');
       metaEl.className = 'route-file-meta';
-      metaEl.innerHTML = formatSize(files[0].size) + ' &middot; ' + esc(dominantInfo.label);
+      metaEl.innerHTML = formatSize(files[0].size) + ' &middot; <span class="route-format-badge">' + esc(dominantInfo.label) + '</span>';
       det.appendChild(metaEl);
 
       inlineMetaEl = document.createElement('div');
@@ -1353,6 +1389,14 @@ export function initSmartDrop() {
     if (isSingle && inlineMetaEl) {
       getMediaMeta(files[0], dominant).then(parts => {
         if (parts.length > 0) inlineMetaEl.textContent = parts.join(' \u00b7 ');
+      });
+    }
+
+    // Async classification tooltip on format badge
+    const badge = routePanel.querySelector('.route-format-badge');
+    if (badge) {
+      getClassificationTooltip(dominantInfo.ext).then(tip => {
+        if (tip) badge.title = tip;
       });
     }
 

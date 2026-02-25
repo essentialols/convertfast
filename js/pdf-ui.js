@@ -36,17 +36,22 @@ export function init() {
   fileInput.addEventListener('change', () => { addFiles(fileInput.files); fileInput.value = ''; });
 
   const qualitySnaps = [10, 25, 50, 75, 80, 90, 100];
+  const qualityNote = document.getElementById('quality-note');
   if (qualitySlider && qualityValue) {
-    const saved = localStorage.getItem('cf-quality');
-    if (saved && saved >= 10 && saved <= 100) {
+    const saved = parseInt(localStorage.getItem('cf-quality'), 10);
+    if (saved >= 10 && saved <= 100) {
       qualitySlider.value = saved;
       qualityValue.textContent = saved + '%';
+      if (qualityNote) qualityNote.textContent = saved >= 100
+        ? 'Full quality. Converting between formats may still affect encoding.' : '';
     }
     qualitySlider.addEventListener('input', () => {
       const v = snapTo(parseInt(qualitySlider.value, 10), qualitySnaps, 90);
       qualitySlider.value = v;
       qualityValue.textContent = v + '%';
       localStorage.setItem('cf-quality', v);
+      if (qualityNote) qualityNote.textContent = v >= 100
+        ? 'Full quality. Converting between formats may still affect encoding.' : '';
     });
   }
 

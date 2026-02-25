@@ -132,7 +132,7 @@ async function identifyFileType(file) {
   for (const entry of db) {
     const sigHex = entry.magic.toUpperCase();
     const offset = (entry.offset || 0) * 2;
-    if (hex.length >= offset + sigHex.length && hex.substr(offset, sigHex.length) === sigHex) {
+    if (hex.length >= offset + sigHex.length && hex.substring(offset, offset + sigHex.length) === sigHex) {
       return entry;
     }
   }

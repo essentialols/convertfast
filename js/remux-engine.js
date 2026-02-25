@@ -29,7 +29,7 @@ export async function remuxMovToMp4(file, onProgress) {
   let pos = 0;
   while (pos + 8 <= bytes.length && pos < 4096) {
     const size = view.getUint32(pos);
-    if (size < 8) break;
+    if (size < 8 || size > bytes.length - pos) break;
     const type = chr4(bytes, pos + 4);
 
     if (type === 'ftyp') {

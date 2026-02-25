@@ -59,27 +59,28 @@ export async function imagesToGif(files, opts = {}) {
 
   // Step 3: Encode each frame
   const gif = GIFEncoder();
-  for (let i = 0; i < images.length; i++) {
-    ctx.clearRect(0, 0, w, h);
-    ctx.drawImage(images[i], 0, 0, w, h);
-    const imageData = ctx.getImageData(0, 0, w, h);
-    const index = applyPalette(imageData.data, palette);
-    gif.writeFrame(index, w, h, { palette, delay, dispose: 0, repeat: loop });
+  try {
+    for (let i = 0; i < images.length; i++) {
+      ctx.clearRect(0, 0, w, h);
+      ctx.drawImage(images[i], 0, 0, w, h);
+      const imageData = ctx.getImageData(0, 0, w, h);
+      const index = applyPalette(imageData.data, palette);
+      gif.writeFrame(index, w, h, { palette, delay, dispose: 0, repeat: loop });
 
-    const pct = 10 + Math.round((i / images.length) * 90);
-    onProgress(pct, `Encoding frame ${i + 1} of ${images.length}...`);
+      const pct = 10 + Math.round((i / images.length) * 90);
+      onProgress(pct, `Encoding frame ${i + 1} of ${images.length}...`);
 
-    // Yield to keep UI responsive
-    if (i % 3 === 0) await new Promise(r => setTimeout(r, 0));
+      // Yield to keep UI responsive
+      if (i % 3 === 0) await new Promise(r => setTimeout(r, 0));
+    }
+
+    gif.finish();
+    const blob = new Blob([gif.bytes()], { type: 'image/gif' });
+    onProgress(100, `Done: ${images.length} frames`);
+    return blob;
+  } finally {
+    for (const img of images) img.close();
   }
-
-  // Clean up ImageBitmaps
-  for (const img of images) img.close();
-
-  gif.finish();
-  const blob = new Blob([gif.bytes()], { type: 'image/gif' });
-  onProgress(100, `Done: ${images.length} frames`);
-  return blob;
 }
 
 export { DEFAULT_DELAY, DEFAULT_MAX_WIDTH };

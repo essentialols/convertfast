@@ -62,6 +62,7 @@ async function textToPdfBlob(text, onProgress) {
 async function extractEpubText(file, onProgress) {
   if (onProgress) onProgress(10);
   const buf = new Uint8Array(await file.arrayBuffer());
+  if (typeof fflate === 'undefined') throw new Error('ZIP library not loaded. Please reload the page.');
   const zip = fflate.unzipSync(buf);
   if (onProgress) onProgress(20);
 
@@ -135,8 +136,7 @@ async function extractEpubText(file, onProgress) {
     // Try exact match first, then try decoding URI components
     let data = zip[path];
     if (!data) {
-      const decoded = decodeURIComponent(path);
-      data = zip[decoded];
+      try { data = zip[decodeURIComponent(path)]; } catch {}
     }
     if (!data) continue;
 
@@ -332,6 +332,7 @@ export async function rtfToPdf(file, onProgress) {
 async function extractDocxText(file, onProgress) {
   if (onProgress) onProgress(10);
   const buf = new Uint8Array(await file.arrayBuffer());
+  if (typeof fflate === 'undefined') throw new Error('ZIP library not loaded. Please reload the page.');
   const zip = fflate.unzipSync(buf);
   if (onProgress) onProgress(30);
 
@@ -445,7 +446,8 @@ function palmDocDecompress(data) {
       const len = (next & 0x07) + 3;
       const pos = out.length;
       for (let j = 0; j < len; j++) {
-        out.push(out[pos - dist + j] || 0);
+        const idx = pos - dist + j;
+        out.push(idx >= 0 && idx < out.length ? out[idx] : 0);
       }
     } else if (byte >= 0x09 && byte <= 0x7F) {
       // Literal byte
@@ -494,6 +496,8 @@ async function extractMobiText(file, onProgress) {
   const rec0Start = recordOffsets[0];
   const rec0End = recordOffsets.length > 1 ? recordOffsets[1] : buf.length;
   if (rec0Start >= buf.length) throw new Error('Invalid MOBI file: record 0 out of bounds.');
+  if (rec0End - rec0Start < 14) throw new Error('Invalid MOBI file: record 0 header too short.');
+  if (rec0Start + 14 > buf.length) throw new Error('Invalid MOBI file: record 0 header too short.');
 
   // PalmDOC header (first 16 bytes of record 0)
   const compression = view.getUint16(rec0Start, false);

@@ -143,7 +143,7 @@ function setupDragReorder(el) {
     else el.before(dragSrc);
     // Sync the files array to match new DOM order
     const [moved] = files.splice(fromIdx, 1);
-    files.splice(fromIdx < toIdx ? toIdx - 1 : toIdx, 0, moved);
+    files.splice(toIdx, 0, moved);
   });
 }
 

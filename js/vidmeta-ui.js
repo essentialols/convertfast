@@ -18,6 +18,7 @@ let dropZone, fileInput, fileList, metadataPanel;
 let stripAllBtn, clearAllBtn;
 let currentFile = null;
 let processing = false;
+let previewUrl = null;
 
 export function init() {
   dropZone = document.getElementById('drop-zone');
@@ -81,6 +82,7 @@ async function handleFile(files) {
   }
 
   dropZone.classList.add('compact');
+  renderVideoPreview(file);
   showFileItem(file, null);
   setStatus('Loading metadata library...');
 
@@ -92,6 +94,63 @@ async function handleFile(files) {
   } catch (err) {
     setStatus('Error: ' + err.message);
   }
+}
+
+function renderVideoPreview(file) {
+  const wrapper = document.createElement('div');
+  wrapper.id = 'video-preview';
+  wrapper.className = 'route-video-preview';
+  wrapper.style.paddingBottom = '0.75rem';
+  wrapper.style.borderBottom = '1px solid var(--border)';
+  wrapper.style.marginBottom = '0.75rem';
+  wrapper.style.textAlign = 'left';
+
+  const filmstrip = document.createElement('div');
+  filmstrip.className = 'route-filmstrip';
+  wrapper.appendChild(filmstrip);
+
+  fileList.parentNode.insertBefore(wrapper, fileList);
+  extractFrames(file, filmstrip);
+}
+
+async function extractFrames(file, container, count) {
+  count = count || 6;
+  try {
+    const url = URL.createObjectURL(file);
+    previewUrl = url;
+    const v = document.createElement('video');
+    v.preload = 'auto';
+    v.muted = true;
+    v.src = url;
+    await new Promise((resolve, reject) => {
+      v.onloadeddata = resolve;
+      v.onerror = reject;
+    });
+    const dur = v.duration;
+    if (!dur || !isFinite(dur) || !v.videoWidth) return;
+    const gap = 3;
+    const containerW = container.offsetWidth || 700;
+    const aspect = v.videoWidth / v.videoHeight;
+    const frameW = Math.floor((containerW - gap * (count - 1)) / count);
+    const frameH = Math.round(frameW / aspect);
+    for (let i = 0; i < count; i++) {
+      const t = dur * ((i + 1) / (count + 1));
+      v.currentTime = t;
+      await new Promise((resolve) => {
+        const timeout = setTimeout(() => { v.removeEventListener('seeked', onSeeked); resolve(); }, 5000);
+        const onSeeked = () => { clearTimeout(timeout); v.removeEventListener('seeked', onSeeked); resolve(); };
+        v.addEventListener('seeked', onSeeked);
+      });
+      if (!v.videoWidth) continue;
+      const canvas = document.createElement('canvas');
+      canvas.width = frameW;
+      canvas.height = frameH;
+      canvas.className = 'route-frame';
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(v, 0, 0, frameW, frameH);
+      container.appendChild(canvas);
+    }
+  } catch { /* graceful failure: filmstrip stays empty */ }
 }
 
 function showFileItem(file, error) {
@@ -130,6 +189,9 @@ function resetState() {
   if (stripAllBtn) stripAllBtn.style.display = 'none';
   if (clearAllBtn) clearAllBtn.style.display = 'none';
   if (dropZone) dropZone.classList.remove('compact');
+  if (previewUrl) { URL.revokeObjectURL(previewUrl); previewUrl = null; }
+  const prev = document.getElementById('video-preview');
+  if (prev) prev.remove();
 }
 
 function renderMetadata(metadata) {

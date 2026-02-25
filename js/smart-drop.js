@@ -226,7 +226,19 @@ async function getMediaMeta(file, mime) {
     if (mime.startsWith('image/')) {
       const { readMetadata } = await import('./exif-engine.js');
       const md = await readMetadata(file);
-      const w = md.basic?.['Width'], h = md.basic?.['Height'];
+      let w = md.basic?.['Width'], h = md.basic?.['Height'];
+      // Fallback: get dimensions from browser Image API (works for all formats)
+      if (!w || !h) {
+        try {
+          const dims = await new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => { resolve({ w: img.naturalWidth, h: img.naturalHeight }); URL.revokeObjectURL(img.src); };
+            img.onerror = () => { URL.revokeObjectURL(img.src); reject(); };
+            img.src = URL.createObjectURL(file);
+          });
+          w = dims.w; h = dims.h;
+        } catch {}
+      }
       if (w && h) meta.push(w + ' x ' + h);
       const model = md.camera?.['Model'];
       if (model) meta.push(model.trim());
@@ -1213,8 +1225,14 @@ async function runInlineMetadata(file, mime, metaEl, chevron) {
   try {
     if (mime.startsWith('video/')) {
       await renderInlineVideoMeta(file, panel);
-    } else {
+    } else if (mime.startsWith('image/')) {
       await renderInlineImageMeta(file, panel);
+    } else if (mime === 'application/pdf') {
+      await renderInlinePdfMeta(file, panel);
+    } else if (mime.startsWith('audio/')) {
+      await renderInlineAudioMeta(file, panel);
+    } else {
+      panel.innerHTML = '<div class="meta-notice">No additional metadata available.</div>';
     }
     chevron.textContent = '\u25be';
   } catch (err) {
@@ -1401,6 +1419,118 @@ async function renderInlineImageMeta(file, container) {
       const displayVal = field === 'File Size' ? formatSize(value) : String(value);
       cell.innerHTML = '<span class="route-meta-compact-key">' + esc(field) + '</span> ' +
         '<span class="route-meta-compact-val">' + esc(displayVal) + '</span>';
+      grid.appendChild(cell);
+    }
+    group.appendChild(grid);
+    container.appendChild(group);
+  }
+}
+
+async function renderInlinePdfMeta(file, container) {
+  container.innerHTML = '<div class="meta-notice">Loading PDF metadata...</div>';
+  const pdfjs = await import('https://cdn.jsdelivr.net/npm/pdfjs-dist@5.4.624/build/pdf.min.mjs');
+  pdfjs.GlobalWorkerOptions.workerSrc =
+    'https://cdn.jsdelivr.net/npm/pdfjs-dist@5.4.624/build/pdf.worker.min.mjs';
+  const data = new Uint8Array(await file.arrayBuffer());
+  const pdf = await pdfjs.getDocument({ data }).promise;
+  const meta = await pdf.getMetadata().catch(() => null);
+  container.innerHTML = '';
+
+  const entries = [];
+  const info = meta?.info || {};
+  if (info.Title) entries.push(['Title', info.Title]);
+  if (info.Author) entries.push(['Author', info.Author]);
+  if (info.Subject) entries.push(['Subject', info.Subject]);
+  if (info.Creator) entries.push(['Creator', info.Creator]);
+  if (info.Producer) entries.push(['Producer', info.Producer]);
+  if (info.CreationDate) entries.push(['Created', info.CreationDate.replace(/^D:/, '').replace(/'/g, '')]);
+  if (info.ModDate) entries.push(['Modified', info.ModDate.replace(/^D:/, '').replace(/'/g, '')]);
+  if (info.Keywords) entries.push(['Keywords', info.Keywords]);
+  entries.push(['Pages', String(pdf.numPages)]);
+
+  // Page dimensions from first page
+  const page = await pdf.getPage(1);
+  const vp = page.getViewport({ scale: 1 });
+  const ptW = Math.round(vp.width);
+  const ptH = Math.round(vp.height);
+  const inW = (vp.width / 72).toFixed(1);
+  const inH = (vp.height / 72).toFixed(1);
+  entries.push(['Page Size', ptW + ' x ' + ptH + ' pt (' + inW + ' x ' + inH + ' in)']);
+
+  if (entries.length === 0) {
+    container.innerHTML = '<div class="meta-notice">No metadata found in this PDF.</div>';
+    return;
+  }
+
+  const group = document.createElement('div');
+  group.className = 'route-meta-compact-group';
+  const title = document.createElement('div');
+  title.className = 'route-meta-compact-title';
+  title.textContent = 'Document';
+  group.appendChild(title);
+  const grid = document.createElement('div');
+  grid.className = 'route-meta-compact-grid';
+  for (const [label, value] of entries) {
+    const cell = document.createElement('div');
+    cell.className = 'route-meta-compact-cell';
+    cell.innerHTML = '<span class="route-meta-compact-key">' + esc(label) + '</span> ' +
+      '<span class="route-meta-compact-val">' + esc(value) + '</span>';
+    grid.appendChild(cell);
+  }
+  group.appendChild(grid);
+  container.appendChild(group);
+}
+
+async function renderInlineAudioMeta(file, container) {
+  const { readVideoMetadata } = await import('./vidmeta-engine.js');
+  container.innerHTML = '<div class="meta-notice">Loading metadata library...</div>';
+  const metadata = await readVideoMetadata(file);
+  container.innerHTML = '';
+
+  if (metadata._empty) {
+    container.innerHTML = '<div class="meta-notice">No metadata found in this audio file.</div>';
+    return;
+  }
+
+  const raw = metadata._tracks || {};
+  const gen = raw.general || {};
+  const aud = raw.audio || {};
+
+  const skipKeys = new Set([
+    '@type', '@typeorder', 'DataSize', 'FooterSize', 'HeaderSize',
+    'StreamSize', 'FileSize', 'StreamOrder', 'ID', 'UniqueID', 'extra',
+    'Duration',
+  ]);
+
+  const friendlyName = (key) => key
+    .replace(/_/g, ' ').replace(/([a-z])([A-Z])/g, '$1 $2')
+    .replace(/\bString\b/g, '').replace(/\bNum\b/, '#')
+    .replace(/\s+/g, ' ').trim();
+
+  const sections = [
+    { label: 'General', data: gen },
+    { label: 'Audio', data: aud },
+  ];
+
+  for (const sec of sections) {
+    const entries = Object.entries(sec.data)
+      .filter(([k, v]) => !skipKeys.has(k) && typeof v !== 'object' && v !== '' && v != null)
+      .map(([k, v]) => [friendlyName(k), String(v)]);
+    if (entries.length === 0) continue;
+
+    const group = document.createElement('div');
+    group.className = 'route-meta-compact-group';
+    const title = document.createElement('div');
+    title.className = 'route-meta-compact-title';
+    title.textContent = sec.label;
+    group.appendChild(title);
+    const grid = document.createElement('div');
+    grid.className = 'route-meta-compact-grid';
+    for (const [label, value] of entries) {
+      const cell = document.createElement('div');
+      cell.className = 'route-meta-compact-cell';
+      cell.innerHTML = '<span class="route-meta-compact-key">' + esc(label) + '</span> ' +
+        '<span class="route-meta-compact-val">' + esc(value) + '</span>';
       grid.appendChild(cell);
     }
     group.appendChild(grid);

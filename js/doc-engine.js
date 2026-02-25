@@ -445,7 +445,8 @@ function palmDocDecompress(data) {
       const len = (next & 0x07) + 3;
       const pos = out.length;
       for (let j = 0; j < len; j++) {
-        out.push(out[pos - dist + j] || 0);
+        const idx = pos - dist + j;
+        out.push(idx >= 0 ? out[idx] : 0);
       }
     } else if (byte >= 0x09 && byte <= 0x7F) {
       // Literal byte

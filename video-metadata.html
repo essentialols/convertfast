@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Video Metadata Viewer - Free, Private | IrisFiles</title>
+  <meta name="description" content="View and strip metadata from video files in your browser. See codec, bitrate, frame rate, resolution, audio info, and more. Supports MP4, MOV, WebM, AVI, MKV. No upload required.">
+  <meta property="og:title" content="Video Metadata Viewer - Free, Private | IrisFiles">
+  <meta property="og:description" content="View and strip metadata from video files in your browser. See codec, bitrate, frame rate, resolution, audio info, and more. No upload required.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://irisfiles.com/video-metadata">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Video Metadata Viewer - Free, Private | IrisFiles">
+  <meta name="twitter:description" content="View and strip metadata from video files in your browser. See codec, bitrate, frame rate, resolution, audio info, and more. No upload required.">
+  <meta property="og:image" content="https://irisfiles.com/img/og-default.png">
+  <meta name="twitter:image" content="https://irisfiles.com/img/og-default.png">
+  <link rel="canonical" href="https://irisfiles.com/video-metadata">
+  <link rel="stylesheet" href="css/style.css?v=2">
+  <link rel="icon" href="/favicon.png" type="image/png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <script type="application/ld+json">
+  [
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Video Metadata Viewer - IrisFiles",
+      "url": "https://irisfiles.com/video-metadata",
+      "description": "View and strip metadata from video files in your browser. See codec, bitrate, frame rate, audio info, and more. No server upload.",
+      "applicationCategory": "MultimediaApplication",
+      "operatingSystem": "Any",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What metadata do video files contain?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Video files can contain metadata including video codec (H.264, H.265, VP9, AV1), resolution, frame rate, bitrate, audio codec, sample rate, channel layout, creation date, encoder software, and tags like title, artist, and copyright. This data is embedded in the container format (MP4, MKV, WebM, etc.)."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does stripping metadata re-encode the video?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. IrisFiles uses FFmpeg.wasm with copy mode (-c copy), which removes only the metadata bytes without touching the video or audio streams. This means zero quality loss and fast processing regardless of video length."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Why is the download larger or smaller than the original?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The stripped file should be very close to the original size, typically a few kilobytes smaller due to removed metadata. If the size differs significantly, the container may have been remuxed slightly differently, but the video and audio quality remain identical."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Are my videos uploaded to a server?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. All metadata reading and stripping happens entirely in your browser using WebAssembly (mediainfo.js for reading, FFmpeg.wasm for stripping). Your video files never leave your device."
+          }
+        }
+      ]
+    }
+  ]
+  </script>
+</head>
+<body>
+  <header class="header">
+    <div class="container container--wide">
+      <a href="/" class="logo">Iris<span>Files</span></a>
+      <nav class="nav">
+        <a href="/about">About</a>
+        <a href="https://ko-fi.com/irisfiles" class="support-btn" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 8h1.5a2.5 2.5 0 010 5H17"/><path d="M3 8h14v9a4 4 0 01-4 4H7a4 4 0 01-4-4V8z" fill="currentColor" stroke="none" opacity=".15"/><path d="M3 8h14v9a4 4 0 01-4 4H7a4 4 0 01-4-4V8z"/><path d="M6 1v3M10 1v3M14 1v3" opacity=".6"/></svg> Support this project</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <a href="/" class="back-link"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 12L6 8l4-4"/></svg> All Converters</a>
+    <section class="hero">
+      <h1>Video Metadata Viewer</h1>
+      <p>View and strip metadata from video files. See codec, bitrate, frame rate, resolution, audio details, and more. All processing happens in your browser.</p>
+    </section>
+
+    <div class="trust-banner">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 1L3 5v4c0 4.4 3 8.5 7 9.9 4-1.4 7-5.5 7-9.9V5l-7-4z" fill="#16a34a" opacity=".15"/><path d="M10 1L3 5v4c0 4.4 3 8.5 7 9.9 4-1.4 7-5.5 7-9.9V5l-7-4z" stroke="#16a34a" stroke-width="1.5" fill="none"/><path d="M7 10l2 2 4-4" stroke="#16a34a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Your files never leave your browser. Zero server uploads. 100% private.
+    </div>
+
+    <div class="experimental-banner">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 1.5L1.5 17.5h17L10 1.5z" fill="#d97706" opacity=".15"/><path d="M10 1.5L1.5 17.5h17L10 1.5z" stroke="#d97706" stroke-width="1.5" fill="none" stroke-linejoin="round"/><path d="M10 7v4" stroke="#d97706" stroke-width="1.5" stroke-linecap="round"/><circle cx="10" cy="14" r=".75" fill="#d97706"/></svg>
+      Metadata stripping uses FFmpeg.wasm (~10 MB download, cached after first use). Reading metadata uses mediainfo.js (~1.5 MB).
+    </div>
+
+    <div class="disclaimer-banner">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 1.5L1.5 17.5h17L10 1.5z" fill="#dc2626" opacity=".15"/><path d="M10 1.5L1.5 17.5h17L10 1.5z" stroke="#dc2626" stroke-width="1.5" fill="none" stroke-linejoin="round"/><path d="M10 7v4" stroke="#dc2626" stroke-width="1.5" stroke-linecap="round"/><circle cx="10" cy="14" r=".75" fill="#dc2626"/></svg>
+      This tool is provided as-is with no warranty. We are not responsible for any data loss or issues that may occur. Always keep backups of your original files.
+    </div>
+
+    <div id="drop-zone" class="drop-zone">
+      <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M28 8H12a4 4 0 00-4 4v24a4 4 0 004 4h24a4 4 0 004-4V20L28 8z"/><path d="M28 8v12h12"/><path d="M24 34v-8m-4 4l4-4 4 4"/></svg>
+      <p>Drag & drop a video here, or <strong>click to browse</strong></p>
+      <p style="font-size:0.8rem;margin-top:0.5rem">Supports MP4, MOV, WebM, AVI, MKV. Max 100 MB per file.</p>
+      <input type="file" id="file-input" accept="video/*,.mp4,.mov,.webm,.avi,.mkv">
+    </div>
+
+    <div id="file-list" class="file-list"></div>
+
+    <div id="metadata-panel" class="metadata-panel"></div>
+
+    <div class="batch-actions">
+      <button id="strip-all" class="btn btn--danger" style="display:none;border:1px solid var(--danger);padding:0.6rem 1.25rem;font-size:0.9rem">Strip All Metadata</button>
+      <button id="clear-all" class="btn btn--secondary" style="display:none">Clear</button>
+    </div>
+
+    <div class="related-tools">
+      <h2>Related Tools</h2>
+      <div class="related-tools__links">
+        <a href="/compress-video">Compress Video</a>
+        <a href="/mov-to-mp4">MOV to MP4</a>
+        <a href="/video-to-gif">Video to GIF</a>
+        <a href="/image-metadata">Image Metadata</a>
+      </div>
+    </div>
+
+    <section class="faq">
+      <h2>Frequently Asked Questions</h2>
+      <div class="faq-item">
+        <button class="faq-question">What metadata do video files contain?</button>
+        <div class="faq-answer">
+          <p>Video files can contain metadata including video codec (H.264, H.265, VP9, AV1), resolution, frame rate, bitrate, audio codec, sample rate, channel layout, creation date, encoder software, and tags like title, artist, and copyright. This data is embedded in the container format (MP4, MKV, WebM, etc.).</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question">Does stripping metadata re-encode the video?</button>
+        <div class="faq-answer">
+          <p>No. IrisFiles uses FFmpeg.wasm with copy mode (-c copy), which removes only the metadata bytes without touching the video or audio streams. This means zero quality loss and fast processing regardless of video length.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question">Why is the download larger or smaller than the original?</button>
+        <div class="faq-answer">
+          <p>The stripped file should be very close to the original size, typically a few kilobytes smaller due to removed metadata. If the size differs significantly, the container may have been remuxed slightly differently, but the video and audio quality remain identical.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question">Are my videos uploaded to a server?</button>
+        <div class="faq-answer">
+          <p>No. All metadata reading and stripping happens entirely in your browser using WebAssembly (mediainfo.js for reading, FFmpeg.wasm for stripping). Your video files never leave your device.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-links">
+        <a href="/">All Converters</a>
+        <a href="/compress-video">Compress Video</a>
+        <a href="/image-metadata">Image Metadata</a>
+        <a href="/about">About</a>
+      </div>
+      <p>IrisFiles. All processing happens in your browser.</p>
+    </div>
+  </footer>
+
+  <script type="module" src="js/vidmeta-boot.js"></script>
+</body>
+</html>

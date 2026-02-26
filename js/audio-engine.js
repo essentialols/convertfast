@@ -206,7 +206,7 @@ function encodeWav(audioBuffer, onProgress) {
  * @returns {Promise<Blob>}
  */
 async function encodeMp3(audioBuffer, onProgress, kbps = 128) {
-  const numChannels = Math.min(audioBuffer.numberOfChannels, 2); // lamejs supports mono/stereo
+  const numChannels = Math.max(1, Math.min(audioBuffer.numberOfChannels, 2)); // lamejs supports mono/stereo
   const sampleRate = audioBuffer.sampleRate;
   const encoder = new lamejs.Mp3Encoder(numChannels, sampleRate, kbps);
   const chunkSize = 1152;

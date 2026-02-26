@@ -96,7 +96,7 @@ export async function convertAudioFFmpeg(file, targetFormat, onProgress = () => 
 
   onProgress(15);
 
-  const inputExt = (file.name.match(/\.(\w+)$/) || [, 'wav'])[1].toLowerCase();
+  const inputExt = ((file.name || '').match(/\.(\w+)$/) || [, 'wav'])[1].toLowerCase();
   const inputName = `input.${inputExt}`;
   const outputName = `output.${fmt.ext}`;
 

@@ -48,6 +48,7 @@ export async function createZip(files, onProgress) {
     if (onProgress) onProgress(Math.round(((i + 1) / files.length) * 60));
   }
 
+  if (typeof fflate === 'undefined') throw new Error('ZIP library not loaded. Please reload the page.');
   const zipped = fflate.zipSync(zipInput);
   if (onProgress) onProgress(90);
 
@@ -63,6 +64,7 @@ export async function createZip(files, onProgress) {
  * @returns {Promise<Array<{name: string, compressedSize: number, uncompressedSize: number}>>}
  */
 export async function zipToFileList(file) {
+  if (typeof fflate === 'undefined') throw new Error('ZIP library not loaded. Please reload the page.');
   const buffer = await file.arrayBuffer();
   const raw = new Uint8Array(buffer);
   if (typeof fflate === 'undefined') throw new Error('ZIP library not loaded. Please reload the page.');

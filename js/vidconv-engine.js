@@ -87,7 +87,7 @@ export async function convertVideo(file, targetFormat, onProgress, onStatus, opt
   if (onProgress) onProgress(15);
   if (onStatus) onStatus('Reading file...');
 
-  const inputExt = (file.name.match(/\.(\w+)$/) || [, 'mp4'])[1].toLowerCase();
+  const inputExt = ((file.name || '').match(/\.(\w+)$/) || [, 'mp4'])[1].toLowerCase();
   const inputName = `input.${inputExt}`;
   const outputName = `output.${fmt.ext}`;
 
@@ -215,7 +215,7 @@ export async function compressVideo(file, opts, onProgress, onStatus) {
   if (onProgress) onProgress(15);
   if (onStatus) onStatus('Reading file...');
 
-  const inputExt = (file.name.match(/\.(\w+)$/) || [, 'mp4'])[1].toLowerCase();
+  const inputExt = ((file.name || '').match(/\.(\w+)$/) || [, 'mp4'])[1].toLowerCase();
   const inputName = `input.${inputExt}`;
   const outputName = 'output.mp4';
 

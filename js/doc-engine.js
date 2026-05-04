@@ -443,7 +443,7 @@ function palmDocDecompress(data) {
       for (let j = 0; j < byte && i < data.length; j++) {
         out.push(data[i++]);
       }
-    } else if (byte >= 0x80) {
+    } else if (byte >= 0x80 && byte <= 0xBF) {
       // LZ77 back-reference: 2-byte token
       if (i >= data.length) break;
       const next = data[i++];

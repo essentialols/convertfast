@@ -65,7 +65,7 @@ export async function imagesToGif(files, opts = {}) {
       ctx.drawImage(images[i], 0, 0, w, h);
       const imageData = ctx.getImageData(0, 0, w, h);
       const index = applyPalette(imageData.data, palette);
-      gif.writeFrame(index, w, h, { palette, delay, dispose: 0, repeat: loop });
+      gif.writeFrame(index, w, h, { palette, delay, dispose: 0, ...(i === 0 ? { repeat: loop } : {}) });
 
       const pct = 10 + Math.round((i / images.length) * 90);
       onProgress(pct, `Encoding frame ${i + 1} of ${images.length}...`);

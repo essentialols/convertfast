@@ -49,8 +49,8 @@ export async function imagesToPdf(files, onProgress, quality = 0.92) {
   for (let i = 0; i < files.length; i++) {
     const file = files[i];
     const url = URL.createObjectURL(file.blob);
-    const img = await loadImage(url);
-    URL.revokeObjectURL(url);
+    let img;
+    try { img = await loadImage(url); } finally { URL.revokeObjectURL(url); }
 
     const w = img.naturalWidth;
     const h = img.naturalHeight;

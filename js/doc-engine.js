@@ -338,7 +338,12 @@ async function extractDocxText(file, onProgress) {
   if (onProgress) onProgress(10);
   const buf = new Uint8Array(await file.arrayBuffer());
   if (typeof fflate === 'undefined') throw new Error('ZIP library not loaded. Please reload the page.');
-  const zip = fflate.unzipSync(buf);
+  let zip;
+  try {
+    zip = fflate.unzipSync(buf);
+  } catch (e) {
+    throw new Error('Failed to extract DOCX: file may be corrupted or not a valid DOCX archive.');
+  }
   if (onProgress) onProgress(30);
 
   // Find word/document.xml

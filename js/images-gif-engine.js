@@ -40,6 +40,7 @@ export async function imagesToGif(files, opts = {}) {
   canvas.width = w;
   canvas.height = h;
   const ctx = canvas.getContext('2d', { willReadFrequently: true });
+  if (!ctx) throw new Error('Could not get canvas context');
 
   // Step 2: Sample pixels from all frames for global palette
   onProgress(5, 'Building color palette...');

@@ -112,11 +112,13 @@ export function init() {
     btn.addEventListener('click', () => {
       const item = btn.parentElement;
       const answer = item.querySelector('.faq-answer');
+      if (!answer) return;
       const isOpen = item.classList.contains('open');
       // Close all
       document.querySelectorAll('.faq-item.open').forEach(el => {
         el.classList.remove('open');
-        el.querySelector('.faq-answer').style.maxHeight = null;
+        const a = el.querySelector('.faq-answer');
+        if (a) a.style.maxHeight = null;
       });
       if (!isOpen) {
         item.classList.add('open');

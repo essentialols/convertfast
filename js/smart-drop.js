@@ -109,9 +109,14 @@ let _fileTypesDB = null;
 
 async function loadFileTypesDB() {
   if (_fileTypesDB) return _fileTypesDB;
-  const resp = await fetch('/data/file-signatures.json');
-  _fileTypesDB = await resp.json();
-  return _fileTypesDB;
+  try {
+    const resp = await fetch('/data/file-signatures.json');
+    if (!resp.ok) return [];
+    _fileTypesDB = await resp.json();
+    return _fileTypesDB;
+  } catch {
+    return [];
+  }
 }
 
 async function getClassificationTooltip(ext) {

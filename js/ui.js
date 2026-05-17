@@ -116,9 +116,10 @@ export function init() {
       // Close all
       document.querySelectorAll('.faq-item.open').forEach(el => {
         el.classList.remove('open');
-        el.querySelector('.faq-answer').style.maxHeight = null;
+        const a = el.querySelector('.faq-answer');
+        if (a) a.style.maxHeight = null;
       });
-      if (!isOpen) {
+      if (!isOpen && answer) {
         item.classList.add('open');
         answer.style.maxHeight = answer.scrollHeight + 'px';
       }

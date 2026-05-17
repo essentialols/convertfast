@@ -58,6 +58,7 @@ export async function videoToGif(file, opts = {}) {
   canvas.width = w;
   canvas.height = h;
   const ctx = canvas.getContext('2d', { willReadFrequently: true });
+  if (!ctx) throw new Error('Could not get canvas context');
 
   // Step 1: Sample frames for global palette
   onProgress(0, 'Analyzing colors...');

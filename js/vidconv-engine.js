@@ -113,7 +113,7 @@ function applyQualityToArgs(args, quality) {
   if (bvIdx >= 0) {
     const raw = out[bvIdx + 1];
     const isM = raw.includes("M");
-    const baseK = parseInt(raw) * (isM ? 1000 : 1);
+    const baseK = parseFloat(raw) * (isM ? 1000 : 1);
     const scale = quality === "medium" ? 0.6 : 0.35;
     const scaledK = Math.round(baseK * scale);
     out[bvIdx + 1] =

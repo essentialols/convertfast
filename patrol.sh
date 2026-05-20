@@ -140,8 +140,7 @@ echo "" | tee -a "$LOG"
 echo "Found $COUNT issue(s)." | tee -a "$LOG"
 
 if [[ "$COUNT" == "0" ]]; then
-  echo "Clean patrol. Nothing to fix." | tee -a "$LOG"
-  exit 0
+  echo "Clean patrol. No code bugs to fix." | tee -a "$LOG"
 fi
 
 if [[ "$DRY_RUN" == true ]]; then
@@ -149,7 +148,12 @@ if [[ "$DRY_RUN" == true ]]; then
   exit 0
 fi
 
-# --- Phase 2: Fix each issue in an isolated worktree ---
+# --- Phase 2: Fix each issue in an isolated worktree (skip if 0 issues) ---
+FIXED=0
+SKIPPED=0
+WORKTREE_DIR="$PROJECT_DIR/.patrol/worktree"
+
+if [[ "$COUNT" != "0" ]]; then
 echo "" | tee -a "$LOG"
 echo "Phase 2: Fixing issues (using worktrees for isolation)..." | tee -a "$LOG"
 
@@ -159,10 +163,6 @@ echo "$ISSUES" | python3 -c "
 import sys, json
 for i, issue in enumerate(json.load(sys.stdin)):
     print(f\"{i}|{issue['file']}|{issue['severity']}|{issue['description']}|{issue.get('fix','')}\")" > "$ISSUES_FILE"
-
-FIXED=0
-SKIPPED=0
-WORKTREE_DIR="$PROJECT_DIR/.patrol/worktree"
 
 while IFS='|' read -r idx file severity desc fix; do
   FIX_BRANCH="patrol/${TIMESTAMP}-${idx}"
@@ -251,6 +251,120 @@ PREOF
 done < "$ISSUES_FILE"
 
 rm -f "$ISSUES_FILE"
+fi  # end of COUNT != 0
+
+# --- Phase 3: Run E2E test suite ---
+echo "" | tee -a "$LOG"
+echo "Phase 3: Running E2E test suite..." | tee -a "$LOG"
+
+E2E_RESULT_FILE=$(mktemp)
+if (cd "$PROJECT_DIR" && npx playwright test --reporter=json > "$E2E_RESULT_FILE" 2>>"$LOG"); then
+  E2E_PASSED=$(python3 -c "import sys,json; r=json.load(open('$E2E_RESULT_FILE')); print(r['stats']['expected'])" 2>/dev/null || echo "?")
+  echo "E2E: all $E2E_PASSED tests passed." | tee -a "$LOG"
+else
+  E2E_PASSED=$(python3 -c "import sys,json; r=json.load(open('$E2E_RESULT_FILE')); print(r['stats']['expected'])" 2>/dev/null || echo "?")
+  E2E_FAILED=$(python3 -c "import sys,json; r=json.load(open('$E2E_RESULT_FILE')); print(r['stats']['unexpected'])" 2>/dev/null || echo "?")
+  E2E_FAILURES=$(python3 -c "
+import json
+r = json.load(open('$E2E_RESULT_FILE'))
+for s in r.get('suites', []):
+  for sp in s.get('specs', []):
+    for t in sp.get('tests', []):
+      if t.get('status') == 'unexpected':
+        print(f\"  - {sp['title']}: {t['results'][0].get('error',{}).get('message','unknown')[:120]}\")
+" 2>/dev/null || echo "  (could not parse failures)")
+  echo "E2E: $E2E_PASSED passed, $E2E_FAILED FAILED." | tee -a "$LOG"
+  echo "$E2E_FAILURES" | tee -a "$LOG"
+
+  # Create an issue for E2E failures
+  gh issue create \
+    --title "patrol: E2E test failures ($E2E_FAILED failing)" \
+    --label "patrol,bug" \
+    --body "$(cat <<E2EEOF
+**Date:** $(date +%Y-%m-%d)
+**Passed:** $E2E_PASSED
+**Failed:** $E2E_FAILED
+
+**Failing tests:**
+$E2E_FAILURES
+
+---
+*Automated patrol E2E run. Review failures and fix or update tests.*
+E2EEOF
+)" 2>>"$LOG" || true
+fi
+rm -f "$E2E_RESULT_FILE"
+
+# --- Phase 4: Develop new tests for uncovered features ---
+echo "" | tee -a "$LOG"
+echo "Phase 4: Developing new tests for uncovered features..." | tee -a "$LOG"
+
+TEST_DEV_BRANCH="patrol/${TIMESTAMP}-tests"
+rm -rf "$WORKTREE_DIR" 2>/dev/null || true
+git branch -D "$TEST_DEV_BRANCH" 2>/dev/null || true
+git worktree add -b "$TEST_DEV_BRANCH" "$WORKTREE_DIR" main 2>>"$LOG"
+
+TEST_DEV_PROMPT="You are a test development bot for IrisFiles. Your working directory is $WORKTREE_DIR.
+
+Your job: find features that lack E2E test coverage and write new Playwright tests.
+
+Steps:
+1. Read the existing test files in test/e2e/ to understand what is already covered
+2. Read recent git changes: git log --oneline -20 and git diff HEAD~5 --stat
+3. Read the JS engine and UI files to find features NOT yet tested
+4. Write new tests in the EXISTING test files (add to the most appropriate file)
+5. Follow the patterns in the existing tests exactly (imports, selectors, fixtures)
+6. Focus on: new conversion routes, edge cases, error handling, UI controls
+7. Available fixtures: sample.png, sample.jpg, sample.webp, sample.bmp, sample.gif, sample2.png, sample2.jpg, large.jpg, transparent.png, sample.pdf, sample2.pdf, sample.wav, sample.mp3, sample.ogg, sample.mp4, sample.mov, sample.avi, sample.rtf, sample.txt, sample.zip
+8. Run: cd $WORKTREE_DIR && npx playwright test --reporter=line 2>&1 | tail -5
+9. If new tests fail, fix them or remove them
+10. Only commit tests that pass
+
+Output a summary of what tests you added and why."
+
+TEST_DEV_OUTPUT=$(claude --print \
+  --dangerously-skip-permissions \
+  --allowedTools "Read Glob Grep Edit Write Bash" \
+  -p "$TEST_DEV_PROMPT" 2>>"$LOG") || true
+
+echo "$TEST_DEV_OUTPUT" | tail -10 | tee -a "$LOG"
+
+if [[ -n "$(git -C "$WORKTREE_DIR" status --porcelain)" ]]; then
+  # Verify new tests pass
+  if (cd "$WORKTREE_DIR" && npx playwright test --reporter=line > /dev/null 2>&1); then
+    NEW_TESTS=$(git -C "$WORKTREE_DIR" diff --stat | grep -c 'spec.mjs' || echo 0)
+    git -C "$WORKTREE_DIR" add -A
+    git -C "$WORKTREE_DIR" commit -m "patrol: add E2E tests for uncovered features" --no-verify
+    git -C "$WORKTREE_DIR" push -u origin "$TEST_DEV_BRANCH" 2>>"$LOG"
+    PR_URL=$(gh pr create \
+      --repo "$(git remote get-url origin | sed 's/\.git$//' | sed 's|.*github.com[:/]||')" \
+      --base main \
+      --head "$TEST_DEV_BRANCH" \
+      --title "patrol: new E2E tests for uncovered features" \
+      --label "patrol,tests" \
+      --body "$(cat <<TESTEOF
+**New tests added to $NEW_TESTS file(s).**
+
+$(echo "$TEST_DEV_OUTPUT" | tail -20)
+
+---
+*Automated patrol test development. All tests pass.*
+TESTEOF
+)" 2>>"$LOG") || true
+    if [[ -n "$PR_URL" ]]; then
+      echo "Test PR created: $PR_URL" | tee -a "$LOG"
+    fi
+  else
+    echo "SKIPPED: new tests failed validation" | tee -a "$LOG"
+  fi
+else
+  echo "No new tests needed." | tee -a "$LOG"
+fi
+
+git worktree remove "$WORKTREE_DIR" --force 2>/dev/null || rm -rf "$WORKTREE_DIR"
+if ! git rev-parse --verify "origin/$TEST_DEV_BRANCH" &>/dev/null; then
+  git branch -D "$TEST_DEV_BRANCH" 2>/dev/null || true
+fi
 
 echo "" | tee -a "$LOG"
 echo "=== Patrol complete: $FIXED fixed, $SKIPPED skipped ===" | tee -a "$LOG"

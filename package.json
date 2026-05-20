@@ -7,9 +7,11 @@
     "build": "bash build.sh",
     "dev": "npx serve . -p 3000",
     "start": "npx serve . -p 3000",
-    "test": "node test/validate.mjs"
+    "test": "node test/validate.mjs",
+    "test:e2e": "npx playwright test"
   },
   "devDependencies": {
+    "@playwright/test": "^1.60.0",
     "esbuild": "^0.24.0",
     "fflate": "^0.8.2",
     "gifenc": "^1.0.3",

@@ -105,12 +105,14 @@ function applyQualityToArgs(args, quality) {
   const out = [...args];
   const offset = QUALITY_OFFSET[quality] || 0;
   const crfIdx = out.indexOf("-crf");
-  if (crfIdx >= 0) out[crfIdx + 1] = String(parseInt(out[crfIdx + 1]) + offset);
+  if (crfIdx >= 0 && crfIdx + 1 < out.length)
+    out[crfIdx + 1] = String(parseInt(out[crfIdx + 1]) + offset);
   const qvIdx = out.indexOf("-q:v");
-  if (qvIdx >= 0) out[qvIdx + 1] = String(parseInt(out[qvIdx + 1]) + offset);
+  if (qvIdx >= 0 && qvIdx + 1 < out.length)
+    out[qvIdx + 1] = String(parseInt(out[qvIdx + 1]) + offset);
   // For webm, also scale the bitrate cap
   const bvIdx = out.indexOf("-b:v");
-  if (bvIdx >= 0) {
+  if (bvIdx >= 0 && bvIdx + 1 < out.length) {
     const raw = out[bvIdx + 1];
     const isM = raw.includes("M");
     const baseK = parseFloat(raw) * (isM ? 1000 : 1);

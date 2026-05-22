@@ -141,3 +141,90 @@ test.describe('Clear all', () => {
     await expect(fileList).toBeEmpty();
   });
 });
+
+test.describe('Merge PDF download', () => {
+  test('merged PDF download has .pdf extension', async ({ page }) => {
+    await page.goto('/merge-pdf');
+    await page.locator('#file-input').setInputFiles([fixture('sample.pdf'), fixture('sample2.pdf')]);
+    await page.locator('#action-btn').click();
+    await page.locator('#pdf-results').waitFor({ timeout: 15000 });
+    const [dl] = await Promise.all([
+      page.waitForEvent('download'),
+      page.locator('#dl-single').click(),
+    ]);
+    expect(dl.suggestedFilename()).toMatch(/\.pdf$/);
+  });
+});
+
+test.describe('JPG to PDF download', () => {
+  test('download has .pdf extension', async ({ page }) => {
+    await page.goto('/jpg-to-pdf');
+    await page.locator('#file-input').setInputFiles(fixture('sample.jpg'));
+    await page.locator('#action-btn').click();
+    await page.locator('#pdf-results').waitFor({ timeout: 15000 });
+    const [dl] = await Promise.all([
+      page.waitForEvent('download'),
+      page.locator('#dl-single').click(),
+    ]);
+    expect(dl.suggestedFilename()).toMatch(/\.pdf$/);
+  });
+});
+
+test.describe('PDF to JPG download', () => {
+  test('download has .jpg extension', async ({ page }) => {
+    await page.goto('/pdf-to-jpg');
+    await page.locator('#file-input').setInputFiles(fixture('sample.pdf'));
+    await page.locator('#action-btn').click();
+    await page.locator('#pdf-results').waitFor({ timeout: 15000 });
+    const [dl] = await Promise.all([
+      page.waitForEvent('download'),
+      page.locator('.dl-btn').first().click(),
+    ]);
+    expect(dl.suggestedFilename()).toMatch(/\.jpg$/);
+  });
+});
+
+test.describe('PDF to PNG download', () => {
+  test('download has .png extension', async ({ page }) => {
+    await page.goto('/pdf-to-png');
+    await page.locator('#file-input').setInputFiles(fixture('sample.pdf'));
+    await page.locator('#action-btn').click();
+    await page.locator('#pdf-results').waitFor({ timeout: 15000 });
+    const [dl] = await Promise.all([
+      page.waitForEvent('download'),
+      page.locator('.dl-btn').first().click(),
+    ]);
+    expect(dl.suggestedFilename()).toMatch(/\.png$/);
+  });
+});
+
+test.describe('PNG to PDF', () => {
+  test('upload PNG and convert, download has .pdf extension', async ({ page }) => {
+    await page.goto('/png-to-pdf');
+    await page.locator('#file-input').setInputFiles(fixture('sample.png'));
+    await page.locator('#action-btn').click();
+    await page.locator('#pdf-results').waitFor({ timeout: 15000 });
+    const [dl] = await Promise.all([
+      page.waitForEvent('download'),
+      page.locator('#dl-single').click(),
+    ]);
+    expect(dl.suggestedFilename()).toMatch(/\.pdf$/);
+  });
+});
+
+test.describe('Split PDF download', () => {
+  test('split produces downloadable pages', async ({ page }) => {
+    await page.goto('/split-pdf');
+    await page.locator('#file-input').setInputFiles(fixture('sample.pdf'));
+    await page.locator('#action-btn').click();
+    await page.locator('#pdf-results').waitFor({ timeout: 15000 });
+    const dlButtons = page.locator('.dl-btn');
+    const count = await dlButtons.count();
+    expect(count).toBeGreaterThan(0);
+    const [dl] = await Promise.all([
+      page.waitForEvent('download'),
+      dlButtons.first().click(),
+    ]);
+    expect(dl.suggestedFilename()).toMatch(/\.pdf$/);
+  });
+});

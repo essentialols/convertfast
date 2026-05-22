@@ -388,3 +388,76 @@ test.describe('Compress mode format flexibility', () => {
     await expect(page.locator('.btn-download').first()).toBeVisible();
   });
 });
+
+test.describe('Compress output is smaller or equal', () => {
+  test('compressed JPEG file size is reported in meta', async ({ page }) => {
+    await page.goto('/compress');
+    await page.locator('#quality-slider').fill('30');
+    await page.locator('#quality-slider').dispatchEvent('input');
+    await page.locator('#file-input').setInputFiles(fixture('large.jpg'));
+    await page.locator('.file-item.done').first().waitFor({ timeout: 15000 });
+    const meta = await page.locator('.file-item__meta').first().textContent();
+    expect(meta).toContain('→');
+  });
+});
+
+test.describe('Download All ZIP for compress batch', () => {
+  test('Download All as ZIP works for compressed batch', async ({ page }) => {
+    await page.goto('/compress');
+    await page.locator('#file-input').setInputFiles([fixture('sample.jpg'), fixture('sample2.jpg')]);
+    await page.locator('.file-item.done').nth(1).waitFor({ timeout: 15000 });
+    const [dl] = await Promise.all([
+      page.waitForEvent('download'),
+      page.locator('#download-all').click(),
+    ]);
+    expect(dl.suggestedFilename()).toMatch(/\.zip$/);
+  });
+});
+
+test.describe('BMP to WebP conversion', () => {
+  test('converts and downloads as .webp', async ({ page }) => {
+    await page.goto('/bmp-to-webp');
+    await page.locator('#file-input').setInputFiles(fixture('sample.bmp'));
+    await page.locator('.file-item.done').first().waitFor({ timeout: 15000 });
+    const [dl] = await Promise.all([
+      page.waitForEvent('download'),
+      page.locator('.btn-download').first().click(),
+    ]);
+    expect(dl.suggestedFilename()).toMatch(/\.webp$/);
+  });
+});
+
+test.describe('GIF to WebP conversion', () => {
+  test('converts and downloads as .webp', async ({ page }) => {
+    await page.goto('/gif-to-webp');
+    await page.locator('#file-input').setInputFiles(fixture('sample.gif'));
+    await page.locator('.file-item.done').first().waitFor({ timeout: 15000 });
+    const [dl] = await Promise.all([
+      page.waitForEvent('download'),
+      page.locator('.btn-download').first().click(),
+    ]);
+    expect(dl.suggestedFilename()).toMatch(/\.webp$/);
+  });
+});
+
+test.describe('Quality slider extremes', () => {
+  test('quality at minimum still produces output', async ({ page }) => {
+    await page.goto('/png-to-jpg');
+    await page.locator('#quality-slider').fill('10');
+    await page.locator('#quality-slider').dispatchEvent('input');
+    await expect(page.locator('#quality-value')).toHaveText('10%');
+    await page.locator('#file-input').setInputFiles(fixture('sample.png'));
+    await page.locator('.file-item.done').first().waitFor({ timeout: 15000 });
+    await expect(page.locator('.btn-download').first()).toBeVisible();
+  });
+
+  test('quality at 100% still produces output', async ({ page }) => {
+    await page.goto('/png-to-jpg');
+    await page.locator('#quality-slider').fill('100');
+    await page.locator('#quality-slider').dispatchEvent('input');
+    await expect(page.locator('#quality-value')).toHaveText('100%');
+    await page.locator('#file-input').setInputFiles(fixture('sample.png'));
+    await page.locator('.file-item.done').first().waitFor({ timeout: 15000 });
+    await expect(page.locator('.btn-download').first()).toBeVisible();
+  });
+});

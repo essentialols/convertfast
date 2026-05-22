@@ -276,3 +276,45 @@ test.describe('Audio Converter Config', () => {
     expect(targetFormat).toMatch(/ogg|flac|m4a|aac/);
   });
 });
+
+test.describe('Audio Conversion - WAV to MP3 download extension', () => {
+  test('download file has .mp3 extension and correct filename', async ({ page }) => {
+    await page.goto('/wav-to-mp3');
+    await dropFile(page, '#drop-zone', fixture('sample.wav'));
+    await page.locator('.file-item.done').first().waitFor({ timeout: 30000 });
+    const [dl] = await Promise.all([
+      page.waitForEvent('download'),
+      page.locator('.btn-download').first().click(),
+    ]);
+    const filename = dl.suggestedFilename();
+    expect(filename).toMatch(/\.mp3$/);
+    expect(filename).toContain('sample');
+  });
+});
+
+test.describe('Audio Conversion - wrong format rejected', () => {
+  test('uploading a PDF to audio converter shows error', async ({ page }) => {
+    await page.goto('/wav-to-mp3');
+    await dropFile(page, '#drop-zone', fixture('sample.pdf'));
+    await page.locator('.file-item__status.error, .file-item__status:has-text("Error")').first().waitFor({ timeout: 10000 });
+  });
+});
+
+test.describe('Audio Compression - quality presets', () => {
+  test('all quality options are selectable', async ({ page }) => {
+    await page.goto('/compress-audio');
+    const qualityDropdown = page.locator('#compress-quality');
+    const options = qualityDropdown.locator('option');
+    const count = await options.count();
+    expect(count).toBeGreaterThanOrEqual(3);
+
+    await qualityDropdown.selectOption('low');
+    await expect(qualityDropdown).toHaveValue('low');
+
+    await qualityDropdown.selectOption('medium');
+    await expect(qualityDropdown).toHaveValue('medium');
+
+    await qualityDropdown.selectOption('high');
+    await expect(qualityDropdown).toHaveValue('high');
+  });
+});

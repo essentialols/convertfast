@@ -502,4 +502,135 @@ test.describe('Resize with output format', () => {
     ]);
     expect(dl.suggestedFilename()).toMatch(/\.png$/);
   });
+
+  test('resize converts JPG and outputs as .jpg', async ({ page }) => {
+    await page.goto('/resize-image');
+    await page.locator('#file-input').setInputFiles(fixture('sample.jpg'));
+    await page.waitForTimeout(500);
+    await page.locator('#resize-width').fill('50');
+    await page.locator('#resize-btn').click();
+    await page.locator('.file-item.done').first().waitFor({ timeout: 10000 });
+    const [dl] = await Promise.all([
+      page.waitForEvent('download'),
+      page.locator('.btn-download').first().click(),
+    ]);
+    expect(dl.suggestedFilename()).toMatch(/\.jpg$/);
+  });
+});
+
+test.describe('Resize - aspect ratio reverse direction', () => {
+  test('changing height updates width when aspect lock is on', async ({ page }) => {
+    await page.goto('/resize-image');
+    await page.locator('#file-input').setInputFiles(fixture('sample.png'));
+    await page.waitForTimeout(500);
+    const lockCheckbox = page.locator('#lock-aspect');
+    await expect(lockCheckbox).toBeChecked();
+    const origWidth = await page.locator('#resize-width').inputValue();
+    await page.locator('#resize-height').fill('25');
+    await page.locator('#resize-height').dispatchEvent('input');
+    await page.waitForTimeout(300);
+    const newWidth = await page.locator('#resize-width').inputValue();
+    expect(parseInt(newWidth)).toBeGreaterThan(0);
+    expect(newWidth).not.toBe(origWidth);
+  });
+});
+
+test.describe('Resize - Download All as ZIP', () => {
+  test('batch resize produces ZIP download', async ({ page }) => {
+    await page.goto('/resize-image');
+    await page.locator('#file-input').setInputFiles([fixture('sample.png'), fixture('sample2.png')]);
+    await page.waitForTimeout(500);
+    await page.locator('#resize-btn').click();
+    await page.locator('.file-item.done').nth(1).waitFor({ timeout: 10000 });
+    const [dl] = await Promise.all([
+      page.waitForEvent('download'),
+      page.locator('#download-all').click(),
+    ]);
+    expect(dl.suggestedFilename()).toMatch(/\.zip$/);
+  });
+});
+
+test.describe('Images to GIF - Frame management', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/images-to-gif');
+  });
+
+  test('remove button removes individual frame', async ({ page }) => {
+    await page.locator('#file-input').setInputFiles([fixture('sample.png'), fixture('sample2.png')]);
+    await page.waitForTimeout(500);
+    const frameItems = page.locator('.frame-item');
+    await expect(frameItems).toHaveCount(2);
+    await page.locator('.frame-item__remove').first().click();
+    await expect(frameItems).toHaveCount(1);
+  });
+
+  test('removing frame below 2 disables convert button', async ({ page }) => {
+    await page.locator('#file-input').setInputFiles([fixture('sample.png'), fixture('sample2.png')]);
+    await page.waitForTimeout(500);
+    await page.locator('.frame-item__remove').first().click();
+    const convertBtn = page.locator('#convert-btn');
+    await expect(convertBtn).toBeDisabled();
+  });
+
+  test('controls section hidden when no frames', async ({ page }) => {
+    await expect(page.locator('#gif-controls')).toBeHidden();
+  });
+
+  test('controls appear after adding frames', async ({ page }) => {
+    await page.locator('#file-input').setInputFiles([fixture('sample.png'), fixture('sample2.png')]);
+    await page.waitForTimeout(500);
+    await expect(page.locator('#gif-controls')).toBeVisible();
+  });
+});
+
+test.describe('Image Metadata - GPS strip', () => {
+  test('strip GPS button visible for JPEG', async ({ page }) => {
+    await page.goto('/image-metadata');
+    await page.locator('#file-input').setInputFiles(fixture('sample.jpg'));
+    await page.locator('#metadata-panel').waitFor({ timeout: 10000 });
+    await expect(page.locator('#strip-gps')).toBeVisible();
+  });
+
+  test('strip GPS produces download', async ({ page }) => {
+    await page.goto('/image-metadata');
+    await page.locator('#file-input').setInputFiles(fixture('sample.jpg'));
+    await page.locator('#metadata-panel').waitFor({ timeout: 10000 });
+    await page.locator('#strip-gps').click();
+    await page.locator('.btn-download').waitFor({ timeout: 10000 });
+    await expect(page.locator('.btn-download')).toBeVisible();
+  });
+
+  test('strip GPS hidden for non-JPEG', async ({ page }) => {
+    await page.goto('/image-metadata');
+    await page.locator('#file-input').setInputFiles(fixture('sample.png'));
+    await page.locator('#metadata-panel').waitFor({ timeout: 10000 });
+    await expect(page.locator('#strip-gps')).toBeHidden();
+  });
+});
+
+test.describe('Strip EXIF - format handling', () => {
+  test('strip EXIF accepts PNG and produces download', async ({ page }) => {
+    await page.goto('/strip-exif');
+    await page.locator('#file-input').setInputFiles(fixture('sample.png'));
+    await page.locator('.file-item.done').waitFor({ timeout: 10000 });
+    await expect(page.locator('.btn-download').first()).toBeVisible();
+  });
+
+  test('strip EXIF accepts WebP', async ({ page }) => {
+    await page.goto('/strip-exif');
+    await page.locator('#file-input').setInputFiles(fixture('sample.webp'));
+    await page.locator('.file-item.done').waitFor({ timeout: 10000 });
+    await expect(page.locator('.btn-download').first()).toBeVisible();
+  });
+
+  test('strip EXIF download has correct extension for JPG', async ({ page }) => {
+    await page.goto('/strip-exif');
+    await page.locator('#file-input').setInputFiles(fixture('sample.jpg'));
+    await page.locator('.file-item.done').waitFor({ timeout: 10000 });
+    const [dl] = await Promise.all([
+      page.waitForEvent('download'),
+      page.locator('.btn-download').first().click(),
+    ]);
+    expect(dl.suggestedFilename()).toMatch(/\.(jpg|jpeg)$/);
+  });
 });

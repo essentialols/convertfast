@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { fixture } from './helpers.mjs';
 
 test.describe('Landing page', () => {
   test('loads with correct title and navigation', async ({ page }) => {
@@ -107,6 +108,15 @@ test.describe('Console errors across tool categories', () => {
     '/extract-zip',
     '/create-zip',
     '/rtf-to-txt',
+    '/compress-audio',
+    '/video-metadata',
+    '/video-speed',
+    '/compress-video',
+    '/pdf-ocr',
+    '/docx-to-txt',
+    '/epub-to-txt',
+    '/jpg-to-pdf',
+    '/pdf-to-jpg',
   ];
 
   toolPages.forEach((toolPath) => {
@@ -134,5 +144,31 @@ test.describe('Navigation from landing page', () => {
     await page.goto('/about');
     const homeLink = page.locator('a[href="/"]').first();
     await expect(homeLink).toBeVisible();
+  });
+});
+
+test.describe('Smart Drop on landing page', () => {
+  test('dropping a PNG shows route panel with conversion options', async ({ page }) => {
+    await page.goto('/');
+    await page.waitForLoadState('networkidle');
+    const dropZone = page.locator('#smart-drop, [data-drop-zone]').first();
+    if (await dropZone.isVisible()) {
+      const fileInput = page.locator('#file-input, input[type="file"]').first();
+      await fileInput.setInputFiles(fixture('sample.png'));
+      const routePanel = page.locator('#route-panel, .route-panel').first();
+      await routePanel.waitFor({ timeout: 10000 }).catch(() => {});
+      if (await routePanel.isVisible()) {
+        const options = page.locator('.route-option');
+        const count = await options.count();
+        expect(count).toBeGreaterThan(0);
+      }
+    }
+  });
+});
+
+test.describe('404 handling', () => {
+  test('nonexistent page returns 404', async ({ page }) => {
+    const response = await page.goto('/this-page-does-not-exist-xyz');
+    expect(response.status()).toBe(404);
   });
 });

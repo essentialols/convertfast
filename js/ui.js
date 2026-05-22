@@ -92,6 +92,7 @@ export function init() {
       for (const entry of fileQueue) {
         if (entry.status === 'done') {
           entry.outputBlob = null;
+          entry.progress = 0;
           entry.status = 'queued';
         }
       }

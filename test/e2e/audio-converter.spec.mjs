@@ -30,10 +30,9 @@ test.describe('Audio Conversion - WAV to MP3', () => {
     await input.setInputFiles(fixture('sample.wav'));
 
     await page.locator('.file-item.done').first().waitFor({ timeout: 30000 });
-    await page.waitForTimeout(500);
 
     const downloadAll = page.locator('#download-all');
-    await expect(downloadAll).toBeVisible();
+    await expect(downloadAll).toBeVisible({ timeout: 5000 });
   });
 });
 
@@ -156,10 +155,9 @@ test.describe('Audio Conversion - File Management', () => {
     await input.setInputFiles(fixture('sample.wav'));
 
     await page.locator('.file-item').nth(1).locator('.file-item__status:has-text("Done")').waitFor({ timeout: 30000 });
-    await page.waitForTimeout(500);
 
     const batchSummary = page.locator('#batch-summary');
-    await expect(batchSummary).toBeVisible();
+    await expect(batchSummary).toBeVisible({ timeout: 5000 });
   });
 });
 

@@ -151,18 +151,13 @@ test.describe('Smart Drop on landing page', () => {
   test('dropping a PNG shows route panel with conversion options', async ({ page }) => {
     await page.goto('/');
     await page.waitForLoadState('networkidle');
-    const dropZone = page.locator('#smart-drop, [data-drop-zone]').first();
-    if (await dropZone.isVisible()) {
-      const fileInput = page.locator('#file-input, input[type="file"]').first();
-      await fileInput.setInputFiles(fixture('sample.png'));
-      const routePanel = page.locator('#route-panel, .route-panel').first();
-      await routePanel.waitFor({ timeout: 10000 }).catch(() => {});
-      if (await routePanel.isVisible()) {
-        const options = page.locator('.route-option');
-        const count = await options.count();
-        expect(count).toBeGreaterThan(0);
-      }
-    }
+    const fileInput = page.locator('#file-input, input[type="file"]').first();
+    await fileInput.setInputFiles(fixture('sample.png'));
+    const routePanel = page.locator('#route-panel, .route-panel').first();
+    await routePanel.waitFor({ timeout: 10000 });
+    const options = page.locator('.route-option');
+    const count = await options.count();
+    expect(count).toBeGreaterThan(0);
   });
 });
 

@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { fixture, getFileItemCount } from './helpers.mjs';
+import { fixture, getFileItemCount, waitForStatus } from './helpers.mjs';
 
 test.describe('Resize Image', () => {
   test.beforeEach(async ({ page }) => {
@@ -8,7 +8,7 @@ test.describe('Resize Image', () => {
 
   test('upload file and verify Ready status', async ({ page }) => {
     await page.locator('#file-input').setInputFiles(fixture('sample.png'));
-    await page.waitForTimeout(500);
+    await page.locator('.file-item').first().waitFor({ timeout: 5000 });
     const statusText = await page.locator('.file-item__status').textContent();
     expect(statusText).toContain('Ready');
     await expect(page.locator('#resize-btn')).toBeVisible();
@@ -16,18 +16,21 @@ test.describe('Resize Image', () => {
 
   test('aspect ratio lock auto-updates height when width changes', async ({ page }) => {
     await page.locator('#file-input').setInputFiles(fixture('sample.png'));
-    await page.waitForTimeout(500);
+    await page.locator('.file-item').first().waitFor({ timeout: 5000 });
     const lockCheckbox = page.locator('#lock-aspect');
     await expect(lockCheckbox).toBeChecked();
     await page.locator('#resize-width').fill('50');
-    await page.waitForTimeout(300);
+    await page.waitForFunction(() => {
+      const h = document.querySelector('#resize-height');
+      return h && h.value && parseInt(h.value) > 0;
+    }, { timeout: 5000 });
     const heightValue = await page.locator('#resize-height').inputValue();
     expect(parseInt(heightValue)).toBeGreaterThan(0);
   });
 
   test('click Resize button changes file status to done', async ({ page }) => {
     await page.locator('#file-input').setInputFiles(fixture('sample.png'));
-    await page.waitForTimeout(500);
+    await page.locator('.file-item').first().waitFor({ timeout: 5000 });
     await page.locator('#resize-btn').click();
     await page.locator('.file-item.done').waitFor({ timeout: 10000 });
     await expect(page.locator('.btn-download')).toBeVisible();
@@ -35,7 +38,7 @@ test.describe('Resize Image', () => {
 
   test('switch resize mode to percent and verify UI changes', async ({ page }) => {
     await page.locator('#file-input').setInputFiles(fixture('sample.png'));
-    await page.waitForTimeout(500);
+    await page.locator('.file-item').first().waitFor({ timeout: 5000 });
     await page.locator('#resize-mode').selectOption('percent');
     await expect(page.locator('#percent-group')).toBeVisible();
     await expect(page.locator('#dimensions-group')).not.toBeVisible();
@@ -43,7 +46,7 @@ test.describe('Resize Image', () => {
 
   test('percent mode resize and convert', async ({ page }) => {
     await page.locator('#file-input').setInputFiles(fixture('sample.png'));
-    await page.waitForTimeout(500);
+    await page.locator('.file-item').first().waitFor({ timeout: 5000 });
     await page.locator('#resize-mode').selectOption('percent');
     await page.locator('#resize-percent').fill('50');
     await page.locator('#resize-btn').click();
@@ -53,20 +56,19 @@ test.describe('Resize Image', () => {
 
   test('uncheck aspect ratio lock and verify independent width/height', async ({ page }) => {
     await page.locator('#file-input').setInputFiles(fixture('sample.png'));
-    await page.waitForTimeout(500);
+    await page.locator('.file-item').first().waitFor({ timeout: 5000 });
     await page.locator('#lock-aspect').uncheck();
     const widthInput = page.locator('#resize-width');
     const heightInput = page.locator('#resize-height');
     const initialHeight = await heightInput.inputValue();
     await widthInput.fill('100');
-    await page.waitForTimeout(300);
     const newHeight = await heightInput.inputValue();
     expect(newHeight).toBe(initialHeight);
   });
 
   test('batch resize multiple images', async ({ page }) => {
     await page.locator('#file-input').setInputFiles([fixture('sample.png'), fixture('sample2.png')]);
-    await page.waitForTimeout(500);
+    await page.locator('.file-item').nth(1).waitFor({ timeout: 5000 });
     await page.locator('#resize-btn').click();
     await page.locator('.file-item.done').nth(1).waitFor({ timeout: 10000 });
     const count = await getFileItemCount(page);
@@ -76,7 +78,7 @@ test.describe('Resize Image', () => {
 
   test('clear all removes all files', async ({ page }) => {
     await page.locator('#file-input').setInputFiles([fixture('sample.png'), fixture('sample2.png')]);
-    await page.waitForTimeout(500);
+    await page.locator('.file-item').nth(1).waitFor({ timeout: 5000 });
     await page.locator('#clear-all').click();
     const count = await getFileItemCount(page);
     expect(count).toBe(0);
@@ -182,7 +184,7 @@ test.describe('Extract ZIP', () => {
 
   test('upload ZIP and action button is visible and enabled', async ({ page }) => {
     await page.locator('#file-input').setInputFiles(fixture('sample.zip'));
-    await page.waitForTimeout(500);
+    await page.locator('#action-btn').waitFor({ timeout: 5000 });
     const actionBtn = page.locator('#action-btn');
     await expect(actionBtn).toBeVisible();
     await expect(actionBtn).toBeEnabled();
@@ -190,7 +192,7 @@ test.describe('Extract ZIP', () => {
 
   test('click Extract and results appear', async ({ page }) => {
     await page.locator('#file-input').setInputFiles(fixture('sample.zip'));
-    await page.waitForTimeout(500);
+    await page.locator('#action-btn').waitFor({ timeout: 5000 });
     await page.locator('#action-btn').click();
     await page.locator('#archive-results').waitFor({ timeout: 10000 });
     await expect(page.locator('#archive-results')).toBeVisible();
@@ -198,7 +200,7 @@ test.describe('Extract ZIP', () => {
 
   test('extracted files have individual download buttons', async ({ page }) => {
     await page.locator('#file-input').setInputFiles(fixture('sample.zip'));
-    await page.waitForTimeout(500);
+    await page.locator('#action-btn').waitFor({ timeout: 5000 });
     await page.locator('#action-btn').click();
     await page.locator('#archive-results').waitFor({ timeout: 10000 });
     const dlButtons = page.locator('.dl-btn');
@@ -208,7 +210,7 @@ test.describe('Extract ZIP', () => {
 
   test('download all button appears for multiple extracted files', async ({ page }) => {
     await page.locator('#file-input').setInputFiles(fixture('sample.zip'));
-    await page.waitForTimeout(500);
+    await page.locator('#action-btn').waitFor({ timeout: 5000 });
     await page.locator('#action-btn').click();
     await page.locator('#archive-results').waitFor({ timeout: 10000 });
     const dlButtons = page.locator('.dl-btn');
@@ -226,7 +228,7 @@ test.describe('Create ZIP', () => {
 
   test('upload multiple images and action button enabled', async ({ page }) => {
     await page.locator('#file-input').setInputFiles([fixture('sample.png'), fixture('sample.jpg')]);
-    await page.waitForTimeout(500);
+    await page.locator('#action-btn').waitFor({ timeout: 5000 });
     const actionBtn = page.locator('#action-btn');
     await expect(actionBtn).toBeVisible();
     await expect(actionBtn).toBeEnabled();
@@ -234,7 +236,7 @@ test.describe('Create ZIP', () => {
 
   test('click Create ZIP and results appear', async ({ page }) => {
     await page.locator('#file-input').setInputFiles([fixture('sample.png'), fixture('sample.jpg')]);
-    await page.waitForTimeout(500);
+    await page.locator('#action-btn').waitFor({ timeout: 5000 });
     await page.locator('#action-btn').click();
     await page.locator('#archive-results').waitFor({ timeout: 10000 });
     await expect(page.locator('#archive-results')).toBeVisible();
@@ -242,7 +244,7 @@ test.describe('Create ZIP', () => {
 
   test('ZIP download button exists and is clickable', async ({ page }) => {
     await page.locator('#file-input').setInputFiles([fixture('sample.png'), fixture('sample.jpg')]);
-    await page.waitForTimeout(500);
+    await page.locator('#action-btn').waitFor({ timeout: 5000 });
     await page.locator('#action-btn').click();
     await page.locator('#archive-results').waitFor({ timeout: 10000 });
     await expect(page.locator('#dl-zip')).toBeVisible();
@@ -250,7 +252,7 @@ test.describe('Create ZIP', () => {
 
   test('clear all removes all files', async ({ page }) => {
     await page.locator('#file-input').setInputFiles([fixture('sample.png'), fixture('sample.jpg')]);
-    await page.waitForTimeout(500);
+    await page.locator('.file-item').first().waitFor({ timeout: 5000 });
     await page.locator('#clear-all').click();
     const count = await getFileItemCount(page);
     expect(count).toBe(0);
@@ -264,7 +266,7 @@ test.describe('Images to GIF', () => {
 
   test('single image disables convert button with help text', async ({ page }) => {
     await page.locator('#file-input').setInputFiles(fixture('sample.png'));
-    await page.waitForTimeout(500);
+    await page.locator('.frame-item').first().waitFor({ timeout: 5000 });
     const convertBtn = page.locator('#convert-btn');
     await expect(convertBtn).toBeDisabled();
     const helpText = await page.locator('#convert-btn').textContent();
@@ -273,7 +275,7 @@ test.describe('Images to GIF', () => {
 
   test('two or more images enables convert button with frame count', async ({ page }) => {
     await page.locator('#file-input').setInputFiles([fixture('sample.png'), fixture('sample2.png')]);
-    await page.waitForTimeout(500);
+    await page.locator('.frame-item').nth(1).waitFor({ timeout: 5000 });
     const convertBtn = page.locator('#convert-btn');
     await expect(convertBtn).toBeEnabled();
     const btnText = await convertBtn.textContent();
@@ -282,7 +284,7 @@ test.describe('Images to GIF', () => {
 
   test('delay slider updates display value', async ({ page }) => {
     await page.locator('#file-input').setInputFiles([fixture('sample.png'), fixture('sample2.png')]);
-    await page.waitForTimeout(500);
+    await page.locator('.frame-item').nth(1).waitFor({ timeout: 5000 });
     await page.locator('#delay-slider').fill('150');
     const displayValue = await page.locator('#delay-value').textContent();
     expect(displayValue).toContain('150');
@@ -290,7 +292,7 @@ test.describe('Images to GIF', () => {
 
   test('width slider updates display value', async ({ page }) => {
     await page.locator('#file-input').setInputFiles([fixture('sample.png'), fixture('sample2.png')]);
-    await page.waitForTimeout(500);
+    await page.locator('.frame-item').nth(1).waitFor({ timeout: 5000 });
     await page.locator('#width-slider').fill('300');
     const displayValue = await page.locator('#width-value').textContent();
     expect(displayValue).toContain('300');
@@ -298,7 +300,7 @@ test.describe('Images to GIF', () => {
 
   test('convert button processes GIF and shows result', async ({ page }) => {
     await page.locator('#file-input').setInputFiles([fixture('sample.png'), fixture('sample2.png')]);
-    await page.waitForTimeout(500);
+    await page.locator('.frame-item').nth(1).waitFor({ timeout: 5000 });
     await page.locator('#convert-btn').click();
     await page.locator('#gif-result').waitFor({ timeout: 30000 });
     await expect(page.locator('#gif-result')).toBeVisible();
@@ -306,7 +308,7 @@ test.describe('Images to GIF', () => {
 
   test('GIF result has download button', async ({ page }) => {
     await page.locator('#file-input').setInputFiles([fixture('sample.png'), fixture('sample2.png')]);
-    await page.waitForTimeout(500);
+    await page.locator('.frame-item').nth(1).waitFor({ timeout: 5000 });
     await page.locator('#convert-btn').click();
     await page.locator('#gif-result').waitFor({ timeout: 30000 });
     await expect(page.locator('#dl-gif')).toBeVisible();
@@ -314,7 +316,7 @@ test.describe('Images to GIF', () => {
 
   test('clear button removes all frames', async ({ page }) => {
     await page.locator('#file-input').setInputFiles([fixture('sample.png'), fixture('sample2.png')]);
-    await page.waitForTimeout(500);
+    await page.locator('.frame-item').nth(1).waitFor({ timeout: 5000 });
     await page.locator('#clear-btn').click();
     const count = await getFileItemCount(page);
     expect(count).toBe(0);
@@ -322,7 +324,7 @@ test.describe('Images to GIF', () => {
 
   test('progress indicator shown during conversion', async ({ page }) => {
     await page.locator('#file-input').setInputFiles([fixture('sample.png'), fixture('sample2.png')]);
-    await page.waitForTimeout(500);
+    await page.locator('.frame-item').nth(1).waitFor({ timeout: 5000 });
     const convertBtn = page.locator('#convert-btn');
     await convertBtn.click();
     const progressElement = page.locator('#gif-progress');
@@ -340,14 +342,14 @@ test.describe('RTF to TXT Converter', () => {
 
   test('upload RTF and action button appears', async ({ page }) => {
     await page.locator('#file-input').setInputFiles(fixture('sample.rtf'));
-    await page.waitForTimeout(500);
+    await page.locator('#action-btn').waitFor({ timeout: 5000 });
     const actionBtn = page.locator('#action-btn');
     await expect(actionBtn).toBeVisible();
   });
 
   test('click Convert and results appear', async ({ page }) => {
     await page.locator('#file-input').setInputFiles(fixture('sample.rtf'));
-    await page.waitForTimeout(500);
+    await page.locator('#action-btn').waitFor({ timeout: 5000 });
     await page.locator('#action-btn').click();
     await page.locator('#doc-results').waitFor({ timeout: 10000 });
     await expect(page.locator('#doc-results')).toBeVisible();
@@ -355,7 +357,7 @@ test.describe('RTF to TXT Converter', () => {
 
   test('download button visible after conversion', async ({ page }) => {
     await page.locator('#file-input').setInputFiles(fixture('sample.rtf'));
-    await page.waitForTimeout(500);
+    await page.locator('#action-btn').waitFor({ timeout: 5000 });
     await page.locator('#action-btn').click();
     await page.locator('#doc-results').waitFor({ timeout: 10000 });
     await expect(page.locator('#dl-doc')).toBeVisible();
@@ -369,14 +371,14 @@ test.describe('PDF OCR', () => {
 
   test('upload PDF and action button visible', async ({ page }) => {
     await page.locator('#file-input').setInputFiles(fixture('sample.pdf'));
-    await page.waitForTimeout(500);
+    await page.locator('#action-btn').waitFor({ timeout: 5000 });
     const actionBtn = page.locator('#action-btn');
     await expect(actionBtn).toBeVisible();
   });
 
   test('OCR language select has options', async ({ page }) => {
     await page.locator('#file-input').setInputFiles(fixture('sample.pdf'));
-    await page.waitForTimeout(500);
+    await page.locator('#action-btn').waitFor({ timeout: 5000 });
     const langSelect = page.locator('#ocr-lang');
     await expect(langSelect).toBeVisible();
     const optionCount = await langSelect.locator('option').count();
@@ -385,7 +387,7 @@ test.describe('PDF OCR', () => {
 
   test('click Extract Text and results appear with timeout', async ({ page }) => {
     await page.locator('#file-input').setInputFiles(fixture('sample.pdf'));
-    await page.waitForTimeout(500);
+    await page.locator('#action-btn').waitFor({ timeout: 5000 });
     await page.locator('#action-btn').click();
     await page.locator('#ocr-results').waitFor({ timeout: 60000 });
     await expect(page.locator('#ocr-results')).toBeVisible();
@@ -393,7 +395,7 @@ test.describe('PDF OCR', () => {
 
   test('OCR results textarea has extracted text', async ({ page }) => {
     await page.locator('#file-input').setInputFiles(fixture('sample.pdf'));
-    await page.waitForTimeout(500);
+    await page.locator('#action-btn').waitFor({ timeout: 5000 });
     await page.locator('#action-btn').click();
     await page.locator('#ocr-results').waitFor({ timeout: 60000 });
     const textContent = await page.locator('#ocr-results-text').inputValue();
@@ -402,7 +404,7 @@ test.describe('PDF OCR', () => {
 
   test('copy button exists after OCR', async ({ page }) => {
     await page.locator('#file-input').setInputFiles(fixture('sample.pdf'));
-    await page.waitForTimeout(500);
+    await page.locator('#action-btn').waitFor({ timeout: 5000 });
     await page.locator('#action-btn').click();
     await page.locator('#ocr-results').waitFor({ timeout: 60000 });
     await expect(page.locator('#ocr-copy')).toBeVisible();
@@ -410,7 +412,7 @@ test.describe('PDF OCR', () => {
 
   test('download button exists after OCR', async ({ page }) => {
     await page.locator('#file-input').setInputFiles(fixture('sample.pdf'));
-    await page.waitForTimeout(500);
+    await page.locator('#action-btn').waitFor({ timeout: 5000 });
     await page.locator('#action-btn').click();
     await page.locator('#ocr-results').waitFor({ timeout: 60000 });
     await expect(page.locator('#ocr-download')).toBeVisible();
@@ -418,7 +420,7 @@ test.describe('PDF OCR', () => {
 
   test('progress bar shown during OCR processing', async ({ page }) => {
     await page.locator('#file-input').setInputFiles(fixture('sample.pdf'));
-    await page.waitForTimeout(500);
+    await page.locator('#action-btn').waitFor({ timeout: 5000 });
     await page.locator('#action-btn').click();
     const progressBar = page.locator('#ocr-progress-bar');
     const isVisible = await progressBar.isVisible().catch(() => false);
@@ -492,7 +494,7 @@ test.describe('Resize with output format', () => {
   test('resize converts PNG and preserves format in download', async ({ page }) => {
     await page.goto('/resize-image');
     await page.locator('#file-input').setInputFiles(fixture('sample.png'));
-    await page.waitForTimeout(500);
+    await page.locator('.file-item').first().waitFor({ timeout: 5000 });
     await page.locator('#resize-width').fill('50');
     await page.locator('#resize-btn').click();
     await page.locator('.file-item.done').first().waitFor({ timeout: 10000 });
@@ -506,7 +508,7 @@ test.describe('Resize with output format', () => {
   test('resize converts JPG and outputs as .jpg', async ({ page }) => {
     await page.goto('/resize-image');
     await page.locator('#file-input').setInputFiles(fixture('sample.jpg'));
-    await page.waitForTimeout(500);
+    await page.locator('.file-item').first().waitFor({ timeout: 5000 });
     await page.locator('#resize-width').fill('50');
     await page.locator('#resize-btn').click();
     await page.locator('.file-item.done').first().waitFor({ timeout: 10000 });
@@ -522,13 +524,20 @@ test.describe('Resize - aspect ratio reverse direction', () => {
   test('changing height updates width when aspect lock is on', async ({ page }) => {
     await page.goto('/resize-image');
     await page.locator('#file-input').setInputFiles(fixture('sample.png'));
-    await page.waitForTimeout(500);
+    await page.locator('.file-item').first().waitFor({ timeout: 5000 });
     const lockCheckbox = page.locator('#lock-aspect');
     await expect(lockCheckbox).toBeChecked();
     const origWidth = await page.locator('#resize-width').inputValue();
     await page.locator('#resize-height').fill('25');
     await page.locator('#resize-height').dispatchEvent('input');
-    await page.waitForTimeout(300);
+    await page.waitForFunction(
+      (orig) => {
+        const w = document.querySelector('#resize-width');
+        return w && w.value !== orig && parseInt(w.value) > 0;
+      },
+      origWidth,
+      { timeout: 5000 }
+    );
     const newWidth = await page.locator('#resize-width').inputValue();
     expect(parseInt(newWidth)).toBeGreaterThan(0);
     expect(newWidth).not.toBe(origWidth);
@@ -539,7 +548,7 @@ test.describe('Resize - Download All as ZIP', () => {
   test('batch resize produces ZIP download', async ({ page }) => {
     await page.goto('/resize-image');
     await page.locator('#file-input').setInputFiles([fixture('sample.png'), fixture('sample2.png')]);
-    await page.waitForTimeout(500);
+    await page.locator('.file-item').nth(1).waitFor({ timeout: 5000 });
     await page.locator('#resize-btn').click();
     await page.locator('.file-item.done').nth(1).waitFor({ timeout: 10000 });
     const [dl] = await Promise.all([
@@ -557,7 +566,7 @@ test.describe('Images to GIF - Frame management', () => {
 
   test('remove button removes individual frame', async ({ page }) => {
     await page.locator('#file-input').setInputFiles([fixture('sample.png'), fixture('sample2.png')]);
-    await page.waitForTimeout(500);
+    await page.locator('.frame-item').nth(1).waitFor({ timeout: 5000 });
     const frameItems = page.locator('.frame-item');
     await expect(frameItems).toHaveCount(2);
     await page.locator('.frame-item__remove').first().click();
@@ -566,7 +575,7 @@ test.describe('Images to GIF - Frame management', () => {
 
   test('removing frame below 2 disables convert button', async ({ page }) => {
     await page.locator('#file-input').setInputFiles([fixture('sample.png'), fixture('sample2.png')]);
-    await page.waitForTimeout(500);
+    await page.locator('.frame-item').nth(1).waitFor({ timeout: 5000 });
     await page.locator('.frame-item__remove').first().click();
     const convertBtn = page.locator('#convert-btn');
     await expect(convertBtn).toBeDisabled();
@@ -578,7 +587,7 @@ test.describe('Images to GIF - Frame management', () => {
 
   test('controls appear after adding frames', async ({ page }) => {
     await page.locator('#file-input').setInputFiles([fixture('sample.png'), fixture('sample2.png')]);
-    await page.waitForTimeout(500);
+    await page.locator('.frame-item').nth(1).waitFor({ timeout: 5000 });
     await expect(page.locator('#gif-controls')).toBeVisible();
   });
 });

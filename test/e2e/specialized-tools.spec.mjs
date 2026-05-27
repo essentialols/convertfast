@@ -617,6 +617,71 @@ test.describe('Image Metadata - GPS strip', () => {
   });
 });
 
+test.describe('Extract ZIP - clear all resets', () => {
+  test('clear all after extraction resets interface', async ({ page }) => {
+    await page.goto('/extract-zip');
+    await page.locator('#file-input').setInputFiles(fixture('sample.zip'));
+    await page.locator('#action-btn').waitFor({ timeout: 5000 });
+    await page.locator('#action-btn').click();
+    await page.locator('#archive-results').waitFor({ timeout: 10000 });
+    await page.locator('#clear-all').click();
+    await expect(page.locator('#archive-results')).not.toBeVisible();
+    const count = await getFileItemCount(page);
+    expect(count).toBe(0);
+  });
+});
+
+test.describe('Create ZIP - download extension', () => {
+  test('created ZIP download has .zip extension', async ({ page }) => {
+    await page.goto('/create-zip');
+    await page.locator('#file-input').setInputFiles([fixture('sample.png'), fixture('sample.jpg')]);
+    await page.locator('#action-btn').waitFor({ timeout: 5000 });
+    await page.locator('#action-btn').click();
+    await page.locator('#archive-results').waitFor({ timeout: 10000 });
+    const [dl] = await Promise.all([
+      page.waitForEvent('download'),
+      page.locator('#dl-zip').click(),
+    ]);
+    expect(dl.suggestedFilename()).toMatch(/\.zip$/);
+  });
+});
+
+test.describe('Create ZIP - clear all resets', () => {
+  test('clear all after ZIP creation resets interface', async ({ page }) => {
+    await page.goto('/create-zip');
+    await page.locator('#file-input').setInputFiles([fixture('sample.png'), fixture('sample.jpg')]);
+    await page.locator('.file-item').first().waitFor({ timeout: 5000 });
+    await page.locator('#action-btn').click();
+    await page.locator('#archive-results').waitFor({ timeout: 10000 });
+    await page.locator('#clear-all').click();
+    const count = await getFileItemCount(page);
+    expect(count).toBe(0);
+  });
+});
+
+test.describe('PDF OCR - clear all resets', () => {
+  test('clear all after OCR resets interface', async ({ page }) => {
+    await page.goto('/pdf-ocr');
+    await page.locator('#file-input').setInputFiles(fixture('sample.pdf'));
+    await page.locator('#action-btn').waitFor({ timeout: 5000 });
+    await page.locator('#action-btn').click();
+    await page.locator('#ocr-results').waitFor({ timeout: 60000 });
+    await page.locator('#clear-all').click();
+    await expect(page.locator('#ocr-results')).not.toBeVisible();
+  });
+});
+
+test.describe('Resize Image - wrong format handling', () => {
+  test('uploading a PDF to resize shows no crash', async ({ page }) => {
+    await page.goto('/resize-image');
+    const errors = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    await page.locator('#file-input').setInputFiles(fixture('sample.pdf'));
+    await page.waitForTimeout(3000);
+    expect(errors).toHaveLength(0);
+  });
+});
+
 test.describe('Strip EXIF - format handling', () => {
   test('strip EXIF accepts PNG and produces download', async ({ page }) => {
     await page.goto('/strip-exif');

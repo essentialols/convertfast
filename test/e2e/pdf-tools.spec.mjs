@@ -228,3 +228,73 @@ test.describe('Split PDF download', () => {
     expect(dl.suggestedFilename()).toMatch(/\.pdf$/);
   });
 });
+
+test.describe('PDF tools wrong format rejection', () => {
+  test('uploading an image to PDF-to-JPG shows no crash', async ({ page }) => {
+    await page.goto('/pdf-to-jpg');
+    await page.locator('#file-input').setInputFiles(fixture('sample.jpg'));
+    const actionBtn = page.locator('#action-btn');
+    const isVisible = await actionBtn.isVisible().catch(() => false);
+    if (isVisible) {
+      await actionBtn.click();
+    }
+    const errors = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    await page.waitForTimeout(2000);
+    expect(errors).toHaveLength(0);
+  });
+});
+
+test.describe('Batch images to PDF', () => {
+  test('multiple images create multi-page PDF', async ({ page }) => {
+    await page.goto('/jpg-to-pdf');
+    await page.locator('#file-input').setInputFiles([fixture('sample.jpg'), fixture('sample2.jpg')]);
+    const actionBtn = page.locator('#action-btn');
+    await expect(actionBtn).toBeVisible();
+    await actionBtn.click();
+    await page.locator('#pdf-results').waitFor({ timeout: 15000 });
+    await expect(page.locator('#dl-single')).toBeVisible();
+  });
+
+  test('multiple PNGs to PDF', async ({ page }) => {
+    await page.goto('/png-to-pdf');
+    await page.locator('#file-input').setInputFiles([fixture('sample.png'), fixture('sample2.png')]);
+    const actionBtn = page.locator('#action-btn');
+    await expect(actionBtn).toBeVisible();
+    await actionBtn.click();
+    await page.locator('#pdf-results').waitFor({ timeout: 15000 });
+    await expect(page.locator('#dl-single')).toBeVisible();
+  });
+});
+
+test.describe('PDF clear after conversion', () => {
+  test('clear all after merge resets interface', async ({ page }) => {
+    await page.goto('/merge-pdf');
+    await page.locator('#file-input').setInputFiles([fixture('sample.pdf'), fixture('sample2.pdf')]);
+    await page.locator('#action-btn').click();
+    await page.locator('#pdf-results').waitFor({ timeout: 15000 });
+    await page.locator('#clear-all').click();
+    await expect(page.locator('#pdf-results')).not.toBeVisible();
+    const fileList = page.locator('#file-list');
+    await expect(fileList).toBeEmpty();
+  });
+
+  test('clear all after split resets interface', async ({ page }) => {
+    await page.goto('/split-pdf');
+    await page.locator('#file-input').setInputFiles(fixture('sample.pdf'));
+    await page.locator('#action-btn').click();
+    await page.locator('#pdf-results').waitFor({ timeout: 15000 });
+    await page.locator('#clear-all').click();
+    await expect(page.locator('#pdf-results')).not.toBeVisible();
+  });
+});
+
+test.describe('Merge PDF file count', () => {
+  test('file list shows correct count before merge', async ({ page }) => {
+    await page.goto('/merge-pdf');
+    await page.locator('#file-input').setInputFiles([fixture('sample.pdf'), fixture('sample2.pdf')]);
+    const fileItems = page.locator('.file-item, .pdf-item');
+    const count = await fileItems.count();
+    expect(count).toBe(2);
+  });
+});

@@ -337,6 +337,15 @@ test.describe('Video Tools E2E', () => {
         await expect(errorElement).toBeVisible();
       }
     });
+
+    test('uploading wrong format to video converter shows no crash', async ({ page }) => {
+      await page.goto('/mov-to-mp4');
+      const errors = [];
+      page.on('pageerror', (error) => errors.push(error.message));
+      await dropFile(page, '#drop-zone', fixture('sample.pdf'));
+      await page.waitForTimeout(3000);
+      expect(errors).toHaveLength(0);
+    });
   });
 
   test.describe('Action Button State During Conversion', () => {
@@ -405,6 +414,118 @@ test.describe('Video Tools E2E', () => {
       await dropFile(page, '#drop-zone', fixture('sample.mp4'));
       await expect(page.locator('#video-file')).toBeVisible();
       await expect(page.locator('#action-btn')).toBeVisible();
+    });
+  });
+
+  test.describe('Video Compression - Clear After Compress', () => {
+    test('clear all after compression resets interface', async ({ page }) => {
+      await page.goto('/compress-video');
+
+      await dropFile(page, '#drop-zone', fixture('sample.mp4'));
+      await expect(page.locator('#video-file')).toBeVisible();
+
+      await page.locator('#compress-quality').selectOption('low');
+      await page.locator('#action-btn').click();
+      await waitForDone(page, { timeout: TIMEOUT });
+
+      await page.locator('#clear-all').click();
+
+      await expect(page.locator('#video-file')).not.toBeVisible();
+      expect(await getFileItemCount(page)).toBe(0);
+    });
+  });
+
+  test.describe('Video Speed - Download Extension', () => {
+    test('speed-adjusted download has video extension', async ({ page }) => {
+      await page.goto('/video-speed');
+
+      await dropFile(page, '#drop-zone', fixture('sample.mp4'));
+      await expect(page.locator('#video-file')).toBeVisible();
+
+      await page.locator('#speed-preset').selectOption('2');
+      await page.locator('#action-btn').click();
+      await waitForDone(page, { timeout: TIMEOUT });
+
+      const [dl] = await Promise.all([
+        page.waitForEvent('download'),
+        page.locator('.btn-download').click(),
+      ]);
+      expect(dl.suggestedFilename()).toMatch(/\.(mp4|webm|avi|mkv|mov)$/i);
+    });
+  });
+
+  test.describe('Video Speed - Clear After Process', () => {
+    test('clear all after speed change resets interface', async ({ page }) => {
+      await page.goto('/video-speed');
+
+      await dropFile(page, '#drop-zone', fixture('sample.mp4'));
+      await expect(page.locator('#video-file')).toBeVisible();
+
+      await page.locator('#speed-preset').selectOption('2');
+      await page.locator('#action-btn').click();
+      await waitForDone(page, { timeout: TIMEOUT });
+
+      await page.locator('#clear-all').click();
+      await expect(page.locator('#video-file')).not.toBeVisible();
+      expect(await getFileItemCount(page)).toBe(0);
+    });
+  });
+
+  test.describe('Video Conversion - Download Extensions', () => {
+    test('MOV to MP4 download has .mp4 extension', async ({ page }) => {
+      await page.goto('/mov-to-mp4');
+
+      await dropFile(page, '#drop-zone', fixture('sample.mov'));
+      await page.locator('#action-btn').click();
+      await waitForDone(page, { timeout: TIMEOUT });
+
+      const [dl] = await Promise.all([
+        page.waitForEvent('download'),
+        page.locator('.btn-download').click(),
+      ]);
+      expect(dl.suggestedFilename()).toMatch(/\.mp4$/i);
+    });
+
+    test('AVI to MP4 download has .mp4 extension', async ({ page }) => {
+      await page.goto('/avi-to-mp4');
+
+      await dropFile(page, '#drop-zone', fixture('sample.avi'));
+      await page.locator('#action-btn').click();
+      await waitForDone(page, { timeout: TIMEOUT });
+
+      const [dl] = await Promise.all([
+        page.waitForEvent('download'),
+        page.locator('.btn-download').click(),
+      ]);
+      expect(dl.suggestedFilename()).toMatch(/\.mp4$/i);
+    });
+  });
+
+  test.describe('Compress Video - Download Extension', () => {
+    test('compressed video download has .mp4 extension', async ({ page }) => {
+      await page.goto('/compress-video');
+
+      await dropFile(page, '#drop-zone', fixture('sample.mp4'));
+      await page.locator('#compress-quality').selectOption('low');
+      await page.locator('#action-btn').click();
+      await waitForDone(page, { timeout: TIMEOUT });
+
+      const [dl] = await Promise.all([
+        page.waitForEvent('download'),
+        page.locator('.btn-download').click(),
+      ]);
+      expect(dl.suggestedFilename()).toMatch(/\.mp4$/i);
+    });
+  });
+
+  test.describe('Video Metadata - Wrong Format', () => {
+    test('uploading non-video to video-metadata shows no crash', async ({ page }) => {
+      await page.goto('/video-metadata');
+      const errors = [];
+      page.on('pageerror', (error) => errors.push(error.message));
+      await dropFile(page, '#drop-zone', fixture('sample.pdf'));
+      await page.waitForTimeout(3000);
+      expect(errors).toHaveLength(0);
     });
   });
 });

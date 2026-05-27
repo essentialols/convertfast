@@ -440,6 +440,21 @@ test.describe('GIF to WebP conversion', () => {
   });
 });
 
+test.describe('Quality slider localStorage persistence on reload', () => {
+  test('quality value persists after navigating away and back', async ({ page }) => {
+    await page.goto('/png-to-jpg');
+    await page.locator('#quality-slider').fill('60');
+    await page.locator('#quality-slider').dispatchEvent('input');
+    await expect(page.locator('#quality-value')).toHaveText('60%');
+
+    await page.goto('/jpg-to-png');
+    await page.goto('/png-to-jpg');
+
+    await expect(page.locator('#quality-slider')).toHaveValue('60');
+    await expect(page.locator('#quality-value')).toHaveText('60%');
+  });
+});
+
 test.describe('Quality slider extremes', () => {
   test('quality at minimum still produces output', async ({ page }) => {
     await page.goto('/png-to-jpg');

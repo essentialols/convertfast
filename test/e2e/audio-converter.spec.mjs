@@ -316,3 +316,61 @@ test.describe('Audio Compression - quality presets', () => {
     await expect(qualityDropdown).toHaveValue('high');
   });
 });
+
+test.describe('Audio Compression - download extension', () => {
+  test('compressed audio download has .mp3 extension', async ({ page }) => {
+    test.setTimeout(60000);
+    await page.goto('/compress-audio');
+    await dropFile(page, '#drop-zone', fixture('sample.mp3'));
+    await page.locator('#audio-file').waitFor({ timeout: 10000 });
+    await page.locator('#compress-quality').selectOption('low');
+    await page.locator('#action-btn').click();
+    await page.locator('#audio-file.done').waitFor({ timeout: 45000 });
+    const [dl] = await Promise.all([
+      page.waitForEvent('download'),
+      page.locator('.btn-download').click(),
+    ]);
+    expect(dl.suggestedFilename()).toMatch(/\.mp3$/);
+  });
+});
+
+test.describe('Audio Compression - wrong format rejected', () => {
+  test('uploading a PDF to compress-audio shows error or no crash', async ({ page }) => {
+    await page.goto('/compress-audio');
+    const errors = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    await dropFile(page, '#drop-zone', fixture('sample.pdf'));
+    await page.waitForTimeout(3000);
+    const hasError = await page.locator('.file-item__status.error, .file-item__status:has-text("Error")').count();
+    if (hasError === 0) {
+      expect(errors).toHaveLength(0);
+    }
+  });
+});
+
+test.describe('Audio Conversion - WAV to OGG download extension', () => {
+  test('download has .ogg extension', async ({ page }) => {
+    test.setTimeout(60000);
+    await page.goto('/wav-to-ogg');
+    await dropFile(page, '#drop-zone', fixture('sample.wav'));
+    await page.locator('.file-item.done').first().waitFor({ timeout: 45000 });
+    const [dl] = await Promise.all([
+      page.waitForEvent('download'),
+      page.locator('.btn-download').first().click(),
+    ]);
+    expect(dl.suggestedFilename()).toMatch(/\.ogg$/);
+  });
+});
+
+test.describe('Audio Conversion - remove and re-add', () => {
+  test('can add new file after removing previous', async ({ page }) => {
+    await page.goto('/wav-to-mp3');
+    await dropFile(page, '#drop-zone', fixture('sample.wav'));
+    await page.locator('.file-item.done').first().waitFor({ timeout: 30000 });
+    await page.locator('.btn-remove').first().click();
+    expect(await page.locator('.file-item').count()).toBe(0);
+    await dropFile(page, '#drop-zone', fixture('sample.wav'));
+    await page.locator('.file-item.done').first().waitFor({ timeout: 30000 });
+    await expect(page.locator('.btn-download').first()).toBeVisible();
+  });
+});

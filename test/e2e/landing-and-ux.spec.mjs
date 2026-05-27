@@ -167,3 +167,107 @@ test.describe('404 handling', () => {
     expect(response.status()).toBe(404);
   });
 });
+
+test.describe('Index page structure', () => {
+  test('has tool category sections', async ({ page }) => {
+    await page.goto('/');
+    const sections = page.locator('.tool-group, .category, section');
+    const count = await sections.count();
+    expect(count).toBeGreaterThan(0);
+  });
+
+  test('has links to audio tools', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.locator('a[href="/wav-to-mp3"]')).toHaveCount(1);
+    const compressAudioLinks = await page.locator('a[href="/compress-audio"]').count();
+    expect(compressAudioLinks).toBeGreaterThan(0);
+  });
+
+  test('has links to video tools', async ({ page }) => {
+    await page.goto('/');
+    const compressVideoLinks = await page.locator('a[href="/compress-video"]').count();
+    expect(compressVideoLinks).toBeGreaterThan(0);
+  });
+
+  test('has links to PDF tools', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.locator('a[href="/split-pdf"]')).toHaveCount(1);
+    await expect(page.locator('a[href="/pdf-ocr"]')).toHaveCount(1);
+  });
+
+  test('has links to specialized tools', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.locator('a[href="/strip-exif"]')).toHaveCount(1);
+    await expect(page.locator('a[href="/image-metadata"]')).toHaveCount(1);
+  });
+});
+
+test.describe('Smart Drop with different file types', () => {
+  test('dropping a JPG shows conversion options', async ({ page }) => {
+    await page.goto('/');
+    await page.waitForLoadState('networkidle');
+    const fileInput = page.locator('#file-input, input[type="file"]').first();
+    await fileInput.setInputFiles(fixture('sample.jpg'));
+    const routePanel = page.locator('#route-panel, .route-panel').first();
+    await routePanel.waitFor({ timeout: 10000 });
+    const options = page.locator('.route-option');
+    const count = await options.count();
+    expect(count).toBeGreaterThan(0);
+  });
+
+  test('dropping a PDF shows PDF-related options', async ({ page }) => {
+    await page.goto('/');
+    await page.waitForLoadState('networkidle');
+    const fileInput = page.locator('#file-input, input[type="file"]').first();
+    await fileInput.setInputFiles(fixture('sample.pdf'));
+    const routePanel = page.locator('#route-panel, .route-panel').first();
+    await routePanel.waitFor({ timeout: 10000 });
+    const options = page.locator('.route-option');
+    const count = await options.count();
+    expect(count).toBeGreaterThan(0);
+  });
+
+  test('dropping an MP3 shows audio-related options', async ({ page }) => {
+    await page.goto('/');
+    await page.waitForLoadState('networkidle');
+    const fileInput = page.locator('#file-input, input[type="file"]').first();
+    await fileInput.setInputFiles(fixture('sample.mp3'));
+    const routePanel = page.locator('#route-panel, .route-panel').first();
+    await routePanel.waitFor({ timeout: 10000 });
+    const options = page.locator('.route-option');
+    const count = await options.count();
+    expect(count).toBeGreaterThan(0);
+  });
+
+  test('dropping a video shows video-related options', async ({ page }) => {
+    await page.goto('/');
+    await page.waitForLoadState('networkidle');
+    const fileInput = page.locator('#file-input, input[type="file"]').first();
+    await fileInput.setInputFiles(fixture('sample.mp4'));
+    const routePanel = page.locator('#route-panel, .route-panel').first();
+    await routePanel.waitFor({ timeout: 10000 });
+    const options = page.locator('.route-option');
+    const count = await options.count();
+    expect(count).toBeGreaterThan(0);
+  });
+});
+
+test.describe('Logo navigation', () => {
+  test('logo links back to home from tool page', async ({ page }) => {
+    await page.goto('/png-to-jpg');
+    const logo = page.locator('.logo a, a.logo, header a[href="/"]').first();
+    await expect(logo).toBeVisible();
+    const href = await logo.getAttribute('href');
+    expect(href).toBe('/');
+  });
+});
+
+test.describe('Footer links', () => {
+  test('footer has privacy and about links', async ({ page }) => {
+    await page.goto('/');
+    const footer = page.locator('footer');
+    await expect(footer).toBeVisible();
+    await expect(footer.locator('a[href="/privacy"]')).toBeVisible();
+    await expect(footer.locator('a[href="/about"]')).toBeVisible();
+  });
+});

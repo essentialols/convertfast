@@ -1,0 +1,51 @@
+name: Browser verification
+
+on:
+  push:
+    branches:
+      - 'automation/**'
+      - 'agent/**'
+      - 'improvement/**'
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  browser-verification:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Check out branch
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Static validation
+        run: npm test
+
+      - name: Render and exercise real inputs
+        run: npx playwright test
+
+      - name: Upload rendered evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: irisfiles-browser-evidence-${{ github.run_attempt }}
+          path: |
+            artifacts/visual/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 14

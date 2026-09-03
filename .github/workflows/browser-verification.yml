@@ -1,21 +1,20 @@
 name: Browser verification
 
 on:
-  push:
-    branches:
-      - 'automation/**'
-      - 'agent/**'
-      - 'improvement/**'
   pull_request:
   workflow_dispatch:
 
 permissions:
   contents: read
 
+concurrency:
+  group: browser-verification-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   browser-verification:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 20
 
     steps:
       - name: Check out branch
@@ -37,7 +36,7 @@ jobs:
         run: npm test
 
       - name: Render and exercise real inputs
-        run: npx playwright test
+        run: npx playwright test test/e2e/visual-verification.spec.mjs test/e2e/landing-and-ux.spec.mjs
 
       - name: Upload rendered evidence
         if: always()

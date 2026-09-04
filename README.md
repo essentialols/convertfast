@@ -114,7 +114,7 @@ irisfiles/
   scripts/build-file-sigs.js  # Regenerates data/file-signatures.json
   img/                    # og-default.png (social card, linked from every page),
                           # favicon-source.png (source for favicon.png/.svg)
-  test/validate.mjs       # Validation suite (134 pages, 9200+ checks)
+  test/validate.mjs       # Validation suite (134 pages, 25000+ checks)
   test/e2e/               # Playwright specs, driven by playwright.config.mjs
   reddit/                 # One-off 2026-03 launch promotion, not part of the site
   patrol.sh, PATROL.md    # Automated Claude Code bug patrol; patrol.sh is invoked by

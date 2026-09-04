@@ -34,4 +34,18 @@ test.describe('Landing page tool search', () => {
     await expect(page.locator('.convert-row:visible')).toHaveCount(0);
     await expect(summary).toHaveText('No matching conversions. Try a format like PNG or a task like compress.');
   });
+
+  test('does not invent self-conversions', async ({ page }) => {
+    await page.goto('/');
+    const search = page.locator('#tools-filter');
+
+    for (const query of ['PNG to PNG', 'HEIC to HEIC', 'JPG to JPG']) {
+      await search.fill(query);
+      await expect(page.locator('.convert-row:visible')).toHaveCount(0);
+    }
+
+    // The task routes that carry their target only in the href still match.
+    await search.fill('PDF to OCR');
+    await expect(page.locator('a[href="/pdf-ocr"]')).toBeVisible();
+  });
 });

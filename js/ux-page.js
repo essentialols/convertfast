@@ -60,7 +60,7 @@ export function normalizeActionLabels(root = document) {
 }
 
 function detectInteractionMode(root = document) {
-  const convertBtn = root.querySelector('#action-btn, #convert-btn, [data-action="convert"]');
+  const convertBtn = root.querySelector('#action-btn, #convert-btn, [data-action=\"convert\"]');
   if (convertBtn) return 'manual';
   return 'auto';
 }

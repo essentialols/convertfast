@@ -7,6 +7,7 @@
 import { convertFont } from './font-engine.js';
 import { formatSize, downloadBlob, downloadAsZip } from './converter.js';
 import { loadPendingFiles } from './smart-drop.js';
+import { showPersistentNotice } from './notice-ui.js';
 
 const MAX_BATCH = 50;
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB per font file
@@ -48,7 +49,7 @@ export function init() {
         el.classList.remove('open');
         const a = el.querySelector('.faq-answer'); if (a) a.style.maxHeight = null;
       });
-      if (!isOpen) { item.classList.add('open'); answer.style.maxHeight = answer.scrollHeight + 'px'; }
+      if (!isOpen && answer) { item.classList.add('open'); answer.style.maxHeight = answer.scrollHeight + 'px'; }
     });
   });
 
@@ -59,13 +60,31 @@ export function init() {
 }
 
 function addFiles(fileList_) {
-  for (const f of fileList_) {
-    if (files.length >= MAX_BATCH) break;
-    if (f.size > MAX_FILE_SIZE) continue;
+  const incoming = Array.from(fileList_);
+  const remaining = MAX_BATCH - files.length;
+  if (remaining <= 0) {
+    showNotice(`Batch limit reached (${MAX_BATCH} files). Clear some files first.`);
+    return;
+  }
+  const toAdd = incoming.slice(0, remaining);
+  if (toAdd.length < incoming.length) {
+    showNotice(`Only added ${toAdd.length} of ${incoming.length} files (batch limit: ${MAX_BATCH}).`);
+  }
+
+  let skipped = 0;
+  for (const f of toAdd) {
+    if (f.size > MAX_FILE_SIZE) { skipped++; continue; }
     files.push(f);
     renderFileEntry(f);
   }
+  if (skipped > 0) {
+    showNotice(`${skipped} file(s) skipped (max ${formatSize(MAX_FILE_SIZE)} per file).`);
+  }
   updateControls();
+}
+
+function showNotice(msg) {
+  showPersistentNotice(dropZone, msg, { id: 'cf-notice', kind: 'warning' });
 }
 
 function renderFileEntry(file) {

@@ -1,6 +1,11 @@
 import { test, expect } from '@playwright/test';
 import { fixture } from './helpers.mjs';
 
+const VALID_PNG = Buffer.from(
+  'iVBORw0KGgoAAAANSUhEUgAAAAQAAAADCAYAAAC09K7GAAAAFUlEQVR4nGMUqbizhQEJMDGgAQwBAGX4AiKp+0UEAAAAAElFTkSuQmCC',
+  'base64'
+);
+
 test.describe('Converter drop zone compaction', () => {
   test('compacts after a valid file is added and expands after Clear All', async ({ page }) => {
     await page.goto('/png-to-jpg');
@@ -8,7 +13,7 @@ test.describe('Converter drop zone compaction', () => {
     const fileInput = page.locator('#file-input');
 
     await expect(dropZone).not.toHaveClass(/compact/);
-    await fileInput.setInputFiles(fixture('sample.png'));
+    await fileInput.setInputFiles({ name: 'compact-test.png', mimeType: 'image/png', buffer: VALID_PNG });
 
     await expect(dropZone).toHaveClass(/compact/);
     await expect(page.locator('.file-item')).toHaveCount(1);

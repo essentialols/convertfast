@@ -60,7 +60,7 @@ export function normalizeActionLabels(root = document) {
 }
 
 function detectInteractionMode(root = document) {
-  const convertBtn = root.querySelector('#action-btn, #convert-btn, [data-action=\"convert\"]');
+  const convertBtn = root.querySelector('#action-btn, #convert-btn, [data-action="convert"]');
   if (convertBtn) return 'manual';
   return 'auto';
 }
@@ -137,6 +137,21 @@ export function injectPreflightBadge(options = {}) {
   }
 }
 
+export function syncDropZoneCompactState(options = {}) {
+  const dropZone = document.querySelector(options.dropZoneSelector || '#drop-zone');
+  const fileList = document.querySelector(options.fileListSelector || '#file-list');
+  if (!dropZone || !fileList) return;
+
+  const sync = () => {
+    dropZone.classList.toggle('compact', fileList.children.length > 0);
+  };
+
+  sync();
+  const observer = new MutationObserver(sync);
+  observer.observe(fileList, { childList: true });
+  return observer;
+}
+
 export function applyPageUX(options = {}) {
   enableKeyboardDropZone(options.dropZoneSelector, options.fileInputSelector);
   enhanceFaqSemantics(document);
@@ -145,4 +160,7 @@ export function applyPageUX(options = {}) {
     injectInteractionHint(options);
   }
   injectPreflightBadge(options);
+  if (options.syncDropZoneCompact) {
+    syncDropZoneCompactState(options);
+  }
 }

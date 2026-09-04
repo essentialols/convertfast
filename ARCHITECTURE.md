@@ -1,40 +1,55 @@
 # IrisFiles Architecture
 
-Privacy-first client-side image converter. All conversion happens in the browser. Files never leave the user's device.
+Privacy-first client-side file converter — images, video, audio, documents, fonts and archives.
+All conversion happens in the browser. Files never leave the user's device.
 
 ## Project Structure
 
-```
-irisfiles/
-├── index.html                # Landing page / hub linking to all converters
-├── heic-to-jpg.html          # HEIC→JPG (hero page, WASM-powered)
-├── heic-to-png.html          # HEIC→PNG (WASM-powered)
-├── webp-to-jpg.html          # WebP→JPG (native Canvas API)
-├── png-to-jpg.html           # PNG→JPG (native Canvas API)
-├── jpg-to-png.html           # JPG→PNG (native Canvas API)
-├── compress.html             # Quality slider, re-encode at lower quality
-├── about.html                # Privacy story, how it works
-├── css/style.css             # All styles, system font stack
-├── js/
-│   ├── converter.js          # Format detection (magic bytes), Canvas encode, download, ZIP
-│   ├── ui.js                 # Drag-drop, file queue, progress, quality slider, FAQ accordion
-│   ├── heic-worker.js        # Lazy loader for heic-to WASM (main thread, needs Canvas)
-│   └── fflate.min.js         # Built: fflate IIFE bundle for client-side ZIP
-├── wasm/heic/
-│   └── heic-to.iife.js       # Built: heic-to IIFE with embedded WASM (~2.5MB)
-├── vercel.json               # Clean URLs, WASM cache headers
-├── build.sh                  # One-shot: copy WASM + bundle fflate from node_modules
-├── package.json              # Dev deps only
-├── robots.txt, sitemap.xml
-└── ARCHITECTURE.md
-```
+See the "Project structure" section of [README.md](README.md). It is the single tree; this file
+does not repeat it.
+
+The load-bearing constraint: `vercel.json` sets `"outputDirectory": "."`, so the repo root *is* the
+web root and every root HTML filename is a live URL enumerated in `sitemap.xml` and asserted by
+`test/validate.mjs`. Root pages cannot be foldered by category without breaking URLs.
+
+## Engines
+
+Each tool follows the engine/UI/boot triad named by a shared filename stem. Engines are pure
+conversion logic with no DOM access; heavy libraries are lazy-loaded from jsDelivr on first use.
+
+| Engine | Does | Library |
+|---|---|---|
+| `converter.js` | Magic-byte format detection, Canvas encode, download, ZIP | — (fflate for ZIP) |
+| `heic-worker.js` | Lazy HEIC decode | heic-to (WASM, libheif 1.21.2), committed to `wasm/heic/` |
+| `resize-engine.js` | Resize via Canvas, target dimensions or percentage | — |
+| `strip-engine.js` | Drop metadata by re-encoding through Canvas | — |
+| `exif-engine.js` | Metadata read/write | ExifReader (read all), piexifjs (lossless JPEG write) |
+| `pdf-engine.js` | Image↔PDF, merge, split | pdf-lib, jsPDF, PDF.js |
+| `ocr-engine.js` | PDF OCR | PDF.js + Tesseract.js |
+| `doc-engine.js` | EPUB/RTF/DOCX/MOBI → TXT and PDF | jsPDF |
+| `font-engine.js` | TTF/OTF/WOFF cross-convert | opentype.js |
+| `archive-engine.js` | ZIP extract and create | fflate (committed) |
+| `gif-engine.js` | Video → GIF, streaming one frame at a time | gifenc (committed) |
+| `images-gif-engine.js` | Images → animated GIF, global palette | gifenc (committed) |
+| `remux-engine.js` | MOV → MP4 by rewriting the ISOBMFF `ftyp` brand | — (no transcode) |
+| `vidconv-engine.js` | Video cross-convert | FFmpeg.wasm via `ffmpeg-shared.js` |
+| `vidspeed-engine.js` | Playback-speed change | FFmpeg.wasm via `ffmpeg-shared.js` |
+| `vidmeta-engine.js` | Video metadata read | MediaInfo.js |
+| `audio-engine.js` | Audio cross-convert | Web Audio decode + lamejs MP3 encode |
+| `compress-audio-engine.js` | Re-encode audio to MP3 at a chosen bitrate | FFmpeg.wasm via `ffmpeg-shared.js` |
+
+`ffmpeg-shared.js` holds a single FFmpeg.wasm instance (~25MB, ~10MB Brotli) reused by every video
+and audio engine, loaded on first use.
 
 ## Conversion Pipeline
 
 ```
 File → detectFormat(magic bytes) → route:
-  HEIC/HEIF → lazy-load heic-to (WASM, libheif 1.21.2) → Canvas → Blob → download
-  Everything else → new Image() → Canvas → toBlob(targetMime, quality) → download
+  HEIC/HEIF        → lazy-load heic-to (WASM, libheif 1.21.2) → Canvas → Blob → download
+  Other images     → new Image() → Canvas → toBlob(targetMime, quality) → download
+  Video/audio      → ensureFFmpeg() → FFmpeg.wasm → Blob → download
+  MOV→MP4          → remux-engine ftyp rewrite (no transcode)
+  Documents / PDF  → lazy-load pdf-lib / jsPDF / PDF.js → Blob → download
 ```
 
 ## Key Decisions

@@ -3,6 +3,8 @@
  * Resizes images via Canvas API. Supports target dimensions or percentage scaling.
  */
 
+import { validateDimensions } from './converter.js';
+
 /**
  * Resize an image file.
  * @param {File|Blob} file - Source image
@@ -32,6 +34,9 @@ export async function resizeImage(file, opts, onProgress) {
     targetW = opts.width || origW;
     targetH = opts.height || origH;
   }
+
+  // Reject before clamping so the error quotes the size the user actually asked for
+  validateDimensions(targetW, targetH);
 
   // Clamp to reasonable limits
   targetW = Math.max(1, Math.min(targetW, 16384));

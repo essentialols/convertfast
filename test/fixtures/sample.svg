@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="384" viewBox="0 0 512 384">
+  <rect width="512" height="384" fill="#123c6e"/>
+  <circle cx="256" cy="192" r="140" fill="none" stroke="#fff" stroke-width="6"/>
+  <rect x="160" y="120" width="192" height="144" fill="none" stroke="#ffdc00" stroke-width="4"/>
+  <text x="24" y="48" fill="#ff0" font-family="sans-serif" font-size="32">IrisFiles SVG</text>
+</svg>

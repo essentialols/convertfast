@@ -40,11 +40,13 @@ export async function extractZip(file, onProgress) {
  * @returns {Promise<Blob>}
  */
 export async function createZip(files, onProgress) {
-  const zipInput = {};
+  const zipInput = Object.create(null);
+  const usedNames = new Set();
 
   for (let i = 0; i < files.length; i++) {
     const buffer = await files[i].blob.arrayBuffer();
-    zipInput[files[i].name] = new Uint8Array(buffer);
+    const name = uniqueArchiveName(files[i].name, usedNames);
+    zipInput[name] = new Uint8Array(buffer);
     if (onProgress) onProgress(Math.round(((i + 1) / files.length) * 60));
   }
 
@@ -55,6 +57,30 @@ export async function createZip(files, onProgress) {
   const blob = new Blob([zipped], { type: 'application/zip' });
   if (onProgress) onProgress(100);
   return blob;
+}
+
+function uniqueArchiveName(name, usedNames) {
+  if (!usedNames.has(name)) {
+    usedNames.add(name);
+    return name;
+  }
+
+  const slash = name.lastIndexOf('/');
+  const dir = slash === -1 ? '' : name.slice(0, slash + 1);
+  const filename = slash === -1 ? name : name.slice(slash + 1);
+  const dot = filename.lastIndexOf('.');
+  const stem = dot > 0 ? filename.slice(0, dot) : filename;
+  const ext = dot > 0 ? filename.slice(dot) : '';
+
+  let suffix = 2;
+  let candidate;
+  do {
+    candidate = `${dir}${stem} (${suffix})${ext}`;
+    suffix++;
+  } while (usedNames.has(candidate));
+
+  usedNames.add(candidate);
+  return candidate;
 }
 
 /**

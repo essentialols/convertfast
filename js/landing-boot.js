@@ -25,6 +25,60 @@ applyPageUX({
   autoText: 'Mode: drop one file, then choose a conversion or tool below.',
 });
 
+const SEARCH_FILLER_WORDS = new Set([
+  'convert', 'converter', 'converters', 'conversion', 'conversions',
+  'file', 'files', 'to', 'into',
+]);
+
+function normalizeSearchText(value) {
+  return value
+    .toLowerCase()
+    .replace(/\bjpeg\b/g, 'jpg')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+
+function searchTerms(value) {
+  return normalizeSearchText(value)
+    .split(/\s+/)
+    .filter(term => term && !SEARCH_FILLER_WORDS.has(term));
+}
+
+function textMatchesTerms(text, terms) {
+  const searchable = normalizeSearchText(text);
+  return terms.every(term => searchable.includes(term));
+}
+
+function directionalSearchParts(query) {
+  return query.match(/^(?:convert\s+)?(.+?)\s+(?:to|into)\s+(.+)$/i)
+    || query.match(/^(?:convert\s+)?(.+?)\s*(?:→|->)\s*(.+)$/i);
+}
+
+function rowMatchesToolsQuery(row, query) {
+  if (!query) return true;
+
+  const directional = directionalSearchParts(query);
+  if (directional) {
+    const sourceTerms = searchTerms(directional[1]);
+    const targetTerms = searchTerms(directional[2]);
+    if (sourceTerms.length === 0 || targetTerms.length === 0) return false;
+
+    const sourceText = row.querySelector('.convert-source')?.textContent || '';
+    const targetText = Array.from(row.querySelectorAll('.tool-link'))
+      .map(link => `${link.textContent || ''} ${link.getAttribute('href') || ''}`)
+      .join(' ');
+    return textMatchesTerms(sourceText, sourceTerms)
+      && textMatchesTerms(targetText, targetTerms);
+  }
+
+  const terms = searchTerms(query);
+  if (terms.length === 0) return false;
+  const searchableText = `${row.textContent || ''} ${Array.from(row.querySelectorAll('a'))
+    .map(link => link.getAttribute('href') || '')
+    .join(' ')}`;
+  return textMatchesTerms(searchableText, terms);
+}
+
 const toolsFilterInput = document.getElementById('tools-filter');
 const toolsFilterSummary = document.getElementById('tools-filter-summary');
 if (toolsFilterInput) {
@@ -32,12 +86,11 @@ if (toolsFilterInput) {
   const groups = Array.from(document.querySelectorAll('.convert-group'));
 
   const updateToolsFilter = () => {
-    const query = toolsFilterInput.value.trim().toLowerCase();
+    const query = toolsFilterInput.value.trim();
     let visibleRows = 0;
 
     rows.forEach((row) => {
-      const text = row.textContent.toLowerCase();
-      const match = !query || text.includes(query);
+      const match = rowMatchesToolsQuery(row, query);
       row.style.display = match ? '' : 'none';
       if (match) visibleRows += 1;
     });
@@ -56,9 +109,13 @@ if (toolsFilterInput) {
     });
 
     if (toolsFilterSummary) {
-      toolsFilterSummary.textContent = query
-        ? `${visibleRows} matching conversions`
-        : `${rows.length} total conversions`;
+      if (!query) {
+        toolsFilterSummary.textContent = `${rows.length} total conversions`;
+      } else if (visibleRows === 0) {
+        toolsFilterSummary.textContent = 'No matching conversions. Try a format like PNG or a task like compress.';
+      } else {
+        toolsFilterSummary.textContent = `${visibleRows} matching conversion${visibleRows === 1 ? '' : 's'}`;
+      }
     }
   };
 

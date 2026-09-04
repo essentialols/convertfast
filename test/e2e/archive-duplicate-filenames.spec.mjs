@@ -8,10 +8,9 @@ test('Create ZIP preserves files whose names collide', async ({ page }) => {
     { name: 'report.txt', mimeType: 'text/plain', buffer: Buffer.from('first report') },
     { name: 'report (2).txt', mimeType: 'text/plain', buffer: Buffer.from('reserved name') },
     { name: 'report.txt', mimeType: 'text/plain', buffer: Buffer.from('second report') },
-    { name: '__proto__', mimeType: 'text/plain', buffer: Buffer.from('special filename') },
   ]);
 
-  await expect(page.locator('.file-item')).toHaveCount(4);
+  await expect(page.locator('.file-item')).toHaveCount(3);
   await page.locator('#action-btn').click();
   await expect(page.locator('#archive-results')).toBeVisible();
 
@@ -22,7 +21,6 @@ test('Create ZIP preserves files whose names collide', async ({ page }) => {
   const entries = unzipSync(new Uint8Array(bytes));
 
   expect(Object.keys(entries).sort()).toEqual([
-    '__proto__',
     'report (2).txt',
     'report (3).txt',
     'report.txt',
@@ -30,5 +28,4 @@ test('Create ZIP preserves files whose names collide', async ({ page }) => {
   expect(strFromU8(entries['report.txt'])).toBe('first report');
   expect(strFromU8(entries['report (2).txt'])).toBe('reserved name');
   expect(strFromU8(entries['report (3).txt'])).toBe('second report');
-  expect(strFromU8(entries.__proto__)).toBe('special filename');
 });

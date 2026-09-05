@@ -61,8 +61,15 @@ export async function convertFont(file, targetFormat, onProgress) {
 
   let resultBuffer;
 
-  if (targetFormat === 'ttf' || targetFormat === 'otf') {
-    // opentype.js outputs sfnt (TTF/OTF) directly
+  if (targetFormat === 'ttf') {
+    // opentype.js 1.3.x serializes parsed outlines as CFF OpenType (`OTTO`).
+    // Never relabel those bytes as a TrueType file.
+    const sfntFlavor = new DataView(sfntBuffer).getUint32(0);
+    if (sfntFlavor !== 0x00010000) {
+      throw new Error('TTF output is not supported for this conversion yet. Try OTF or WOFF instead; no file was created.');
+    }
+    resultBuffer = sfntBuffer;
+  } else if (targetFormat === 'otf') {
     resultBuffer = sfntBuffer;
   } else if (targetFormat === 'woff') {
     resultBuffer = wrapAsWoff(new Uint8Array(sfntBuffer));

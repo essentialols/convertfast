@@ -27,6 +27,15 @@ async function convertAndDownload(page, path, fixtureName, expectedExtension) {
   return output;
 }
 
+async function expectBrowserLoadsFont(page, output) {
+  const status = await page.evaluate(async bytes => {
+    const face = new FontFace('IrisFilesOutputVerification', new Uint8Array(bytes).buffer);
+    await face.load();
+    return face.status;
+  }, Array.from(output));
+  expect(status).toBe('loaded');
+}
+
 async function expectUnsupportedTtf(page, path, fixtureName) {
   const downloads = [];
   page.on('download', download => downloads.push(download));
@@ -44,24 +53,28 @@ async function expectUnsupportedTtf(page, path, fixtureName) {
 }
 
 test.describe('font conversion output', () => {
-  test('TTF to OTF produces real OTF bytes without an automatic download', async ({ page }) => {
+  test('TTF to OTF produces a browser-loadable OTF without an automatic download', async ({ page }) => {
     const output = await convertAndDownload(page, '/ttf-to-otf', 'sample.ttf', 'otf');
     expect(output.subarray(0, 4).toString('ascii')).toBe('OTTO');
+    await expectBrowserLoadsFont(page, output);
   });
 
-  test('WOFF to OTF produces real OTF bytes without an automatic download', async ({ page }) => {
+  test('WOFF to OTF produces a browser-loadable OTF without an automatic download', async ({ page }) => {
     const output = await convertAndDownload(page, '/woff-to-otf', 'sample.woff', 'otf');
     expect(output.subarray(0, 4).toString('ascii')).toBe('OTTO');
+    await expectBrowserLoadsFont(page, output);
   });
 
-  test('TTF to WOFF produces a WOFF file instead of failing on an empty buffer', async ({ page }) => {
+  test('TTF to WOFF produces a browser-loadable WOFF instead of failing on an empty buffer', async ({ page }) => {
     const output = await convertAndDownload(page, '/ttf-to-woff', 'sample.ttf', 'woff');
     expect(Array.from(output.subarray(0, 4))).toEqual([0x77, 0x4f, 0x46, 0x46]); // wOFF
+    await expectBrowserLoadsFont(page, output);
   });
 
-  test('OTF to WOFF produces a WOFF file instead of failing on an empty buffer', async ({ page }) => {
+  test('OTF to WOFF produces a browser-loadable WOFF instead of failing on an empty buffer', async ({ page }) => {
     const output = await convertAndDownload(page, '/otf-to-woff', 'sample.otf', 'woff');
     expect(Array.from(output.subarray(0, 4))).toEqual([0x77, 0x4f, 0x46, 0x46]); // wOFF
+    await expectBrowserLoadsFont(page, output);
   });
 
   test('OTF to TTF refuses to relabel CFF OpenType bytes as TrueType', async ({ page }) => {

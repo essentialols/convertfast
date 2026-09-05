@@ -55,8 +55,8 @@ export async function convertFont(file, targetFormat, onProgress) {
   }
   if (onProgress) onProgress(50);
 
-  // opentype.js download() produces a TTF/OTF ArrayBuffer
-  const sfntBuffer = font.download();
+  // Serialize without triggering opentype.js's browser-download side effect.
+  const sfntBuffer = font.toArrayBuffer();
   if (onProgress) onProgress(70);
 
   let resultBuffer;

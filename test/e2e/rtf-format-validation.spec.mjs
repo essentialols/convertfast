@@ -3,9 +3,13 @@ import { fixture } from './helpers.mjs';
 
 
 test.describe('RTF input validation', () => {
-  test('rejects plain text instead of reporting a successful RTF conversion', async ({ page }) => {
+  test('rejects plain text even when it is disguised with an RTF filename and MIME type', async ({ page }) => {
     await page.goto('/rtf-to-txt');
-    await page.locator('#file-input').setInputFiles(fixture('sample.txt'));
+    await page.locator('#file-input').setInputFiles({
+      name: 'not-actually-rtf.rtf',
+      mimeType: 'application/rtf',
+      buffer: Buffer.from('Plain text pretending to be an RTF document.'),
+    });
 
     await expect(page.locator('#doc-results')).toContainText(
       'This file does not appear to be a valid RTF document.'

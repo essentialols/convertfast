@@ -1,0 +1,37 @@
+import { test, expect } from '@playwright/test';
+import { fixture } from './helpers.mjs';
+
+
+test.describe('RTF input validation', () => {
+  test('rejects plain text instead of reporting a successful RTF conversion', async ({ page }) => {
+    await page.goto('/rtf-to-txt');
+    await page.locator('#file-input').setInputFiles(fixture('sample.txt'));
+
+    await expect(page.locator('#doc-results')).toContainText(
+      'This file does not appear to be a valid RTF document.'
+    );
+    await expect(page.locator('.file-item')).toHaveCount(0);
+    await expect(page.locator('#action-btn')).toBeHidden();
+    await expect(page.locator('#dl-doc')).toHaveCount(0);
+  });
+
+  test('accepts a genuine RTF document and still produces a text download', async ({ page }) => {
+    await page.goto('/rtf-to-txt');
+    await page.locator('#file-input').setInputFiles(fixture('sample.rtf'));
+    await expect(page.locator('#action-btn')).toBeVisible();
+    await page.locator('#action-btn').click();
+    await expect(page.locator('#dl-doc')).toBeVisible({ timeout: 10000 });
+
+    const downloadPromise = page.waitForEvent('download');
+    await page.locator('#dl-doc').click();
+    const download = await downloadPromise;
+    expect(download.suggestedFilename()).toBe('sample.txt');
+
+    const stream = await download.createReadStream();
+    const chunks = [];
+    for await (const chunk of stream) chunks.push(chunk);
+    expect(Buffer.concat(chunks).toString('utf8')).toBe(
+      'Hello World. This is a test document.'
+    );
+  });
+});

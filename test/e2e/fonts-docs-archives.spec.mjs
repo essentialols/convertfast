@@ -1,3 +1,4 @@
+import { readFile } from 'node:fs/promises';
 import { test, expect } from '@playwright/test';
 import { fixture } from './helpers.mjs';
 
@@ -263,7 +264,7 @@ test.describe('Document Pages - DOCX Visible Text', () => {
     const downloadPromise = page.waitForEvent('download');
     await page.locator('#dl-doc').click();
     const download = await downloadPromise;
-    const text = await (await import('node:fs/promises')).readFile(await download.path(), 'utf8');
+    const text = await readFile(await download.path(), 'utf8');
 
     expect(text).toBe([
       'Before inserted ✓ after',

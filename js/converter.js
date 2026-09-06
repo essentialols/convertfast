@@ -21,13 +21,25 @@ const FORMAT_SIGNATURES = [
   { mime: 'image/avif',  ext: 'avif', offsets: [[4,[0x66,0x74,0x79,0x70,0x61,0x76,0x69,0x66]],[4,[0x66,0x74,0x79,0x70,0x61,0x76,0x69,0x73]]] },
 ];
 
+function looksLikeSvg(bytes) {
+  const text = new TextDecoder('utf-8', { fatal: false })
+    .decode(bytes)
+    .replace(/^\uFEFF/, '');
+  const normalized = text
+    .replace(/^\s*<\?xml[\s\S]*?\?>/i, '')
+    .replace(/^\s*(?:<!--[\s\S]*?-->\s*)*/i, '')
+    .replace(/^\s*<!DOCTYPE[^>]*>/i, '')
+    .trimStart();
+  return /^<svg(?:\s|>)/i.test(normalized);
+}
+
 /**
  * Detect image format from magic bytes (not file extension).
  * @param {File} file
  * @returns {Promise<{mime: string, ext: string}|null>}
  */
 export async function detectFormat(file) {
-  const buf = new Uint8Array(await file.slice(0, 32).arrayBuffer());
+  const buf = new Uint8Array(await file.slice(0, 4096).arrayBuffer());
   for (const fmt of FORMAT_SIGNATURES) {
     for (const [offset, sig] of fmt.offsets) {
       if (buf.length >= offset + sig.length &&
@@ -36,6 +48,7 @@ export async function detectFormat(file) {
       }
     }
   }
+  if (looksLikeSvg(buf)) return { mime: 'image/svg+xml', ext: 'svg' };
   return null;
 }
 
@@ -72,6 +85,19 @@ export function validateDimensions(width, height) {
 
 export { MAX_BATCH_SIZE };
 
+async function loadSvgImage(file) {
+  const url = URL.createObjectURL(file);
+  const img = new Image();
+  img.src = url;
+  try {
+    await img.decode();
+    return { image: img, cleanup: () => URL.revokeObjectURL(url) };
+  } catch {
+    URL.revokeObjectURL(url);
+    throw new Error('Could not decode image. The file may be corrupted or in an unsupported format.');
+  }
+}
+
 /**
  * Convert an image using the Canvas API (for natively-supported formats).
  * @param {File|Blob} file - Source image
@@ -80,30 +106,42 @@ export { MAX_BATCH_SIZE };
  * @returns {Promise<Blob>}
  */
 export async function convertWithCanvas(file, targetMime, quality) {
-  // createImageBitmap with imageOrientation auto-corrects EXIF rotation from iPhone photos
-  let bmp;
+  // createImageBitmap with imageOrientation auto-corrects EXIF rotation from iPhone photos.
+  // Chromium does not decode SVG blobs through createImageBitmap, so SVG uses an HTMLImageElement fallback.
+  let source;
+  let cleanup = () => {};
   try {
-    bmp = await createImageBitmap(file, { imageOrientation: 'from-image' });
+    source = await createImageBitmap(file, { imageOrientation: 'from-image' });
+    cleanup = () => source.close();
   } catch {
-    throw new Error('Could not decode image. The file may be corrupted or in an unsupported format.');
+    const fmt = await detectFormat(file);
+    if (fmt?.mime !== 'image/svg+xml') {
+      throw new Error('Could not decode image. The file may be corrupted or in an unsupported format.');
+    }
+    const loaded = await loadSvgImage(file);
+    source = loaded.image;
+    cleanup = loaded.cleanup;
   }
+
+  const width = source.width || source.naturalWidth;
+  const height = source.height || source.naturalHeight;
+  let canvas;
   try {
-    validateDimensions(bmp.width, bmp.height);
-  } catch (e) {
-    bmp.close();
-    throw e;
+    validateDimensions(width, height);
+    canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) throw new Error('Could not get canvas context');
+    if (targetMime === 'image/jpeg') {
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+    ctx.drawImage(source, 0, 0);
+  } finally {
+    cleanup();
   }
-  const canvas = document.createElement('canvas');
-  canvas.width = bmp.width;
-  canvas.height = bmp.height;
-  const ctx = canvas.getContext('2d');
-  if (!ctx) throw new Error('Could not get canvas context');
-  if (targetMime === 'image/jpeg') {
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-  }
-  ctx.drawImage(bmp, 0, 0);
-  bmp.close();
+
   return new Promise((resolve, reject) => {
     canvas.toBlob(
       blob => blob ? resolve(blob) : reject(new Error('Canvas toBlob failed')),

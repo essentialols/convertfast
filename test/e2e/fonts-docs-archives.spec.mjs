@@ -1,3 +1,4 @@
+import { readFile } from 'node:fs/promises';
 import { test, expect } from '@playwright/test';
 import { fixture } from './helpers.mjs';
 
@@ -85,6 +86,27 @@ test.describe('Document Pages - General', () => {
         await expect(clearAll).not.toBeVisible();
       });
     });
+  });
+});
+
+test.describe('Document Pages - EPUB Conversion', () => {
+  test('EPUB to TXT preserves readable block boundaries and Unicode', async ({ page }) => {
+    await page.goto('/epub-to-txt');
+    await page.locator('#file-input').setInputFiles(fixture('sample.epub'));
+    await page.locator('#action-btn').click();
+    await expect(page.locator('#doc-results')).toBeVisible({ timeout: 30000 });
+
+    const downloadPromise = page.waitForEvent('download');
+    await page.locator('#dl-doc').click();
+    const download = await downloadPromise;
+    const outputPath = await download.path();
+    expect(outputPath).toBeTruthy();
+
+    const text = await readFile(outputPath, 'utf8');
+    expect(text).toBe(
+      'Chapter One\nIrisFiles fixture. Unicode: café 日本語 Ω.\n\n' +
+      'Chapter Two\nSecond chapter with more text to paginate.'
+    );
   });
 });
 

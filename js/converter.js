@@ -86,7 +86,10 @@ export function validateDimensions(width, height) {
 export { MAX_BATCH_SIZE };
 
 async function loadSvgImage(file) {
-  const url = URL.createObjectURL(file);
+  const svgBlob = file.type === 'image/svg+xml'
+    ? file
+    : new Blob([await file.arrayBuffer()], { type: 'image/svg+xml' });
+  const url = URL.createObjectURL(svgBlob);
   const img = new Image();
   img.src = url;
   try {

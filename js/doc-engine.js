@@ -333,6 +333,48 @@ export async function rtfToPdf(file, onProgress) {
 
 // --------------- DOCX ---------------
 
+/**
+ * Extract visible text from a WordprocessingML paragraph in document order.
+ *
+ * DOCX paragraphs may wrap runs inside hyperlinks, tracked insertions, content
+ * controls, smart tags, and other containers. Walk those wrappers recursively
+ * instead of looking only at direct w:r children so visible text is not lost.
+ */
+function extractDocxParagraphText(paragraph) {
+  let text = '';
+
+  const visit = node => {
+    for (let i = 0; i < node.childNodes.length; i++) {
+      const child = node.childNodes[i];
+      if (child.nodeType !== 1) continue; // element nodes only
+
+      const name = child.localName || child.nodeName.replace(/^.*:/, '');
+
+      // Deleted/moved-from revision content is not part of the visible document.
+      if (name === 'del' || name === 'moveFrom') {
+        continue;
+      }
+
+      if (name === 't') {
+        text += child.textContent || '';
+      } else if (name === 'tab') {
+        text += '\t';
+      } else if (name === 'br' || name === 'cr') {
+        text += '\n';
+      } else if (name === 'noBreakHyphen') {
+        text += '\u2011';
+      } else if (name === 'softHyphen') {
+        text += '\u00AD';
+      } else {
+        visit(child);
+      }
+    }
+  };
+
+  visit(paragraph);
+  return text;
+}
+
 /** Parse DOCX (ZIP) and extract text from word/document.xml. */
 async function extractDocxText(file, onProgress) {
   if (onProgress) onProgress(10);
@@ -371,57 +413,7 @@ async function extractDocxText(file, onProgress) {
 
   const lines = [];
   for (let i = 0; i < paragraphs.length; i++) {
-    const p = paragraphs[i];
-
-    // Get all text nodes within w:t elements
-    let texts = p.getElementsByTagNameNS(nsW, 't');
-    if (texts.length === 0) {
-      texts = p.querySelectorAll('t');
-    }
-
-    const parts = [];
-    for (let j = 0; j < texts.length; j++) {
-      const t = texts[j].textContent;
-      if (t) parts.push(t);
-    }
-
-    // Check for w:tab elements (insert tab character)
-    let lineText = '';
-    const children = p.childNodes;
-    for (let c = 0; c < children.length; c++) {
-      const run = children[c];
-      if (run.nodeType !== 1) continue; // element nodes only
-      const localName = run.localName || run.nodeName.replace(/^.*:/, '');
-      if (localName === 'r') {
-        // Process run children
-        for (let rc = 0; rc < run.childNodes.length; rc++) {
-          const rChild = run.childNodes[rc];
-          if (rChild.nodeType !== 1) continue;
-          const rName = rChild.localName || rChild.nodeName.replace(/^.*:/, '');
-          if (rName === 't') {
-            lineText += rChild.textContent || '';
-          } else if (rName === 'tab') {
-            lineText += '\t';
-          } else if (rName === 'br') {
-            lineText += '\n';
-          }
-        }
-      } else if (localName === 'hyperlink') {
-        // Extract text from hyperlinks
-        let hTexts = run.getElementsByTagNameNS(nsW, 't');
-        if (hTexts.length === 0) hTexts = run.querySelectorAll('t');
-        for (let h = 0; h < hTexts.length; h++) {
-          lineText += hTexts[h].textContent || '';
-        }
-      }
-    }
-
-    // Fallback: if run-level extraction got nothing, use concatenated text
-    if (!lineText && parts.length > 0) {
-      lineText = parts.join('');
-    }
-
-    lines.push(lineText);
+    lines.push(extractDocxParagraphText(paragraphs[i]));
 
     if (onProgress) onProgress(40 + Math.round((i / paragraphs.length) * 30));
   }

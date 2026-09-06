@@ -141,6 +141,143 @@ test.describe('Document Pages - RTF Conversion', () => {
   });
 });
 
+test.describe('Document Pages - DOCX Visible Text', () => {
+  function crc32(data) {
+    let crc = 0xFFFFFFFF;
+    for (const byte of data) {
+      crc ^= byte;
+      for (let bit = 0; bit < 8; bit++) {
+        crc = (crc >>> 1) ^ ((crc & 1) ? 0xEDB88320 : 0);
+      }
+    }
+    return (crc ^ 0xFFFFFFFF) >>> 0;
+  }
+
+  function storedZip(entries) {
+    const localParts = [];
+    const centralParts = [];
+    let offset = 0;
+
+    for (const [name, value] of Object.entries(entries)) {
+      const nameBytes = Buffer.from(name, 'utf8');
+      const data = Buffer.isBuffer(value) ? value : Buffer.from(value, 'utf8');
+      const crc = crc32(data);
+
+      const local = Buffer.alloc(30);
+      local.writeUInt32LE(0x04034B50, 0);
+      local.writeUInt16LE(20, 4);
+      local.writeUInt16LE(0x0800, 6); // UTF-8 filenames
+      local.writeUInt16LE(0, 8);      // stored, no compression
+      local.writeUInt32LE(crc, 14);
+      local.writeUInt32LE(data.length, 18);
+      local.writeUInt32LE(data.length, 22);
+      local.writeUInt16LE(nameBytes.length, 26);
+      localParts.push(local, nameBytes, data);
+
+      const central = Buffer.alloc(46);
+      central.writeUInt32LE(0x02014B50, 0);
+      central.writeUInt16LE(20, 4);
+      central.writeUInt16LE(20, 6);
+      central.writeUInt16LE(0x0800, 8);
+      central.writeUInt16LE(0, 10);
+      central.writeUInt32LE(crc, 16);
+      central.writeUInt32LE(data.length, 20);
+      central.writeUInt32LE(data.length, 24);
+      central.writeUInt16LE(nameBytes.length, 28);
+      central.writeUInt32LE(offset, 42);
+      centralParts.push(central, nameBytes);
+
+      offset += local.length + nameBytes.length + data.length;
+    }
+
+    const centralSize = centralParts.reduce((sum, part) => sum + part.length, 0);
+    const end = Buffer.alloc(22);
+    end.writeUInt32LE(0x06054B50, 0);
+    end.writeUInt16LE(Object.keys(entries).length, 8);
+    end.writeUInt16LE(Object.keys(entries).length, 10);
+    end.writeUInt32LE(centralSize, 12);
+    end.writeUInt32LE(offset, 16);
+
+    return Buffer.concat([...localParts, ...centralParts, end]);
+  }
+
+  function nestedVisibleTextDocx() {
+    const contentTypes = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+  <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+  <Default Extension="xml" ContentType="application/xml"/>
+  <Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>
+</Types>`;
+    const rels = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>
+</Relationships>`;
+    const documentXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"
+ xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+  <w:body>
+    <w:p>
+      <w:r><w:t xml:space="preserve">Before </w:t></w:r>
+      <w:ins w:id="1" w:author="IrisFiles"><w:r><w:t>inserted ✓</w:t></w:r></w:ins>
+      <w:r><w:t xml:space="preserve"> after</w:t></w:r>
+    </w:p>
+    <w:p><w:r><w:t>Line one</w:t><w:br/><w:t>Line two</w:t></w:r></w:p>
+    <w:p><w:r><w:t>Label</w:t><w:tab/><w:t>Value</w:t></w:r></w:p>
+    <w:p><w:hyperlink r:id="rId2"><w:r><w:t>Docs</w:t><w:br/><w:t>Next</w:t></w:r></w:hyperlink></w:p>
+    <w:p>
+      <w:r><w:t xml:space="preserve">Visible: </w:t></w:r>
+      <w:sdt><w:sdtContent><w:r><w:t>controlled</w:t></w:r></w:sdtContent></w:sdt>
+    </w:p>
+    <w:p>
+      <w:r><w:t>Keep</w:t></w:r>
+      <w:del w:id="2" w:author="IrisFiles"><w:r><w:delText xml:space="preserve"> old</w:delText></w:r></w:del>
+      <w:r><w:t xml:space="preserve"> new</w:t></w:r>
+    </w:p>
+    <w:sectPr/>
+  </w:body>
+</w:document>`;
+    const documentRels = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="https://example.com/" TargetMode="External"/>
+</Relationships>`;
+
+    return storedZip({
+      '[Content_Types].xml': contentTypes,
+      '_rels/.rels': rels,
+      'word/document.xml': documentXml,
+      'word/_rels/document.xml.rels': documentRels,
+    });
+  }
+
+  test('keeps visible text inside valid WordprocessingML wrappers', async ({ page }) => {
+    await page.goto('/docx-to-txt');
+    await page.locator('#file-input').setInputFiles({
+      name: 'nested-visible-text.docx',
+      mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      buffer: nestedVisibleTextDocx(),
+    });
+
+    await page.locator('#action-btn').click();
+    await expect(page.locator('#dl-doc')).toBeVisible({ timeout: 30000 });
+
+    const downloadPromise = page.waitForEvent('download');
+    await page.locator('#dl-doc').click();
+    const download = await downloadPromise;
+    const text = await (await import('node:fs/promises')).readFile(await download.path(), 'utf8');
+
+    expect(text).toBe([
+      'Before inserted ✓ after',
+      'Line one',
+      'Line two',
+      'Label\tValue',
+      'Docs',
+      'Next',
+      'Visible: controlled',
+      'Keep new',
+    ].join('\n'));
+  });
+});
+
 test.describe('Archive Pages - Extract ZIP', () => {
   test('page loads correctly', async ({ page }) => {
     await page.goto(`/extract-zip`);

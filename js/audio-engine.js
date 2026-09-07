@@ -10,6 +10,38 @@ const LAMEJS_CDN = "https://cdn.jsdelivr.net/npm/lamejs@1.2.1/lame.min.js";
 let lameReady = null; // Promise that resolves when lamejs is loaded
 
 /**
+ * Read the sample rate from the mandatory FLAC STREAMINFO block.
+ * Web Audio decodes into the AudioContext's sample rate, so using the
+ * browser default would silently resample FLAC -> WAV conversions.
+ *
+ * @param {ArrayBuffer} arrayBuffer
+ * @returns {number|null}
+ */
+function readFlacSampleRate(arrayBuffer) {
+  const bytes = new Uint8Array(arrayBuffer);
+  if (
+    bytes.length < 42 ||
+    bytes[0] !== 0x66 ||
+    bytes[1] !== 0x4c ||
+    bytes[2] !== 0x61 ||
+    bytes[3] !== 0x43 ||
+    (bytes[4] & 0x7f) !== 0
+  ) {
+    return null;
+  }
+
+  const streamInfoLength =
+    (bytes[5] << 16) | (bytes[6] << 8) | bytes[7];
+  if (streamInfoLength < 34 || bytes.length < 8 + streamInfoLength) {
+    return null;
+  }
+
+  const sampleRate =
+    (bytes[18] << 12) | (bytes[19] << 4) | (bytes[20] >> 4);
+  return sampleRate || null;
+}
+
+/**
  * Lazy-load lamejs from CDN. Only called when MP3 output is needed.
  * @returns {Promise<void>}
  */
@@ -49,11 +81,24 @@ export async function convertAudio(
   const arrayBuffer = await file.arrayBuffer();
   onProgress(10);
 
-  // Decode audio data via Web Audio API
+  // Decode audio data via Web Audio API. decodeAudioData() resamples into
+  // the AudioContext's rate, so preserve FLAC's native rate for WAV output.
   const Ctx = window.AudioContext || window.webkitAudioContext;
   if (!Ctx)
     throw new Error("Audio processing is not supported in this browser.");
-  const audioCtx = new Ctx();
+
+  const sourceSampleRate =
+    targetFormat === "wav" ? readFlacSampleRate(arrayBuffer) : null;
+  let audioCtx = null;
+  if (sourceSampleRate) {
+    try {
+      audioCtx = new Ctx({ sampleRate: sourceSampleRate });
+    } catch {
+      // Some browsers may reject uncommon context rates. Fall back to the
+      // browser default rather than making a previously working conversion fail.
+    }
+  }
+  if (!audioCtx) audioCtx = new Ctx();
   let audioBuffer;
   try {
     audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);

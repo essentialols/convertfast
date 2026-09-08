@@ -36,7 +36,7 @@ async function expectBrowserLoadsFont(page, output) {
   expect(status).toBe('loaded');
 }
 
-async function expectUnsupportedTtf(page, path, fixtureName) {
+async function expectRefusal(page, path, fixtureName, message) {
   const downloads = [];
   page.on('download', download => downloads.push(download));
 
@@ -46,42 +46,53 @@ async function expectUnsupportedTtf(page, path, fixtureName) {
 
   const notice = page.locator('#font-results .notice');
   await expect(notice).toBeVisible({ timeout: 30_000 });
-  await expect(notice).toContainText('TTF output is not supported for this conversion yet');
+  await expect(notice).toContainText(message);
   await expect(notice).toContainText('no file was created');
   expect(downloads).toHaveLength(0);
   await expect(page.locator('#font-results .dl-btn')).toHaveCount(0);
 }
 
 test.describe('font conversion output', () => {
-  test('TTF to OTF produces a browser-loadable OTF without an automatic download', async ({ page }) => {
-    const output = await convertAndDownload(page, '/ttf-to-otf', 'sample.ttf', 'otf');
-    expect(output.subarray(0, 4).toString('ascii')).toBe('OTTO');
-    await expectBrowserLoadsFont(page, output);
-  });
-
-  test('WOFF to OTF produces a browser-loadable OTF without an automatic download', async ({ page }) => {
-    const output = await convertAndDownload(page, '/woff-to-otf', 'sample.woff', 'otf');
-    expect(output.subarray(0, 4).toString('ascii')).toBe('OTTO');
-    await expectBrowserLoadsFont(page, output);
-  });
-
-  test('TTF to WOFF produces a browser-loadable WOFF instead of failing on an empty buffer', async ({ page }) => {
+  // WOFF only wraps an sfnt, so these stay lossless and never re-encode outlines.
+  test('TTF to WOFF wraps the original sfnt into a browser-loadable WOFF', async ({ page }) => {
     const output = await convertAndDownload(page, '/ttf-to-woff', 'sample.ttf', 'woff');
     expect(Array.from(output.subarray(0, 4))).toEqual([0x77, 0x4f, 0x46, 0x46]); // wOFF
+    expect(output.readUInt32BE(4)).toBe(0x00010000); // preserves TrueType flavor
     await expectBrowserLoadsFont(page, output);
   });
 
-  test('OTF to WOFF produces a browser-loadable WOFF instead of failing on an empty buffer', async ({ page }) => {
+  test('OTF to WOFF wraps the original sfnt into a browser-loadable WOFF', async ({ page }) => {
     const output = await convertAndDownload(page, '/otf-to-woff', 'sample.otf', 'woff');
     expect(Array.from(output.subarray(0, 4))).toEqual([0x77, 0x4f, 0x46, 0x46]); // wOFF
+    expect(output.readUInt32BE(4)).toBe(0x4f54544f); // preserves OTTO flavor
     await expectBrowserLoadsFont(page, output);
+  });
+
+  test('WOFF to TTF unwraps the container back to a browser-loadable TrueType font', async ({ page }) => {
+    const output = await convertAndDownload(page, '/woff-to-ttf', 'sample.woff', 'ttf');
+    expect(output.readUInt32BE(0)).toBe(0x00010000);
+    await expectBrowserLoadsFont(page, output);
+  });
+
+  // TTF and OTF name different outline formats, so these need a real re-encode.
+  // opentype.js cannot rebuild every table it can read; refuse rather than emit
+  // a truncated font.
+  test('TTF to OTF reports the fonts whose outlines cannot be rebuilt', async ({ page }) => {
+    await expectRefusal(page, '/ttf-to-otf', 'sample.ttf', 'cannot rebuild');
+  });
+
+  test('WOFF to OTF reports the fonts whose outlines cannot be rebuilt', async ({ page }) => {
+    await expectRefusal(page, '/woff-to-otf', 'sample.woff', 'cannot rebuild');
   });
 
   test('OTF to TTF refuses to relabel CFF OpenType bytes as TrueType', async ({ page }) => {
-    await expectUnsupportedTtf(page, '/otf-to-ttf', 'sample.otf');
+    await expectRefusal(page, '/otf-to-ttf', 'sample.otf', 'TTF output is not supported');
   });
 
-  test('WOFF to TTF refuses to relabel regenerated CFF OpenType bytes as TrueType', async ({ page }) => {
-    await expectUnsupportedTtf(page, '/woff-to-ttf', 'sample.woff');
+  test('WOFF round-trips through TTF without losing tables', async ({ page }) => {
+    const woff = await convertAndDownload(page, '/ttf-to-woff', 'sample.ttf', 'woff');
+    const original = await readFile(fixture('sample.ttf'));
+    // Same table count survives the wrap, so no table is dropped on the way in.
+    expect(woff.readUInt16BE(12)).toBe(original.readUInt16BE(4));
   });
 });

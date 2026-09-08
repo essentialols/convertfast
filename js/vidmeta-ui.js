@@ -232,6 +232,7 @@ function renderMetadata(metadata) {
 
       const valueEl = document.createElement('div');
       valueEl.className = 'meta-value';
+      valueEl.style.overflowWrap = 'anywhere';
       if (field === 'File Size') {
         valueEl.textContent = formatSize(value);
       } else {

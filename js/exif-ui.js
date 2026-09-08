@@ -55,7 +55,7 @@ export function init() {
         el.classList.remove('open');
         const a = el.querySelector('.faq-answer'); if (a) a.style.maxHeight = null;
       });
-      if (!isOpen) { item.classList.add('open'); answer.style.maxHeight = answer.scrollHeight + 'px'; }
+      if (!isOpen && answer) { item.classList.add('open'); answer.style.maxHeight = answer.scrollHeight + 'px'; }
     });
   });
 

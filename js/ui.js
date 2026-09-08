@@ -401,6 +401,9 @@ function updateBatchActions() {
   if (clearAllBtn) {
     clearAllBtn.style.display = fileQueue.length > 0 ? '' : 'none';
   }
+  if (dropZone) {
+    dropZone.classList.toggle('compact', fileQueue.length > 0);
+  }
   updateBatchSummary();
 }
 

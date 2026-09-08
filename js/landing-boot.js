@@ -11,9 +11,10 @@ document.querySelectorAll('.faq-question').forEach(btn => {
     const isOpen = item.classList.contains('open');
     document.querySelectorAll('.faq-item.open').forEach(el => {
       el.classList.remove('open');
-      el.querySelector('.faq-answer').style.maxHeight = null;
+      const a = el.querySelector('.faq-answer');
+      if (a) a.style.maxHeight = null;
     });
-    if (!isOpen) { item.classList.add('open'); answer.style.maxHeight = answer.scrollHeight + 'px'; }
+    if (!isOpen && answer) { item.classList.add('open'); answer.style.maxHeight = answer.scrollHeight + 'px'; }
   });
 });
 
@@ -65,8 +66,15 @@ function rowMatchesToolsQuery(row, query) {
     if (sourceTerms.length === 0 && targetTerms.length === 0) return true;
 
     const sourceText = row.querySelector('.convert-source')?.textContent || '';
+    // A <from>-to-<to> href also names the SOURCE format, so matching target
+    // terms against the whole href makes "png to png" match the PNG row. Task
+    // routes (/create-zip, /pdf-ocr) carry no "-to-" and are used whole.
     const targetText = Array.from(row.querySelectorAll('.tool-link'))
-      .map(link => `${link.textContent || ''} ${link.getAttribute('href') || ''}`)
+      .map(link => {
+        const href = link.getAttribute('href') || '';
+        const sep = href.lastIndexOf('-to-');
+        return `${link.textContent || ''} ${sep === -1 ? href : href.slice(sep + 4)}`;
+      })
       .join(' ');
     return textMatchesTerms(sourceText, sourceTerms)
       && textMatchesTerms(targetText, targetTerms);

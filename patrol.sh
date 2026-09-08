@@ -78,8 +78,18 @@ if [[ -n "$(git status --porcelain)" ]]; then
   echo "WARNING: Working tree has uncommitted changes. Patrol will use worktrees to avoid interference."
 fi
 
-# Pull latest before patrolling (skip if it fails, e.g. during concurrent push)
-git pull --ff-only origin main 2>/dev/null || true
+# Fetch before patrolling. Fix branches are cut from origin/main, not local main:
+# a silently-failed pull used to leave local main stale, so patrol kept
+# rediscovering and re-filing bugs that were already fixed upstream.
+if ! git fetch origin main; then
+  echo "ERROR: could not fetch origin/main. Refusing to patrol against a stale base."
+  exit 1
+fi
+# Triage (Phase 1) reads this checkout, not a worktree, so local main must be current too.
+if ! git merge --ff-only origin/main; then
+  echo "ERROR: local main cannot fast-forward to origin/main. Refusing to patrol against a stale base."
+  exit 1
+fi
 
 TIMESTAMP=$(date +%Y%m%d-%H%M%S)
 LOG=".patrol/patrol-$TIMESTAMP.log"
@@ -174,7 +184,7 @@ while IFS='|' read -r idx file severity desc fix; do
   # Create an isolated worktree so we never touch the main working tree
   rm -rf "$WORKTREE_DIR" 2>/dev/null || true
   git branch -D "$FIX_BRANCH" 2>/dev/null || true
-  git worktree add -b "$FIX_BRANCH" "$WORKTREE_DIR" main 2>>"$LOG"
+  git worktree add -b "$FIX_BRANCH" "$WORKTREE_DIR" origin/main 2>>"$LOG"
 
   FIX_PROMPT="You are a code patrol bot for IrisFiles. Your working directory is $WORKTREE_DIR.
 Read PATROL.md first for guidelines.
@@ -302,7 +312,7 @@ echo "Phase 4: Developing new tests for uncovered features..." | tee -a "$LOG"
 TEST_DEV_BRANCH="patrol/${TIMESTAMP}-tests"
 rm -rf "$WORKTREE_DIR" 2>/dev/null || true
 git branch -D "$TEST_DEV_BRANCH" 2>/dev/null || true
-git worktree add -b "$TEST_DEV_BRANCH" "$WORKTREE_DIR" main 2>>"$LOG"
+git worktree add -b "$TEST_DEV_BRANCH" "$WORKTREE_DIR" origin/main 2>>"$LOG"
 
 TEST_DEV_PROMPT="You are a test development bot for IrisFiles. Your working directory is $WORKTREE_DIR.
 

@@ -68,14 +68,29 @@ const EPUB_BLOCK_ELEMENTS = new Set([
 /** Convert an EPUB XHTML body to readable plain text while preserving block boundaries. */
 function htmlBodyToPlainText(root) {
   let text = '';
+  let preDepth = 0;
+
+  // Prose whitespace is layout, so it collapses; whitespace inside <pre> is
+  // content, so it is appended untouched.
+  function appendProse(value) {
+    let chunk = value.replace(/\s+/g, ' ');
+    if (!chunk) return;
+    if (chunk === ' ' && (!text || text.endsWith('\n'))) return;
+    if (text.endsWith('\n')) chunk = chunk.replace(/^ /, '');
+    text += chunk;
+  }
 
   function appendBreak() {
+    if (preDepth === 0) text = text.replace(/ +$/, '');
     if (text && !text.endsWith('\n')) text += '\n';
   }
 
   function walk(node) {
-    if (node.nodeType === Node.TEXT_NODE) {
-      text += node.nodeValue || '';
+    // XHTML may carry visible text as CDATA, which is not a text node.
+    if (node.nodeType === Node.TEXT_NODE || node.nodeType === Node.CDATA_SECTION_NODE) {
+      const value = node.nodeValue || '';
+      if (preDepth > 0) text += value.replace(/\r\n?/g, '\n');
+      else appendProse(value);
       return;
     }
     if (node.nodeType !== Node.ELEMENT_NODE) return;
@@ -88,18 +103,16 @@ function htmlBodyToPlainText(root) {
     }
 
     const isBlock = EPUB_BLOCK_ELEMENTS.has(tag);
+    const isPre = tag === 'pre';
     if (isBlock) appendBreak();
+    if (isPre) preDepth++;
     for (const child of node.childNodes) walk(child);
+    if (isPre) preDepth--;
     if (isBlock) appendBreak();
   }
 
   walk(root);
-  return text
-    .replace(/\r/g, '')
-    .replace(/[ \t\f\v]+/g, ' ')
-    .replace(/ *\n */g, '\n')
-    .replace(/\n{3,}/g, '\n\n')
-    .trim();
+  return text.replace(/\n{3,}/g, '\n\n').trim();
 }
 
 /** Parse EPUB (ZIP) and extract chapter text in spine order. */
@@ -410,6 +423,18 @@ function extractDocxParagraphText(paragraph) {
 
       // Deleted/moved-from revision content is not part of the visible document.
       if (name === 'del' || name === 'moveFrom') {
+        continue;
+      }
+
+      // Property elements describe formatting, not content; w:pPr/w:tabs holds
+      // tab-stop positions that must not be read as literal tab characters.
+      if (name === 'pPr' || name === 'rPr' || name === 'sectPr') {
+        continue;
+      }
+
+      // A paragraph nested in a text box or table is enumerated separately by
+      // the document-level paragraph list, so descending here would duplicate it.
+      if (name === 'p') {
         continue;
       }
 

@@ -26,6 +26,9 @@ const MODES = {
 
 let mode = null;
 let currentFile = null;
+// Bumped by every selection and by Clear, so a slow validation can tell whether
+// its result still belongs to what the user is looking at.
+let selectionToken = 0;
 let dropZone, fileInput, fileList, actionBtn, clearBtn;
 
 export function init() {
@@ -97,17 +100,25 @@ async function validateRtfFile(file) {
 
 async function setFile(file) {
   if (!file) return;
+  const token = ++selectionToken;
   removeResults();
 
-  try {
-    if (mode.validate) await mode.validate(file);
-  } catch (err) {
+  if (mode.validate) {
+    // Reading the file is async, so drop the previous selection first: it must
+    // not stay convertible while a replacement is being checked.
     currentFile = null;
     fileList.innerHTML = '';
-    const div = makeResultsDiv();
-    div.innerHTML = `<div class="notice" data-kind="error">${esc(err.message)}</div>`;
     updateControls();
-    return;
+    try {
+      await mode.validate(file);
+    } catch (err) {
+      if (token !== selectionToken) return;
+      const div = makeResultsDiv();
+      div.innerHTML = `<div class="notice" data-kind="error">${esc(err.message)}</div>`;
+      updateControls();
+      return;
+    }
+    if (token !== selectionToken) return;
   }
 
   currentFile = file;
@@ -138,6 +149,7 @@ function updateControls() {
 }
 
 function clearAll() {
+  selectionToken++;
   currentFile = null;
   fileList.innerHTML = '';
   removeResults();

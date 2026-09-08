@@ -38,8 +38,35 @@ function looksLikeSvg(bytes) {
  * @param {File} file
  * @returns {Promise<{mime: string, ext: string}|null>}
  */
+function readFourCC(bytes, offset) {
+  if (offset + 4 > bytes.length) return '';
+  return String.fromCharCode(bytes[offset], bytes[offset + 1], bytes[offset + 2], bytes[offset + 3]);
+}
+
+function detectHeifFamily(bytes) {
+  if (bytes.length < 16 || readFourCC(bytes, 4) !== 'ftyp') return null;
+
+  const declaredSize = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength).getUint32(0);
+  const end = declaredSize >= 16 ? Math.min(declaredSize, bytes.length) : bytes.length;
+  const brands = [readFourCC(bytes, 8)];
+  for (let offset = 16; offset + 4 <= end; offset += 4) {
+    brands.push(readFourCC(bytes, offset));
+  }
+
+  if (brands.includes('avif') || brands.includes('avis')) {
+    return { mime: 'image/avif', ext: 'avif' };
+  }
+  if (brands.some(brand => ['heic', 'heix', 'hevc', 'hevx'].includes(brand))) {
+    return { mime: 'image/heic', ext: 'heic' };
+  }
+  return null;
+}
+
 export async function detectFormat(file) {
   const buf = new Uint8Array(await file.slice(0, 4096).arrayBuffer());
+  const heifFamily = detectHeifFamily(buf);
+  if (heifFamily) return heifFamily;
+
   for (const fmt of FORMAT_SIGNATURES) {
     for (const [offset, sig] of fmt.offsets) {
       if (buf.length >= offset + sig.length &&

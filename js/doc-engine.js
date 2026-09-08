@@ -58,6 +58,50 @@ async function textToPdfBlob(text, onProgress) {
 
 // --------------- EPUB ---------------
 
+const EPUB_BLOCK_ELEMENTS = new Set([
+  'address', 'article', 'aside', 'blockquote', 'dd', 'div', 'dl', 'dt',
+  'figcaption', 'figure', 'footer', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+  'header', 'hr', 'li', 'main', 'nav', 'ol', 'p', 'pre', 'section',
+  'table', 'tr', 'ul',
+]);
+
+/** Convert an EPUB XHTML body to readable plain text while preserving block boundaries. */
+function htmlBodyToPlainText(root) {
+  let text = '';
+
+  function appendBreak() {
+    if (text && !text.endsWith('\n')) text += '\n';
+  }
+
+  function walk(node) {
+    if (node.nodeType === Node.TEXT_NODE) {
+      text += node.nodeValue || '';
+      return;
+    }
+    if (node.nodeType !== Node.ELEMENT_NODE) return;
+
+    const tag = (node.localName || '').toLowerCase();
+    if (tag === 'script' || tag === 'style') return;
+    if (tag === 'br') {
+      text += '\n';
+      return;
+    }
+
+    const isBlock = EPUB_BLOCK_ELEMENTS.has(tag);
+    if (isBlock) appendBreak();
+    for (const child of node.childNodes) walk(child);
+    if (isBlock) appendBreak();
+  }
+
+  walk(root);
+  return text
+    .replace(/\r/g, '')
+    .replace(/[ \t\f\v]+/g, ' ')
+    .replace(/ *\n */g, '\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
 /** Parse EPUB (ZIP) and extract chapter text in spine order. */
 async function extractEpubText(file, onProgress) {
   if (onProgress) onProgress(10);
@@ -148,7 +192,7 @@ async function extractEpubText(file, onProgress) {
     const html = new TextDecoder().decode(data);
     const doc = new DOMParser().parseFromString(html, 'application/xhtml+xml');
     const body = doc.body || doc.documentElement;
-    const text = (body.textContent || '').trim();
+    const text = htmlBodyToPlainText(body);
     if (text) chapters.push(text);
 
     if (onProgress) onProgress(30 + Math.round((i / orderedFiles.length) * 40));

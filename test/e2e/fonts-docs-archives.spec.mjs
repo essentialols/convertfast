@@ -196,6 +196,26 @@ test.describe('Archive Pages - Extract ZIP', () => {
     await expect(dlAll).toBeVisible();
   });
 
+  test('archive actions remain comfortable touch targets on narrow phones', async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 700 });
+    await page.goto(`/extract-zip`);
+    await page.locator('#file-input').setInputFiles(fixture('sample.zip'));
+    await page.locator('#action-btn').click();
+    await expect(page.locator('#archive-results')).toBeVisible({ timeout: 15000 });
+
+    for (const selector of ['#action-btn', '#clear-all', '.btn-remove', '#dl-all', '.dl-btn']) {
+      const box = await page.locator(selector).first().boundingBox();
+      expect(box?.height ?? 0).toBeGreaterThanOrEqual(44);
+    }
+
+    await page.goto(`/create-zip`);
+    await page.locator('#file-input').setInputFiles(fixture('sample.png'));
+    await page.locator('#action-btn').click();
+    await expect(page.locator('#archive-results')).toBeVisible({ timeout: 15000 });
+    const downloadBox = await page.locator('#dl-zip').boundingBox();
+    expect(downloadBox?.height ?? 0).toBeGreaterThanOrEqual(44);
+  });
+
   test('clear all resets', async ({ page }) => {
     await page.goto(`/extract-zip`);
     await page.locator('#file-input').setInputFiles(fixture('sample.zip'));

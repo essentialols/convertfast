@@ -1188,6 +1188,8 @@ body {
 
 /* Responsive */
 @media (max-width: 640px) {
+  /* Keep primary, secondary, destructive, and result actions comfortable to tap. */
+  .btn { min-height: 44px; justify-content: center; }
   .hero h1 { font-size: 1.6rem; }
   .hero p { font-size: 1rem; }
   .drop-zone { padding: 2rem 1rem; }

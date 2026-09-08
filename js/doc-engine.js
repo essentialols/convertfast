@@ -569,11 +569,11 @@ async function extractMobiText(file, onProgress) {
   let encoding;
   const mobiHeaderStart = rec0Start + 16;
   if (
-    mobiHeaderStart + 16 <= bytes.length &&
-    bytes[mobiHeaderStart] === 0x4D &&
-    bytes[mobiHeaderStart + 1] === 0x4F &&
-    bytes[mobiHeaderStart + 2] === 0x42 &&
-    bytes[mobiHeaderStart + 3] === 0x49
+    mobiHeaderStart + 16 <= rec0End &&
+    buf[mobiHeaderStart] === 0x4D &&
+    buf[mobiHeaderStart + 1] === 0x4F &&
+    buf[mobiHeaderStart + 2] === 0x42 &&
+    buf[mobiHeaderStart + 3] === 0x49
   ) {
     const mobiEncoding = view.getUint32(mobiHeaderStart + 12, false);
     if (mobiEncoding === 1252) encoding = 'windows-1252';

@@ -85,6 +85,22 @@ test.describe('Responsive design', () => {
     expect(errors).toHaveLength(0);
   });
 
+  test('keeps narrow mobile header readable with touch-sized links', async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 700 });
+    await page.goto('/png-to-jpg');
+    await page.waitForLoadState('networkidle');
+
+    const about = page.locator('.nav a[href="/about"]');
+    const support = page.locator('.support-btn');
+    const aboutBox = await about.boundingBox();
+    const supportBox = await support.boundingBox();
+
+    expect(aboutBox.height).toBeGreaterThanOrEqual(44);
+    expect(supportBox.height).toBeGreaterThanOrEqual(44);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+    await expect(support).toHaveCSS('white-space', 'nowrap');
+  });
+
   test('renders at desktop width without errors', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
     const errors = [];

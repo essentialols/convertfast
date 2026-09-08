@@ -35,7 +35,6 @@ test.describe('Landing page tool search', () => {
     await expect(summary).toHaveText('No matching conversions. Try a format like PNG or a task like compress.');
   });
 
-<<<<<<< HEAD
   test('keeps every tool visible for queries that are only filler words', async ({ page }) => {
     await page.goto('/');
     const search = page.locator('#tools-filter');

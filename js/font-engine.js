@@ -1,7 +1,7 @@
 /**
  * IrisFiles - Font conversion engine
  * Lazy-loads opentype.js from CDN for TTF/OTF parsing and generation.
- * Uses fflate (window.fflate) for WOFF DEFLATE compression.
+ * Uses fflate (window.fflate) for WOFF zlib compression.
  */
 
 const OPENTYPE_CDN = 'https://cdn.jsdelivr.net/npm/opentype.js@1.3.4/dist/opentype.min.js';
@@ -55,14 +55,21 @@ export async function convertFont(file, targetFormat, onProgress) {
   }
   if (onProgress) onProgress(50);
 
-  // opentype.js download() produces a TTF/OTF ArrayBuffer
-  const sfntBuffer = font.download();
+  // Serialize without triggering opentype.js's browser-download side effect.
+  const sfntBuffer = font.toArrayBuffer();
   if (onProgress) onProgress(70);
 
   let resultBuffer;
 
-  if (targetFormat === 'ttf' || targetFormat === 'otf') {
-    // opentype.js outputs sfnt (TTF/OTF) directly
+  if (targetFormat === 'ttf') {
+    // opentype.js 1.3.x serializes parsed outlines as CFF OpenType (`OTTO`).
+    // Never relabel those bytes as a TrueType file.
+    const sfntFlavor = new DataView(sfntBuffer).getUint32(0);
+    if (sfntFlavor !== 0x00010000) {
+      throw new Error('TTF output is not supported for this conversion yet. Try OTF or WOFF instead; no file was created.');
+    }
+    resultBuffer = sfntBuffer;
+  } else if (targetFormat === 'otf') {
     resultBuffer = sfntBuffer;
   } else if (targetFormat === 'woff') {
     resultBuffer = wrapAsWoff(new Uint8Array(sfntBuffer));
@@ -78,7 +85,7 @@ export async function convertFont(file, targetFormat, onProgress) {
 
 /**
  * Wrap an sfnt (TTF/OTF) binary as WOFF 1.0.
- * WOFF structure: WOFFHeader + TableDirectory entries + compressed table data
+ * WOFF structure: WOFFHeader + TableDirectory entries + zlib-compressed table data
  * @param {Uint8Array} sfnt - Raw sfnt bytes
  * @returns {ArrayBuffer} WOFF binary
  */
@@ -102,9 +109,9 @@ function wrapAsWoff(sfnt) {
     tables.push({ tag, checksum, origLength: length, rawData });
   }
 
-  // Compress each table with fflate DEFLATE
+  // WOFF 1.0 requires zlib-wrapped table compression, not raw DEFLATE streams.
   const compressed = tables.map(t => {
-    const comp = fflate.deflateSync(t.rawData);
+    const comp = fflate.zlibSync(t.rawData);
     // Only use compressed version if it is actually smaller
     if (comp.length < t.rawData.length) {
       return { ...t, compData: comp, compLength: comp.length };

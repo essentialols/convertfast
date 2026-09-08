@@ -18,6 +18,7 @@ let activeCount = 0;
 let origW = 0;
 let origH = 0;
 let aspectRatio = 0; // origW / origH
+let dimensionDriver = 'width'; // last dimension edited by the user
 
 let dropZone, fileInput, fileList, downloadAllBtn, clearAllBtn, resizeBtn;
 let widthInput, heightInput, percentInput, resizeMode, lockAspect;
@@ -61,9 +62,12 @@ export function init() {
     applyModeUI();
   }
 
-  // Aspect ratio lock: when width changes, recalculate height and vice versa
+  // Aspect ratio lock: when width changes, recalculate height and vice versa.
+  // Remember which dimension the user edited so mixed-ratio batches can keep
+  // that dimension common while preserving each file's own proportions.
   if (widthInput) {
     widthInput.addEventListener('input', () => {
+      dimensionDriver = 'width';
       if (lockAspect && lockAspect.checked && aspectRatio > 0) {
         const w = parseInt(widthInput.value, 10);
         if (!isNaN(w) && w > 0) {
@@ -74,6 +78,7 @@ export function init() {
   }
   if (heightInput) {
     heightInput.addEventListener('input', () => {
+      dimensionDriver = 'height';
       if (lockAspect && lockAspect.checked && aspectRatio > 0) {
         const h = parseInt(heightInput.value, 10);
         if (!isNaN(h) && h > 0) {
@@ -145,8 +150,11 @@ function currentMode() {
   return resizeMode.value || 'dimensions';
 }
 
-// Build resize opts from current UI state
-function getResizeOpts(inputMime) {
+// Build resize opts from current UI state.
+// With the aspect lock enabled, derive the second dimension from the current
+// file rather than the first file in the batch. This keeps mixed-ratio batches
+// from being stretched or squashed.
+function getResizeOpts(inputMime, dimensions = null) {
   const outputMime = inputMime === 'image/png' ? 'image/png' : 'image/jpeg';
   const opts = { outputMime };
   if (currentMode() === 'percent') {
@@ -154,8 +162,25 @@ function getResizeOpts(inputMime) {
   } else {
     const w = parseInt(widthInput && widthInput.value, 10);
     const h = parseInt(heightInput && heightInput.value, 10);
-    if (w > 0) opts.width  = w;
-    if (h > 0) opts.height = h;
+    const preserveAspect = lockAspect && lockAspect.checked
+      && dimensions && dimensions.width > 0 && dimensions.height > 0;
+
+    if (preserveAspect) {
+      const ratio = dimensions.width / dimensions.height;
+      if (dimensionDriver === 'height' && h > 0) {
+        opts.height = h;
+        opts.width = Math.max(1, Math.round(h * ratio));
+      } else if (w > 0) {
+        opts.width = w;
+        opts.height = Math.max(1, Math.round(w / ratio));
+      } else if (h > 0) {
+        opts.height = h;
+        opts.width = Math.max(1, Math.round(h * ratio));
+      }
+    } else {
+      if (w > 0) opts.width  = w;
+      if (h > 0) opts.height = h;
+    }
   }
   return opts;
 }
@@ -250,9 +275,9 @@ async function processQueue() {
     const t0 = performance.now();
     try {
       const mime = next.file.type || 'image/jpeg';
-      const opts = getResizeOpts(mime);
-      // Upscale warning
       const dims = await getImageDimensions(next.file).catch(() => null);
+      const opts = getResizeOpts(mime, dims);
+      // Upscale warning
       if (dims) {
         const isUpscale = (opts.width && opts.width > dims.width) ||
                           (opts.height && opts.height > dims.height) ||

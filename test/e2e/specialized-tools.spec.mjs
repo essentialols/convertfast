@@ -1,5 +1,16 @@
+import { readFile } from 'node:fs/promises';
 import { test, expect } from '@playwright/test';
 import { fixture, getFileItemCount, waitForStatus } from './helpers.mjs';
+
+function pngDimensions(buffer) {
+  if (buffer.length < 24 || buffer.subarray(0, 8).toString('hex') !== '89504e470d0a1a0a') {
+    throw new Error('Expected PNG output');
+  }
+  return {
+    width: buffer.readUInt32BE(16),
+    height: buffer.readUInt32BE(20),
+  };
+}
 
 test.describe('Resize Image', () => {
   test.beforeEach(async ({ page }) => {
@@ -74,6 +85,34 @@ test.describe('Resize Image', () => {
     const count = await getFileItemCount(page);
     expect(count).toBe(2);
     await expect(page.locator('#download-all')).toBeVisible();
+  });
+
+  test('aspect lock preserves each image ratio in a mixed batch', async ({ page }) => {
+    const names = ['landscape.png', 'portrait.png'];
+    const sourceDimensions = names.map(name => pngDimensions(await readFile(fixture(name))));
+
+    await page.locator('#file-input').setInputFiles(names.map(fixture));
+    await page.locator('.file-item').nth(1).waitFor({ timeout: 5000 });
+    await page.locator('#resize-width').fill('300');
+    await page.locator('#resize-btn').click();
+    await page.locator('.file-item.done').nth(1).waitFor({ timeout: 10000 });
+
+    const outputDimensions = [];
+    for (let i = 0; i < names.length; i++) {
+      const [download] = await Promise.all([
+        page.waitForEvent('download'),
+        page.locator('.btn-download').nth(i).click(),
+      ]);
+      outputDimensions.push(pngDimensions(await readFile(await download.path())));
+    }
+
+    for (let i = 0; i < names.length; i++) {
+      expect(outputDimensions[i].width).toBe(300);
+      const sourceRatio = sourceDimensions[i].width / sourceDimensions[i].height;
+      const outputRatio = outputDimensions[i].width / outputDimensions[i].height;
+      expect(Math.abs(outputRatio - sourceRatio)).toBeLessThan(0.01);
+    }
+    expect(outputDimensions[0].height).not.toBe(outputDimensions[1].height);
   });
 
   test('clear all removes all files', async ({ page }) => {

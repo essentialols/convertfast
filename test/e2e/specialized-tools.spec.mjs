@@ -89,7 +89,9 @@ test.describe('Resize Image', () => {
 
   test('aspect lock preserves each image ratio in a mixed batch', async ({ page }) => {
     const names = ['landscape.png', 'portrait.png'];
-    const sourceDimensions = names.map(name => pngDimensions(await readFile(fixture(name))));
+    const sourceDimensions = await Promise.all(names.map(async name =>
+      pngDimensions(await readFile(fixture(name)))
+    ));
 
     await page.locator('#file-input').setInputFiles(names.map(fixture));
     await page.locator('.file-item').nth(1).waitFor({ timeout: 5000 });

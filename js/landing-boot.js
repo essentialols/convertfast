@@ -60,7 +60,9 @@ function rowMatchesToolsQuery(row, query) {
   if (directional) {
     const sourceTerms = searchTerms(directional[1]);
     const targetTerms = searchTerms(directional[2]);
-    if (sourceTerms.length === 0 || targetTerms.length === 0) return false;
+    // "files to png" carries no usable source, so fall back to the plain
+    // search rather than matching nothing.
+    if (sourceTerms.length === 0 && targetTerms.length === 0) return true;
 
     const sourceText = row.querySelector('.convert-source')?.textContent || '';
     const targetText = Array.from(row.querySelectorAll('.tool-link'))
@@ -71,7 +73,9 @@ function rowMatchesToolsQuery(row, query) {
   }
 
   const terms = searchTerms(query);
-  if (terms.length === 0) return false;
+  // A query that is only filler ("convert", "files") narrows nothing, so it
+  // must not hide every tool.
+  if (terms.length === 0) return true;
   const searchableText = `${row.textContent || ''} ${Array.from(row.querySelectorAll('a'))
     .map(link => link.getAttribute('href') || '')
     .join(' ')}`;

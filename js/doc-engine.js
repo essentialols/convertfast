@@ -180,6 +180,7 @@ function parseRtf(rtfString) {
   let skipGroup = 0; // depth at which we started skipping
   let i = 0;
   const len = rtfString.length;
+  let ansiDecoder = null;
 
   // Groups to skip entirely (metadata, headers, footers, etc.)
   const skipGroups = ['fonttbl', 'colortbl', 'stylesheet', 'info', 'header', 'footer',
@@ -233,11 +234,15 @@ function parseRtf(rtfString) {
       if (rtfString[i] === '-') { text += '\u00AD'; i++; continue; } // soft hyphen
       if (rtfString[i] === '_') { text += '\u2011'; i++; continue; } // non-breaking hyphen
 
-      // Hex escape \'xx
+      // Hex escape \'xx. These are bytes in the active RTF ANSI code page.
       if (rtfString[i] === '\'') {
         const hex = rtfString.substring(i + 1, i + 3);
         const code = parseInt(hex, 16);
-        if (!isNaN(code)) text += String.fromCharCode(code);
+        if (!isNaN(code)) {
+          text += ansiDecoder
+            ? ansiDecoder.decode(Uint8Array.of(code))
+            : String.fromCharCode(code);
+        }
         i += 3;
         continue;
       }
@@ -263,7 +268,16 @@ function parseRtf(rtfString) {
       if (i < len && rtfString[i] === ' ') i++;
 
       // Handle known control words
-      if (word === 'par' || word === 'line') {
+      if (word === 'ansi') {
+        ansiDecoder = new TextDecoder('windows-1252');
+      } else if (word === 'ansicpg') {
+        const codePage = parseInt(param, 10);
+        // Preserve the existing byte-for-byte fallback for code pages that
+        // require handling beyond the common Windows-1252 path.
+        ansiDecoder = codePage === 1252 ? new TextDecoder('windows-1252') : null;
+      } else if (word === 'mac' || word === 'pc' || word === 'pca') {
+        ansiDecoder = null;
+      } else if (word === 'par' || word === 'line') {
         text += '\n';
       } else if (word === 'tab') {
         text += '\t';

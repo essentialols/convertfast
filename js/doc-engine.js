@@ -614,12 +614,31 @@ async function extractMobiText(file, onProgress) {
 
   if (onProgress) onProgress(65);
 
-  // Decode as UTF-8 (most MOBI files use UTF-8 or CP1252)
+  // Prefer the encoding declared by the MOBI header. PalmDOC-only files may
+  // not have one, so fall back to strict UTF-8 before trying Windows-1252.
+  let encoding;
+  const mobiHeaderStart = rec0Start + 16;
+  if (
+    mobiHeaderStart + 16 <= bytes.length &&
+    bytes[mobiHeaderStart] === 0x4D &&
+    bytes[mobiHeaderStart + 1] === 0x4F &&
+    bytes[mobiHeaderStart + 2] === 0x42 &&
+    bytes[mobiHeaderStart + 3] === 0x49
+  ) {
+    const mobiEncoding = view.getUint32(mobiHeaderStart + 12, false);
+    if (mobiEncoding === 1252) encoding = 'windows-1252';
+    else if (mobiEncoding === 65001) encoding = 'utf-8';
+  }
+
   let text;
-  try {
-    text = new TextDecoder('utf-8').decode(combined);
-  } catch {
-    text = new TextDecoder('windows-1252').decode(combined);
+  if (encoding) {
+    text = new TextDecoder(encoding).decode(combined);
+  } else {
+    try {
+      text = new TextDecoder('utf-8', { fatal: true }).decode(combined);
+    } catch {
+      text = new TextDecoder('windows-1252').decode(combined);
+    }
   }
 
   // If text contains HTML, strip tags

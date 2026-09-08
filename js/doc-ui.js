@@ -16,8 +16,8 @@ import { loadPendingFiles } from './smart-drop.js';
 const MODES = {
   'epub-to-txt':  { fn: epubToText, accept: '.epub', label: 'EPUB', outExt: 'txt', outMime: 'text/plain' },
   'epub-to-pdf':  { fn: epubToPdf,  accept: '.epub', label: 'EPUB', outExt: 'pdf', outMime: 'application/pdf' },
-  'rtf-to-txt':   { fn: rtfToText,  accept: '.rtf',  label: 'RTF',  outExt: 'txt', outMime: 'text/plain' },
-  'rtf-to-pdf':   { fn: rtfToPdf,   accept: '.rtf',  label: 'RTF',  outExt: 'pdf', outMime: 'application/pdf' },
+  'rtf-to-txt':   { fn: rtfToText,  accept: '.rtf',  label: 'RTF',  outExt: 'txt', outMime: 'text/plain', validate: validateRtfFile },
+  'rtf-to-pdf':   { fn: rtfToPdf,   accept: '.rtf',  label: 'RTF',  outExt: 'pdf', outMime: 'application/pdf', validate: validateRtfFile },
   'docx-to-txt':  { fn: docxToText, accept: '.docx', label: 'DOCX', outExt: 'txt', outMime: 'text/plain' },
   'docx-to-pdf':  { fn: docxToPdf,  accept: '.docx', label: 'DOCX', outExt: 'pdf', outMime: 'application/pdf' },
   'mobi-to-txt':  { fn: mobiToText, accept: '.mobi,.prc', label: 'MOBI', outExt: 'txt', outMime: 'text/plain' },
@@ -78,10 +78,39 @@ export function init() {
   });
 }
 
-function setFile(file) {
+async function validateRtfFile(file) {
+  const bytes = new Uint8Array(await file.slice(0, 32).arrayBuffer());
+  let start = 0;
+  if (bytes.length >= 3 && bytes[0] === 0xEF && bytes[1] === 0xBB && bytes[2] === 0xBF) {
+    start = 3;
+  }
+  while (start < bytes.length &&
+         (bytes[start] === 0x20 || bytes[start] === 0x09 ||
+          bytes[start] === 0x0A || bytes[start] === 0x0D)) {
+    start++;
+  }
+  const prefix = String.fromCharCode(...bytes.slice(start));
+  if (!/^\{\\rtf\d/.test(prefix)) {
+    throw new Error('This file does not appear to be a valid RTF document.');
+  }
+}
+
+async function setFile(file) {
   if (!file) return;
-  currentFile = file;
   removeResults();
+
+  try {
+    if (mode.validate) await mode.validate(file);
+  } catch (err) {
+    currentFile = null;
+    fileList.innerHTML = '';
+    const div = makeResultsDiv();
+    div.innerHTML = `<div class="notice" data-kind="error">${esc(err.message)}</div>`;
+    updateControls();
+    return;
+  }
+
+  currentFile = file;
   fileList.innerHTML = '';
 
   const div = document.createElement('div');

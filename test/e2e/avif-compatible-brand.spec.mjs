@@ -23,7 +23,7 @@ test('AVIF with mif1 major brand and avif compatible brand converts to PNG', asy
     buffer: variant,
   });
 
-  await expect(page.locator('.file-item__status.done').first()).toBeVisible({ timeout: 10_000 });
+  await expect(page.locator('.file-item.done').first()).toBeVisible({ timeout: 10_000 });
 
   const downloadPromise = page.waitForEvent('download');
   await page.locator('.btn-download').first().click();
